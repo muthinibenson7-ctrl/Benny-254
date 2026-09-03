@@ -1,21 +1,14 @@
 {
-  "name": "online-sphere",
+  "name": "online-sphere-commerce",
   "version": "1.0.0",
-  "description": "Online Sphere digital platform",
+  "description": "Online Sphere Commerce with M-PESA Daraja integration",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
+    "start": "node server.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "better-sqlite3": "^11.8.1"
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0"
   }
 }
