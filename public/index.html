@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <meta name="theme-color"
-          content="#08111f">
+    <meta
+        name="theme-color"
+        content="#07111f"
+    >
 
-    <meta name="description"
-          content="Online Sphere — Secure Member Portal">
+    <meta
+        name="description"
+        content="Online Sphere — a modern digital platform."
+    >
 
-    <title>Online Sphere | Secure Member Portal</title>
+    <title>Online Sphere | Digital Platform</title>
 
-    <link rel="stylesheet"
-          href="style.css">
-
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 </head>
 
 <body>
@@ -34,7 +32,7 @@
      PAGE LOADER
 ===================================================== -->
 
-<div class="page-loader" id="pageLoader">
+<div class="page-loader">
 
     <div class="loader-logo">
         OS
@@ -42,26 +40,26 @@
 
     <div class="loader-spinner"></div>
 
-    <p>
-        Loading Online Sphere...
-    </p>
+    <p>Loading Online Sphere...</p>
 
 </div>
 
 
 <!-- =====================================================
-     SECURITY / WELCOME SCREEN
+     SECURITY SCREEN
 ===================================================== -->
 
-<div class="security-screen"
-     id="securityScreen">
+<div
+    class="security-screen"
+    id="securityScreen"
+>
 
     <div class="security-background"></div>
 
     <div class="security-box">
 
         <div class="security-logo">
-            <span>OS</span>
+            OS
         </div>
 
         <div class="security-lock">
@@ -69,57 +67,33 @@
         </div>
 
         <span class="security-label">
-            SECURE MEMBER PORTAL
+            SECURE ACCESS
         </span>
 
-        <h1>
-            Welcome to
-            <span>Online Sphere</span>
-        </h1>
+        <h2>
+            Welcome to Online Sphere
+        </h2>
 
         <p>
-            Enter your name to access your member
-            portal and personalized dashboard.
+            Your digital platform is protected by
+            a secure access gateway.
         </p>
 
-        <div class="input-group">
+        <form id="securityForm">
 
-            <label for="memberName">
-                Member Name
-            </label>
-
-            <input
-                type="text"
-                id="memberName"
-                placeholder="Enter your name"
-                autocomplete="name"
-                maxlength="40"
+            <button
+                type="submit"
+                class="security-button"
             >
+                Enter Secure Platform
+            </button>
 
-        </div>
-
-        <button
-            class="security-button"
-            onclick="enterPortal()">
-
-            <span>
-                Enter Secure Portal
-            </span>
-
-            <span>
-                →
-            </span>
-
-        </button>
+        </form>
 
         <div class="security-info">
-
-            <span>🛡️</span>
-
-            <p>
-                Protected member environment
-            </p>
-
+            🛡️ Secure interface
+            &nbsp; • &nbsp;
+            🔒 Protected session
         </div>
 
     </div>
@@ -128,71 +102,48 @@
 
 
 <!-- =====================================================
-     NAVIGATION
+     TOP NAVIGATION
 ===================================================== -->
 
-<header class="topbar"
-        id="topbar">
+<header class="topbar">
 
-    <div class="brand"
-         onclick="showSection('home')">
+    <div class="brand">
 
         <div class="brand-logo">
             OS
         </div>
 
         <div class="brand-text">
-
-            <strong>
-                ONLINE SPHERE
-            </strong>
-
-            <span>
-                Member Portal
-            </span>
-
+            <strong>ONLINE</strong>
+            <span>SPHERE</span>
         </div>
 
     </div>
 
 
-    <button
-        class="menu-btn"
-        id="menuButton"
-        onclick="toggleMenu()"
-        aria-label="Open navigation">
+    <nav>
 
-        <span></span>
-        <span></span>
-        <span></span>
-
-    </button>
-
-
-    <nav id="navigation">
-
-        <a href="#home"
-           onclick="closeMenu()">
+        <a href="#home">
             Home
         </a>
 
-        <a href="#features"
-           onclick="closeMenu()">
+        <a href="#features">
             Features
         </a>
 
-        <a href="#account"
-           onclick="closeMenu()">
+        <a href="#account">
             Account
         </a>
 
-        <a href="#transactions"
-           onclick="closeMenu()">
+        <a href="#activity">
             Activity
         </a>
 
-        <a href="#support"
-           onclick="closeMenu()">
+        <a href="#security">
+            Security
+        </a>
+
+        <a href="#support">
             Support
         </a>
 
@@ -203,26 +154,29 @@
 
         <button
             class="theme-button"
-            id="themeButton"
-            onclick="toggleTheme()"
-            aria-label="Toggle theme">
-
+            type="button"
+            aria-label="Switch theme"
+        >
             🌙
-
         </button>
 
         <button
             class="profile-button"
-            onclick="showSection('account')">
+            type="button"
+        >
 
             <span class="profile-avatar">
                 👤
             </span>
 
-            <span id="navMemberName">
-                Guest
-            </span>
+        </button>
 
+        <button
+            class="menu-btn"
+            type="button"
+            aria-label="Open menu"
+        >
+            ☰
         </button>
 
     </div>
@@ -231,131 +185,110 @@
 
 
 <!-- =====================================================
-     MAIN CONTENT
+     HERO
 ===================================================== -->
 
 <main>
 
-
-<!-- =====================================================
-     HERO
-===================================================== -->
-
-<section class="hero"
-         id="home">
+<section
+    class="hero"
+    id="home"
+>
 
     <div class="hero-background"></div>
 
     <div class="hero-content">
 
-        <div class="hero-badge">
-
+        <span class="hero-badge">
             <span class="pulse-dot"></span>
-
-            MEMBER PORTAL ONLINE
-
-        </div>
-
+            DIGITAL PLATFORM
+        </span>
 
         <h1>
-
-            Your money.
-            <br>
-
-            Your account.
-            <br>
-
-            <span>
-                Your Sphere.
-            </span>
-
+            Your Digital World,
+            <span>Connected.</span>
         </h1>
 
-
         <p class="hero-description">
-
-            Welcome to Online Sphere — a modern digital
-            member environment designed to give you a
-            simple, secure and convenient way to manage
-            your account.
-
+            Welcome to Online Sphere — a modern,
+            secure and intelligent digital platform
+            designed to bring your essential services
+            together in one place.
         </p>
-
 
         <div class="hero-buttons">
 
-            <button
+            <a
+                href="#account"
                 class="primary-btn"
-                onclick="showSection('account')">
+            >
+                Open Dashboard →
+            </a>
 
-                <span>
-                    Open My Dashboard
-                </span>
-
-                <span>
-                    →
-                </span>
-
-            </button>
-
-
-            <button
+            <a
+                href="#features"
                 class="secondary-btn"
-                onclick="showSection('features')">
-
+            >
                 Explore Features
-
-            </button>
+            </a>
 
         </div>
 
-
         <div class="hero-trust">
 
-            <div>
-
-                <strong>
-                    🔐
-                </strong>
-
-                <span>
-                    Secure
-                </span>
-
-            </div>
-
-            <div>
-
-                <strong>
-                    ⚡
-                </strong>
-
-                <span>
-                    Fast
-                </span>
-
-            </div>
-
-            <div>
-
-                <strong>
-                    📱
-                </strong>
-
-                <span>
-                    Mobile Ready
-                </span>
-
-            </div>
+            <span>✓ Secure</span>
+            <span>✓ Fast</span>
+            <span>✓ Modern</span>
 
         </div>
 
     </div>
 
 
-    <!-- HERO DASHBOARD CARD -->
+    <!-- DIGITAL CARD -->
 
     <div class="hero-visual">
+
+        <div class="digital-card">
+
+            <div class="card-glow"></div>
+
+            <div class="digital-card-top">
+
+                <div class="mini-brand">
+                    ONLINE SPHERE
+                </div>
+
+                <span>
+                    ●●●
+                </span>
+
+            </div>
+
+            <div class="card-balance-label">
+                Available Balance
+            </div>
+
+            <div class="card-balance">
+                KSh 0.00
+            </div>
+
+            <div class="balance-line"></div>
+
+            <div class="digital-card-bottom">
+
+                <span>
+                    DIGITAL ACCOUNT
+                </span>
+
+                <span>
+                    OS
+                </span>
+
+            </div>
+
+        </div>
+
 
         <div class="floating-notification">
 
@@ -364,93 +297,13 @@
             </div>
 
             <div>
-
                 <strong>
-                    Account Active
+                    Account Ready
                 </strong>
 
-                <span>
-                    Your account is ready
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="digital-card">
-
-            <div class="card-glow"></div>
-
-
-            <div class="digital-card-top">
-
-                <div class="mini-brand">
-                    OS
-                </div>
-
-                <span>
-                    ONLINE SPHERE
-                </span>
-
-                <span>
-                    •••
-                </span>
-
-            </div>
-
-
-            <div class="card-balance-label">
-                AVAILABLE BALANCE
-            </div>
-
-
-            <div class="card-balance">
-
                 <small>
-                    KSh
+                    Your platform is active
                 </small>
-
-                <span id="balance">
-                    0.00
-                </span>
-
-            </div>
-
-
-            <div class="balance-line">
-
-                <span></span>
-
-            </div>
-
-
-            <div class="digital-card-bottom">
-
-                <div>
-
-                    <small>
-                        MEMBER
-                    </small>
-
-                    <strong id="displayName">
-                        Guest Member
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <small>
-                        STATUS
-                    </small>
-
-                    <strong class="active-status">
-                        ● ACTIVE
-                    </strong>
-
-                </div>
-
             </div>
 
         </div>
@@ -459,19 +312,17 @@
         <div class="floating-stat stat-one">
 
             <div class="floating-stat-icon">
-                📈
+                ⚡
             </div>
 
             <div>
-
                 <strong>
-                    Account Growth
+                    Fast
                 </strong>
 
-                <span>
-                    Manage your activity
-                </span>
-
+                <small>
+                    Experience
+                </small>
             </div>
 
         </div>
@@ -484,15 +335,13 @@
             </div>
 
             <div>
-
                 <strong>
-                    Protected
+                    Secure
                 </strong>
 
-                <span>
-                    Secure portal
-                </span>
-
+                <small>
+                    Protection
+                </small>
             </div>
 
         </div>
@@ -511,19 +360,17 @@
     <div class="quick-stat">
 
         <div class="quick-icon">
-            💰
+            ⚡
         </div>
 
         <div>
-
-            <span>
-                AVAILABLE BALANCE
-            </span>
-
             <strong>
-                KSh <b id="quickBalance">0.00</b>
+                Fast
             </strong>
 
+            <span>
+                Digital experience
+            </span>
         </div>
 
     </div>
@@ -532,19 +379,17 @@
     <div class="quick-stat">
 
         <div class="quick-icon">
-            📥
+            🔐
         </div>
 
         <div>
-
-            <span>
-                TOTAL DEPOSITS
-            </span>
-
             <strong>
-                KSh <b id="totalDeposits">0.00</b>
+                Protected
             </strong>
 
+            <span>
+                Secure interface
+            </span>
         </div>
 
     </div>
@@ -553,19 +398,17 @@
     <div class="quick-stat">
 
         <div class="quick-icon">
-            🎁
+            📱
         </div>
 
         <div>
-
-            <span>
-                MEMBER BONUS
-            </span>
-
             <strong>
-                KSh <b id="bonus">0.00</b>
+                Mobile Ready
             </strong>
 
+            <span>
+                Designed for phones
+            </span>
         </div>
 
     </div>
@@ -574,19 +417,17 @@
     <div class="quick-stat">
 
         <div class="quick-icon">
-            🔄
+            🌐
         </div>
 
         <div>
-
-            <span>
-                TRANSACTIONS
-            </span>
-
-            <strong id="transactionCount">
-                0
+            <strong>
+                Connected
             </strong>
 
+            <span>
+                One digital space
+            </span>
         </div>
 
     </div>
@@ -598,23 +439,24 @@
      FEATURES
 ===================================================== -->
 
-<section class="features-section"
-         id="features">
+<section
+    class="features-section"
+    id="features"
+>
 
-    <div class="section-heading centered">
+    <div class="section-heading">
 
         <span class="section-label">
-            WHY ONLINE SPHERE
+            PLATFORM FEATURES
         </span>
 
         <h2>
-            Everything you need,
-            <span>in one place.</span>
+            Everything in one sphere.
         </h2>
 
         <p>
-            A clean and modern member environment
-            built around convenience and simplicity.
+            Explore the core features of the
+            Online Sphere platform.
         </p>
 
     </div>
@@ -624,156 +466,116 @@
 
         <article class="feature-card">
 
-            <div class="feature-number">
+            <span class="feature-number">
                 01
-            </div>
+            </span>
 
             <div class="feature-icon">
-                🔐
+                💼
             </div>
 
             <h3>
-                Secure Access
+                Digital Account
             </h3>
 
             <p>
-                Access your member environment
-                through a dedicated secure portal.
+                Manage your digital account
+                from one convenient dashboard.
             </p>
 
-            <span class="feature-link">
-                Learn more →
-            </span>
+            <a
+                href="#account"
+                class="feature-link"
+            >
+                View Account →
+            </a>
 
         </article>
 
 
-        <article class="feature-card featured">
+        <article class="feature-card">
 
-            <div class="feature-number">
+            <span class="feature-number">
                 02
-            </div>
+            </span>
 
             <div class="feature-icon">
                 💳
             </div>
 
             <h3>
-                Easy Payments
+                Payments
             </h3>
 
             <p>
-                Designed for convenient payment and
-                account management workflows.
+                A clean interface prepared for
+                secure payment integrations.
             </p>
 
-            <span class="feature-link">
-                Explore payments →
-            </span>
+            <a
+                href="#payment"
+                class="feature-link"
+            >
+                Explore Payments →
+            </a>
 
         </article>
 
 
         <article class="feature-card">
 
-            <div class="feature-number">
+            <span class="feature-number">
                 03
-            </div>
+            </span>
 
             <div class="feature-icon">
                 📊
             </div>
 
             <h3>
-                Account Overview
+                Activity
             </h3>
 
             <p>
-                View balances, activity and account
-                information from one dashboard.
+                Keep track of account activity
+                and important events.
             </p>
 
-            <span class="feature-link">
-                View dashboard →
-            </span>
+            <a
+                href="#activity"
+                class="feature-link"
+            >
+                View Activity →
+            </a>
 
         </article>
 
 
         <article class="feature-card">
 
-            <div class="feature-number">
+            <span class="feature-number">
                 04
-            </div>
+            </span>
 
             <div class="feature-icon">
-                📱
+                🛡️
             </div>
 
             <h3>
-                Mobile Ready
+                Security Centre
             </h3>
 
             <p>
-                Optimized for phones, tablets and
-                desktop screens.
+                Security-focused interface designed
+                for safer digital interactions.
             </p>
 
-            <span class="feature-link">
-                Learn more →
-            </span>
-
-        </article>
-
-
-        <article class="feature-card">
-
-            <div class="feature-number">
-                05
-            </div>
-
-            <div class="feature-icon">
-                🔔
-            </div>
-
-            <h3>
-                Activity Updates
-            </h3>
-
-            <p>
-                Keep track of important account
-                activity and transactions.
-            </p>
-
-            <span class="feature-link">
-                View activity →
-            </span>
-
-        </article>
-
-
-        <article class="feature-card">
-
-            <div class="feature-number">
-                06
-            </div>
-
-            <div class="feature-icon">
-                🆘
-            </div>
-
-            <h3>
-                Member Support
-            </h3>
-
-            <p>
-                Get assistance whenever you need
-                help with your account.
-            </p>
-
-            <span class="feature-link">
-                Contact support →
-            </span>
+            <a
+                href="#security"
+                class="feature-link"
+            >
+                Security Centre →
+            </a>
 
         </article>
 
@@ -783,42 +585,46 @@
 
 
 <!-- =====================================================
-     ACCOUNT DASHBOARD
+     ACCOUNT
 ===================================================== -->
 
-<section class="account-section"
-         id="account">
+<section
+    class="account-section"
+    id="account"
+>
 
     <div class="section-heading">
 
-        <div>
+        <span class="section-label">
+            ACCOUNT
+        </span>
 
-            <span class="section-label">
-                MEMBER ACCOUNT
-            </span>
+        <h2>
+            Your digital dashboard.
+        </h2>
 
-            <h2>
-                Your personal dashboard
-            </h2>
+        <p>
+            A central place to manage your
+            Online Sphere account.
+        </p>
 
-        </div>
+    </div>
 
 
-        <div class="account-status">
+    <div class="account-status">
 
-            <span class="status-dot"></span>
+        <span class="status-dot"></span>
 
-            Account Active
-
-        </div>
+        <span>
+            Online
+        </span>
 
     </div>
 
 
     <div class="account-layout">
 
-
-        <!-- BALANCE CARD -->
+        <!-- MAIN BALANCE -->
 
         <div class="main-balance-card">
 
@@ -826,21 +632,18 @@
 
                 <div>
 
-                    <span>
-                        AVAILABLE BALANCE
+                    <span class="card-balance-label">
+                        CURRENT BALANCE
                     </span>
 
                     <h3>
-                        KSh
-                        <strong id="accountBalance">
-                            0.00
-                        </strong>
+                        KSh 0.00
                     </h3>
 
                 </div>
 
                 <div class="main-balance-icon">
-                    💰
+                    KSh
                 </div>
 
             </div>
@@ -855,14 +658,17 @@
                     </span>
 
                     <span>
-                        Active
+                        0%
                     </span>
 
                 </div>
 
                 <div class="progress-track">
 
-                    <div class="progress-fill"></div>
+                    <div
+                        class="progress-fill"
+                        style="width: 0%"
+                    ></div>
 
                 </div>
 
@@ -871,29 +677,13 @@
 
             <div class="main-card-footer">
 
-                <div>
+                <span>
+                    Online Sphere Account
+                </span>
 
-                    <span>
-                        MEMBER
-                    </span>
-
-                    <strong id="accountMemberName">
-                        Guest Member
-                    </strong>
-
-                </div>
-
-                <div>
-
-                    <span>
-                        MEMBER ID
-                    </span>
-
-                    <strong>
-                        OS-2026
-                    </strong>
-
-                </div>
+                <span>
+                    Active
+                </span>
 
             </div>
 
@@ -906,54 +696,44 @@
 
             <button
                 class="large-action deposit-action"
-                onclick="openModal('depositModal')">
+                type="button"
+            >
 
-                <div class="large-action-icon">
+                <span class="large-action-icon">
                     +
-                </div>
+                </span>
 
-                <div>
-
+                <span>
                     <strong>
-                        Deposit Funds
+                        Deposit
                     </strong>
 
-                    <span>
-                        Add funds to your account
-                    </span>
-
-                </div>
-
-                <b>
-                    →
-                </b>
+                    <small>
+                        Add funds
+                    </small>
+                </span>
 
             </button>
 
 
             <button
                 class="large-action withdraw-action"
-                onclick="openModal('withdrawModal')">
+                type="button"
+            >
 
-                <div class="large-action-icon">
+                <span class="large-action-icon">
                     ↑
-                </div>
+                </span>
 
-                <div>
-
+                <span>
                     <strong>
-                        Withdraw Funds
+                        Withdraw
                     </strong>
 
-                    <span>
-                        Request a withdrawal
-                    </span>
-
-                </div>
-
-                <b>
-                    →
-                </b>
+                    <small>
+                        Request withdrawal
+                    </small>
+                </span>
 
             </button>
 
@@ -965,33 +745,28 @@
 
 
 <!-- =====================================================
-     TRANSACTIONS
+     ACTIVITY
 ===================================================== -->
 
-<section class="activity-section"
-         id="transactions">
+<section
+    class="activity-section"
+    id="activity"
+>
 
     <div class="section-heading">
 
-        <div>
+        <span class="section-label">
+            ACTIVITY
+        </span>
 
-            <span class="section-label">
-                ACCOUNT ACTIVITY
-            </span>
+        <h2>
+            Recent activity.
+        </h2>
 
-            <h2>
-                Recent transactions
-            </h2>
-
-        </div>
-
-        <button
-            class="outline-button"
-            onclick="clearTransactions()">
-
-            Clear History
-
-        </button>
+        <p>
+            Your latest account events will
+            appear here.
+        </p>
 
     </div>
 
@@ -1000,50 +775,41 @@
 
         <div class="activity-header">
 
-            <span>
-                DESCRIPTION
-            </span>
+            <strong>
+                Activity History
+            </strong>
 
-            <span>
-                AMOUNT
-            </span>
-
-            <span>
-                DATE
-            </span>
-
-            <span>
-                STATUS
-            </span>
+            <button
+                class="outline-button"
+                type="button"
+            >
+                Refresh
+            </button>
 
         </div>
 
 
-        <div id="transactionList">
+        <div class="empty-activity">
 
-            <div class="empty-activity">
-
-                <div class="empty-icon">
-                    📋
-                </div>
-
-                <h3>
-                    No transactions yet
-                </h3>
-
-                <p>
-                    Your account activity will appear here.
-                </p>
-
-                <button
-                    class="primary-small"
-                    onclick="openModal('depositModal')">
-
-                    Make a Deposit
-
-                </button>
-
+            <div class="empty-icon">
+                📭
             </div>
+
+            <h3>
+                No activity yet
+            </h3>
+
+            <p>
+                Your account activity will appear
+                here when available.
+            </p>
+
+            <button
+                class="primary-small"
+                type="button"
+            >
+                Explore Platform
+            </button>
 
         </div>
 
@@ -1053,58 +819,49 @@
 
 
 <!-- =====================================================
-     PAYMENT SECTION
+     PAYMENT
 ===================================================== -->
 
-<section class="payment-section">
+<section
+    class="payment-section"
+    id="payment"
+>
 
     <div class="payment-card">
 
         <div class="payment-content">
 
             <span class="section-label">
-                PAYMENT CENTER
+                PAYMENTS
             </span>
 
             <h2>
-                Manage payments
-                <span>with ease.</span>
+                Simple digital payments.
             </h2>
 
             <p>
-                Online Sphere provides a simple interface
-                for managing your account payment activities.
+                Online Sphere is designed with
+                payment integration in mind,
+                providing a clean foundation for
+                future secure payment services.
             </p>
 
 
             <div class="payment-features">
 
-                <div>
-                    <span>✓</span>
-                    Secure payment workflow
-                </div>
+                <span>
+                    ✓ Mobile friendly
+                </span>
 
-                <div>
-                    <span>✓</span>
-                    Mobile-friendly interface
-                </div>
+                <span>
+                    ✓ Secure architecture
+                </span>
 
-                <div>
-                    <span>✓</span>
-                    Transaction tracking
-                </div>
+                <span>
+                    ✓ Ready for integration
+                </span>
 
             </div>
-
-
-            <button
-                class="primary-btn"
-                onclick="openModal('depositModal')">
-
-                Open Payment Center
-                →
-
-            </button>
 
         </div>
 
@@ -1116,7 +873,7 @@
                 <div class="phone-top">
 
                     <span>
-                        Online Sphere
+                        ONLINE SPHERE
                     </span>
 
                     <span>
@@ -1126,22 +883,16 @@
                 </div>
 
                 <div class="phone-icon">
-                    M
+                    💳
                 </div>
 
-                <strong>
-                    M-Pesa
-                </strong>
-
-                <span>
-                    Payment Center
-                </span>
+                <h3>
+                    Payment Centre
+                </h3>
 
                 <div class="phone-line"></div>
-
-                <small>
-                    Secure payment workflow
-                </small>
+                <div class="phone-line"></div>
+                <div class="phone-line short"></div>
 
             </div>
 
@@ -1153,10 +904,13 @@
 
 
 <!-- =====================================================
-     SECURITY SECTION
+     SECURITY
 ===================================================== -->
 
-<section class="security-section">
+<section
+    class="security-section"
+    id="security"
+>
 
     <div class="security-content">
 
@@ -1167,60 +921,61 @@
         <div>
 
             <span class="section-label">
-                SECURITY FIRST
+                SECURITY CENTRE
             </span>
 
             <h2>
-                Your account deserves
-                <span>protection.</span>
+                Security comes first.
             </h2>
 
             <p>
-                Online Sphere is designed with a
-                security-first interface and clear
-                account activity visibility.
+                Online Sphere uses a security-focused
+                interface designed to provide a safer
+                digital experience.
             </p>
 
         </div>
 
+    </div>
 
-        <div class="security-items">
 
-            <div>
+    <div class="security-items">
 
-                <strong>
-                    🔒
-                </strong>
+        <div class="security-item">
 
-                <span>
-                    Protected Access
-                </span>
+            <strong>
+                🔐 Protected Access
+            </strong>
 
-            </div>
+            <span>
+                Secure gateway interface
+            </span>
 
-            <div>
+        </div>
 
-                <strong>
-                    👁️
-                </strong>
 
-                <span>
-                    Activity Visibility
-                </span>
+        <div class="security-item">
 
-            </div>
+            <strong>
+                📱 Session Ready
+            </strong>
 
-            <div>
+            <span>
+                Mobile-first experience
+            </span>
 
-                <strong>
-                    📱
-                </strong>
+        </div>
 
-                <span>
-                    Mobile Protection
-                </span>
 
-            </div>
+        <div class="security-item">
+
+            <strong>
+                🛡️ Privacy Focus
+            </strong>
+
+            <span>
+                Security-conscious design
+            </span>
 
         </div>
 
@@ -1233,53 +988,51 @@
      SUPPORT
 ===================================================== -->
 
-<section class="support-section"
-         id="support">
+<section
+    class="support-section"
+    id="support"
+>
 
     <div class="support-box">
 
         <div class="support-icon">
-            🆘
+            💬
         </div>
 
         <div class="support-content">
 
             <span class="section-label">
-                MEMBER SUPPORT
+                SUPPORT
             </span>
 
             <h2>
-                We're here to help.
+                Need assistance?
             </h2>
 
             <p>
-                Need assistance with your account,
-                payments or transactions? Contact
-                the Online Sphere support team.
+                Our support centre is ready to
+                become your central help point.
             </p>
 
         </div>
 
         <button
             class="support-button"
-            onclick="contactSupport()">
-
-            Contact Support
-            →
-
+            type="button"
+        >
+            Contact Support →
         </button>
 
     </div>
 
 </section>
 
+</main>
+
 
 <!-- =====================================================
      FOOTER
 ===================================================== -->
-
-</main>
-
 
 <footer>
 
@@ -1287,21 +1040,23 @@
 
         <div class="footer-brand">
 
-            <div class="brand-logo">
-                OS
-            </div>
+            <div class="brand">
 
-            <div>
+                <div class="brand-logo">
+                    OS
+                </div>
 
-                <strong>
-                    ONLINE SPHERE
-                </strong>
-
-                <span>
-                    Secure Member Portal
-                </span>
+                <div class="brand-text">
+                    <strong>ONLINE</strong>
+                    <span>SPHERE</span>
+                </div>
 
             </div>
+
+            <p>
+                A modern digital platform
+                built for a connected world.
+            </p>
 
         </div>
 
@@ -1314,10 +1069,6 @@
                     Platform
                 </strong>
 
-                <a href="#home">
-                    Home
-                </a>
-
                 <a href="#features">
                     Features
                 </a>
@@ -1326,46 +1077,29 @@
                     Account
                 </a>
 
+                <a href="#activity">
+                    Activity
+                </a>
+
             </div>
 
 
             <div>
 
                 <strong>
-                    Account
+                    Company
                 </strong>
 
-                <a href="#transactions">
-                    Transactions
+                <a href="#security">
+                    Security
                 </a>
 
                 <a href="#support">
                     Support
                 </a>
 
-                <a href="#account">
-                    Dashboard
-                </a>
-
-            </div>
-
-
-            <div>
-
-                <strong>
-                    Security
-                </strong>
-
-                <a href="#">
-                    Privacy
-                </a>
-
-                <a href="#">
-                    Security
-                </a>
-
-                <a href="#">
-                    Terms
+                <a href="#home">
+                    Home
                 </a>
 
             </div>
@@ -1378,11 +1112,15 @@
     <div class="footer-bottom">
 
         <span>
-            © 2026 Online Sphere. All rights reserved.
+            ©
+            <span class="current-year">
+                2026
+            </span>
+            Online Sphere. All rights reserved.
         </span>
 
         <span>
-            Built for a better digital experience.
+            Built for the digital future.
         </span>
 
     </div>
@@ -1394,24 +1132,22 @@
      DEPOSIT MODAL
 ===================================================== -->
 
-<div class="modal"
-     id="depositModal">
+<div
+    class="modal"
+    id="depositModal"
+>
 
-    <div class="modal-overlay"
-         onclick="closeModal('depositModal')">
-    </div>
-
+    <div class="modal-overlay"></div>
 
     <div class="modal-box">
 
         <button
             class="modal-close"
-            onclick="closeModal('depositModal')">
-
+            type="button"
+            aria-label="Close"
+        >
             ×
-
         </button>
-
 
         <div class="modal-header">
 
@@ -1421,13 +1157,13 @@
 
             <div>
 
-                <span>
-                    PAYMENT CENTER
-                </span>
+                <h3>
+                    Deposit
+                </h3>
 
-                <h2>
-                    Deposit Funds
-                </h2>
+                <p>
+                    Add funds to your account.
+                </p>
 
             </div>
 
@@ -1435,99 +1171,77 @@
 
 
         <p class="modal-description">
-
-            Enter your deposit amount and M-Pesa
-            number to continue.
-
+            Enter the amount you would like to
+            deposit. Payment processing will be
+            connected through a verified backend
+            integration in a future version.
         </p>
 
 
-        <div class="form-group">
+        <form id="depositForm">
 
-            <label for="depositAmount">
-                Deposit Amount
-            </label>
+            <div class="form-group">
 
-            <div class="amount-input">
-
-                <span>
-                    KSh
-                </span>
+                <label for="depositAmount">
+                    Amount
+                </label>
 
                 <input
-                    type="number"
                     id="depositAmount"
-                    placeholder="0.00"
+                    class="amount-input"
+                    type="number"
                     min="1"
-                    step="1"
+                    placeholder="Enter amount"
+                    required
                 >
 
             </div>
 
-        </div>
 
+            <div class="mpesa-info">
 
-        <div class="form-group">
+                <div class="mpesa-logo">
+                    M
+                </div>
 
-            <label for="mpesaNumber">
-                M-Pesa Number
-            </label>
+                <div>
 
-            <input
-                type="tel"
-                id="mpesaNumber"
-                placeholder="07XXXXXXXX"
-                maxlength="13"
-            >
+                    <strong>
+                        M-Pesa
+                    </strong>
 
-        </div>
+                    <span>
+                        Payment integration placeholder
+                    </span>
 
+                </div>
 
-        <!--
-            KEEP YOUR EXISTING M-PESA DETAILS HERE
-            UNCHANGED WHEN WE CONNECT DARAJA.
-        -->
-
-        <div class="mpesa-info">
-
-            <div class="mpesa-logo">
-                M
             </div>
 
-            <div>
 
+            <div class="available-box">
+
+                Available Balance:
                 <strong>
-                    M-Pesa Payment
+                    KSh 0.00
                 </strong>
 
-                <span>
-                    Secure payment processing
-                </span>
-
             </div>
 
-            <span>
-                ✓
-            </span>
 
-        </div>
+            <button
+                class="modal-primary"
+                type="submit"
+            >
+                Continue
+            </button>
 
-
-        <button
-            class="modal-primary"
-            onclick="processDeposit()">
-
-            Continue Deposit
-            →
-
-        </button>
+        </form>
 
 
         <small class="modal-note">
-
-            Your payment will be processed through
-            the configured payment system.
-
+            Demo interface — no payment is processed
+            by this front-end page.
         </small>
 
     </div>
@@ -1536,27 +1250,25 @@
 
 
 <!-- =====================================================
-     WITHDRAWAL MODAL
+     WITHDRAW MODAL
 ===================================================== -->
 
-<div class="modal"
-     id="withdrawModal">
+<div
+    class="modal"
+    id="withdrawModal"
+>
 
-    <div class="modal-overlay"
-         onclick="closeModal('withdrawModal')">
-    </div>
-
+    <div class="modal-overlay"></div>
 
     <div class="modal-box">
 
         <button
             class="modal-close"
-            onclick="closeModal('withdrawModal')">
-
+            type="button"
+            aria-label="Close"
+        >
             ×
-
         </button>
-
 
         <div class="modal-header">
 
@@ -1566,13 +1278,13 @@
 
             <div>
 
-                <span>
-                    ACCOUNT
-                </span>
+                <h3>
+                    Withdraw
+                </h3>
 
-                <h2>
-                    Withdraw Funds
-                </h2>
+                <p>
+                    Request a withdrawal.
+                </p>
 
             </div>
 
@@ -1580,84 +1292,72 @@
 
 
         <p class="modal-description">
-
-            Enter the amount and M-Pesa number
-            for your withdrawal request.
-
+            Enter your withdrawal details below.
+            Actual withdrawal processing requires
+            a secure backend and verified payment API.
         </p>
 
 
-        <div class="available-box">
+        <form id="withdrawForm">
 
-            <span>
-                AVAILABLE BALANCE
-            </span>
+            <div class="form-group">
 
-            <strong>
-                KSh <b id="withdrawBalance">
-                    0.00
-                </b>
-            </strong>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label for="withdrawAmount">
-                Withdrawal Amount
-            </label>
-
-            <div class="amount-input">
-
-                <span>
-                    KSh
-                </span>
+                <label for="withdrawAmount">
+                    Amount
+                </label>
 
                 <input
-                    type="number"
                     id="withdrawAmount"
-                    placeholder="0.00"
+                    class="amount-input"
+                    type="number"
                     min="1"
-                    step="1"
+                    placeholder="Enter amount"
+                    required
                 >
 
             </div>
 
-        </div>
+
+            <div class="form-group">
+
+                <label for="withdrawPhone">
+                    M-Pesa Phone Number
+                </label>
+
+                <input
+                    id="withdrawPhone"
+                    type="tel"
+                    placeholder="07XXXXXXXX"
+                    autocomplete="tel"
+                    required
+                >
+
+            </div>
 
 
-        <div class="form-group">
+            <div class="available-box">
 
-            <label for="withdrawNumber">
-                M-Pesa Number
-            </label>
+                Available Balance:
+                <strong>
+                    KSh 0.00
+                </strong>
 
-            <input
-                type="tel"
-                id="withdrawNumber"
-                placeholder="07XXXXXXXX"
-                maxlength="13"
+            </div>
+
+
+            <button
+                class="modal-primary"
+                type="submit"
             >
+                Submit Request
+            </button>
 
-        </div>
-
-
-        <button
-            class="modal-primary"
-            onclick="processWithdrawal()">
-
-            Request Withdrawal
-            →
-
-        </button>
+        </form>
 
 
         <small class="modal-note">
-
-            Withdrawal requests will be processed
-            through the configured backend.
-
+            Demo interface — no withdrawal is processed
+            by this front-end page.
         </small>
 
     </div>
@@ -1666,32 +1366,31 @@
 
 
 <!-- =====================================================
-     NOTIFICATION TOAST
+     TOAST
 ===================================================== -->
 
-<div class="toast"
-     id="toast">
+<div class="toast">
 
-    <div class="toast-icon"
-         id="toastIcon">
-
+    <div class="toast-icon">
         ✓
-
     </div>
 
     <div>
 
-        <strong id="toastTitle">
-            Success
+        <strong>
+            Online Sphere
         </strong>
 
-        <p id="toastMessage">
-            Operation completed.
+        <p>
+            Welcome.
         </p>
 
     </div>
 
-    <button onclick="hideToast()">
+    <button
+        type="button"
+        aria-label="Close notification"
+    >
         ×
     </button>
 
@@ -1704,14 +1403,10 @@
 
 <button
     class="back-to-top"
-    id="backToTop"
-    onclick="window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    })">
-
+    type="button"
+    aria-label="Back to top"
+>
     ↑
-
 </button>
 
 
@@ -1720,1104 +1415,6 @@
 ===================================================== -->
 
 <script src="app.js"></script>
-
-
-<script>
-
-/*
-===========================================================
-ONLINE SPHERE — PAGE CONTROLLER
-===========================================================
-*/
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        setTimeout(function () {
-
-            const loader =
-                document.getElementById(
-                    "pageLoader"
-                );
-
-            if (loader) {
-                loader.classList.add("hidden");
-            }
-
-        }, 700);
-
-
-        updatePageName();
-
-        updatePageBalances();
-
-        setupScrollEffects();
-
-    }
-);
-
-
-/*
------------------------------------------------------------
-PORTAL ACCESS
------------------------------------------------------------
-*/
-
-function enterPortal() {
-
-    const input =
-        document.getElementById(
-            "memberName"
-        );
-
-    if (!input) return;
-
-    const name =
-        input.value.trim();
-
-    if (!name) {
-
-        showToast(
-            "Welcome",
-            "Please enter your name first.",
-            "warning"
-        );
-
-        input.focus();
-
-        return;
-    }
-
-
-    if (typeof account !== "undefined") {
-
-        account.name = name;
-
-        if (typeof saveAccount === "function") {
-            saveAccount();
-        }
-
-    }
-
-
-    localStorage.setItem(
-        "onlineSphereName",
-        name
-    );
-
-
-    const displayName =
-        document.getElementById(
-            "displayName"
-        );
-
-    if (displayName) {
-        displayName.textContent = name;
-    }
-
-
-    const securityScreen =
-        document.getElementById(
-            "securityScreen"
-        );
-
-    if (securityScreen) {
-
-        securityScreen.classList.add(
-            "security-hidden"
-        );
-
-        setTimeout(function () {
-
-            securityScreen.style.display =
-                "none";
-
-        }, 600);
-
-    }
-
-
-    updatePageName();
-
-
-    showToast(
-        "Welcome to Online Sphere",
-        "Your secure member portal is ready.",
-        "success"
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-UPDATE MEMBER NAME
------------------------------------------------------------
-*/
-
-function updatePageName() {
-
-    const savedName =
-        localStorage.getItem(
-            "onlineSphereName"
-        );
-
-
-    const name =
-        savedName || "Guest Member";
-
-
-    const ids = [
-
-        "displayName",
-        "accountMemberName",
-        "navMemberName"
-
-    ];
-
-
-    ids.forEach(function (id) {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-
-            if (id === "navMemberName") {
-
-                element.textContent =
-                    savedName || "Guest";
-
-            } else {
-
-                element.textContent =
-                    name;
-
-            }
-
-        }
-
-    });
-
-}
-
-
-/*
------------------------------------------------------------
-BALANCE DISPLAY
------------------------------------------------------------
-*/
-
-function updatePageBalances() {
-
-    if (
-        typeof account === "undefined"
-    ) {
-        return;
-    }
-
-
-    const balance =
-        Number(account.balance || 0)
-            .toFixed(2);
-
-
-    const deposits =
-        Number(account.deposits || 0)
-            .toFixed(2);
-
-
-    const bonus =
-        Number(account.bonus || 0)
-            .toFixed(2);
-
-
-    const balanceIds = [
-
-        "balance",
-        "quickBalance",
-        "accountBalance",
-        "withdrawBalance"
-
-    ];
-
-
-    balanceIds.forEach(function (id) {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-            element.textContent =
-                balance;
-        }
-
-    });
-
-
-    const depositIds = [
-
-        "totalDeposits"
-
-    ];
-
-
-    depositIds.forEach(function (id) {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-            element.textContent =
-                deposits;
-        }
-
-    });
-
-
-    const bonusIds = [
-
-        "bonus"
-
-    ];
-
-
-    bonusIds.forEach(function (id) {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-            element.textContent =
-                bonus;
-        }
-
-    });
-
-
-    const transactionCount =
-        document.getElementById(
-            "transactionCount"
-        );
-
-
-    if (transactionCount) {
-
-        transactionCount.textContent =
-            account.transactions
-                ? account.transactions.length
-                : 0;
-
-    }
-
-}
-
-
-/*
------------------------------------------------------------
-NAVIGATION
------------------------------------------------------------
-*/
-
-function toggleMenu() {
-
-    const navigation =
-        document.getElementById(
-            "navigation"
-        );
-
-    const menuButton =
-        document.getElementById(
-            "menuButton"
-        );
-
-
-    if (navigation) {
-        navigation.classList.toggle(
-            "active"
-        );
-    }
-
-
-    if (menuButton) {
-        menuButton.classList.toggle(
-            "active"
-        );
-    }
-
-}
-
-
-function closeMenu() {
-
-    const navigation =
-        document.getElementById(
-            "navigation"
-        );
-
-    const menuButton =
-        document.getElementById(
-            "menuButton"
-        );
-
-
-    if (navigation) {
-        navigation.classList.remove(
-            "active"
-        );
-    }
-
-
-    if (menuButton) {
-        menuButton.classList.remove(
-            "active"
-        );
-    }
-
-}
-
-
-/*
------------------------------------------------------------
-SECTION SCROLL
------------------------------------------------------------
-*/
-
-function showSection(id) {
-
-    const section =
-        document.getElementById(id);
-
-    if (!section) return;
-
-
-    section.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-
-}
-
-
-/*
------------------------------------------------------------
-THEME
------------------------------------------------------------
-*/
-
-function toggleTheme() {
-
-    document.body.classList.toggle(
-        "light-theme"
-    );
-
-
-    const isLight =
-        document.body.classList.contains(
-            "light-theme"
-        );
-
-
-    localStorage.setItem(
-        "onlineSphereTheme",
-        isLight ? "light" : "dark"
-    );
-
-
-    const button =
-        document.getElementById(
-            "themeButton"
-        );
-
-
-    if (button) {
-
-        button.textContent =
-            isLight ? "☀️" : "🌙";
-
-    }
-
-}
-
-
-(function loadTheme() {
-
-    const savedTheme =
-        localStorage.getItem(
-            "onlineSphereTheme"
-        );
-
-
-    if (savedTheme === "light") {
-
-        document.body.classList.add(
-            "light-theme"
-        );
-
-    }
-
-})();
-
-
-/*
------------------------------------------------------------
-MODALS
------------------------------------------------------------
-*/
-
-function openModal(id) {
-
-    const modal =
-        document.getElementById(id);
-
-    if (!modal) return;
-
-
-    modal.classList.add(
-        "active"
-    );
-
-
-    document.body.classList.add(
-        "modal-open"
-    );
-
-
-    updatePageBalances();
-
-}
-
-
-function closeModal(id) {
-
-    const modal =
-        document.getElementById(id);
-
-    if (!modal) return;
-
-
-    modal.classList.remove(
-        "active"
-    );
-
-
-    document.body.classList.remove(
-        "modal-open"
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-CLOSE MODALS WITH ESCAPE
------------------------------------------------------------
-*/
-
-document.addEventListener(
-    "keydown",
-    function (event) {
-
-        if (event.key === "Escape") {
-
-            document
-                .querySelectorAll(".modal.active")
-                .forEach(function (modal) {
-
-                    modal.classList.remove(
-                        "active"
-                    );
-
-                });
-
-            document.body.classList.remove(
-                "modal-open"
-            );
-
-        }
-
-    }
-);
-
-
-/*
------------------------------------------------------------
-DEPOSIT
------------------------------------------------------------
-*/
-
-function processDeposit() {
-
-    const amountInput =
-        document.getElementById(
-            "depositAmount"
-        );
-
-    const phoneInput =
-        document.getElementById(
-            "mpesaNumber"
-        );
-
-
-    const amount =
-        Number(amountInput?.value);
-
-
-    const phone =
-        phoneInput?.value.trim();
-
-
-    if (!amount || amount <= 0) {
-
-        showToast(
-            "Invalid amount",
-            "Enter a valid deposit amount.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (!phone) {
-
-        showToast(
-            "M-Pesa number required",
-            "Enter the M-Pesa number.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !/^(\+254|254|0)7\d{8}$/.test(
-            phone.replace(/\s/g, "")
-        )
-    ) {
-
-        showToast(
-            "Invalid number",
-            "Enter a valid Kenyan mobile number.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        typeof account === "undefined"
-    ) {
-        return;
-    }
-
-
-    /*
-       PROTOTYPE ONLY
-
-       This updates the local demonstration
-       balance.
-
-       Real M-Pesa processing will be connected
-       through the Node.js backend later.
-    */
-
-
-    account.balance += amount;
-
-    account.deposits += amount;
-
-
-    account.transactions.unshift({
-
-        type: "Deposit",
-
-        amount: amount,
-
-        date:
-            new Date().toLocaleString(),
-
-        status: "Pending"
-
-    });
-
-
-    if (typeof saveAccount === "function") {
-        saveAccount();
-    }
-
-
-    updatePageBalances();
-
-
-    if (typeof updateDisplay === "function") {
-        updateDisplay();
-    }
-
-
-    closeModal(
-        "depositModal"
-    );
-
-
-    amountInput.value = "";
-
-    phoneInput.value = "";
-
-
-    showToast(
-        "Deposit recorded",
-        "Your deposit has been added to the prototype account.",
-        "success"
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-WITHDRAWAL
------------------------------------------------------------
-*/
-
-function processWithdrawal() {
-
-    const amountInput =
-        document.getElementById(
-            "withdrawAmount"
-        );
-
-    const phoneInput =
-        document.getElementById(
-            "withdrawNumber"
-        );
-
-
-    const amount =
-        Number(amountInput?.value);
-
-
-    const phone =
-        phoneInput?.value.trim();
-
-
-    if (!amount || amount <= 0) {
-
-        showToast(
-            "Invalid amount",
-            "Enter a valid withdrawal amount.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (!phone) {
-
-        showToast(
-            "M-Pesa number required",
-            "Enter the M-Pesa number.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !/^(\+254|254|0)7\d{8}$/.test(
-            phone.replace(/\s/g, "")
-        )
-    ) {
-
-        showToast(
-            "Invalid number",
-            "Enter a valid Kenyan mobile number.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    if (
-        typeof account === "undefined"
-    ) {
-        return;
-    }
-
-
-    if (
-        amount > Number(account.balance)
-    ) {
-
-        showToast(
-            "Insufficient balance",
-            "Your available balance is too low.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    account.balance -= amount;
-
-
-    account.transactions.unshift({
-
-        type: "Withdrawal",
-
-        amount: amount,
-
-        date:
-            new Date().toLocaleString(),
-
-        status: "Pending"
-
-    });
-
-
-    if (typeof saveAccount === "function") {
-        saveAccount();
-    }
-
-
-    updatePageBalances();
-
-
-    if (typeof updateDisplay === "function") {
-        updateDisplay();
-    }
-
-
-    closeModal(
-        "withdrawModal"
-    );
-
-
-    amountInput.value = "";
-
-    phoneInput.value = "";
-
-
-    showToast(
-        "Withdrawal request",
-        "Your withdrawal request has been recorded.",
-        "success"
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-CLEAR TRANSACTIONS
------------------------------------------------------------
-*/
-
-function clearTransactions() {
-
-    if (
-        typeof account === "undefined"
-    ) {
-        return;
-    }
-
-
-    if (
-        !account.transactions ||
-        account.transactions.length === 0
-    ) {
-
-        showToast(
-            "Nothing to clear",
-            "There are no transactions yet.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "Clear all transaction history?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    account.transactions = [];
-
-
-    if (typeof saveAccount === "function") {
-        saveAccount();
-    }
-
-
-    if (typeof updateDisplay === "function") {
-        updateDisplay();
-    }
-
-
-    updatePageBalances();
-
-
-    showToast(
-        "History cleared",
-        "Transaction history has been cleared.",
-        "success"
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-SUPPORT
------------------------------------------------------------
-*/
-
-function contactSupport() {
-
-    showToast(
-        "Support",
-        "Support contact details will be connected here.",
-        "success"
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-TOAST
------------------------------------------------------------
-*/
-
-let toastTimer;
-
-
-function showToast(
-    title,
-    message,
-    type = "success"
-) {
-
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    const toastTitle =
-        document.getElementById(
-            "toastTitle"
-        );
-
-
-    const toastMessage =
-        document.getElementById(
-            "toastMessage"
-        );
-
-
-    const toastIcon =
-        document.getElementById(
-            "toastIcon"
-        );
-
-
-    if (!toast) return;
-
-
-    toastTitle.textContent =
-        title;
-
-
-    toastMessage.textContent =
-        message;
-
-
-    toast.className =
-        "toast " + type;
-
-
-    if (toastIcon) {
-
-        toastIcon.textContent =
-            type === "warning"
-                ? "!"
-                : "✓";
-
-    }
-
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toastTimer =
-        setTimeout(
-            hideToast,
-            4500
-        );
-
-}
-
-
-function hideToast() {
-
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    if (toast) {
-
-        toast.classList.remove(
-            "show"
-        );
-
-    }
-
-}
-
-
-/*
------------------------------------------------------------
-SCROLL EFFECTS
------------------------------------------------------------
-*/
-
-function setupScrollEffects() {
-
-    const backToTop =
-        document.getElementById(
-            "backToTop"
-        );
-
-
-    window.addEventListener(
-        "scroll",
-        function () {
-
-            if (
-                window.scrollY > 500
-            ) {
-
-                if (backToTop) {
-
-                    backToTop.classList.add(
-                        "visible"
-                    );
-
-                }
-
-            } else {
-
-                if (backToTop) {
-
-                    backToTop.classList.remove(
-                        "visible"
-                    );
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-ENTER KEY ON MEMBER NAME
------------------------------------------------------------
-*/
-
-const memberInput =
-    document.getElementById(
-        "memberName"
-    );
-
-
-if (memberInput) {
-
-    memberInput.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                enterPortal();
-
-            }
-
-        }
-    );
-
-}
-
-
-/*
------------------------------------------------------------
-WELCOME SCREEN STATE
------------------------------------------------------------
-*/
-
-(function checkPortalState() {
-
-    const savedName =
-        localStorage.getItem(
-            "onlineSphereName"
-        );
-
-
-    if (savedName) {
-
-        const input =
-            document.getElementById(
-                "memberName"
-            );
-
-
-        if (input) {
-            input.value = savedName;
-        }
-
-    }
-
-})();
-
-</script>
 
 </body>
 </html>
