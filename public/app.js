@@ -1,377 +1,963 @@
-let account = JSON.parse(
-    localStorage.getItem("onlineSphereAccount")
-) || {
-    name: "Guest Member",
-    balance: 0,
-    deposits: 0,
-    bonus: 0,
-    transactions: []
-};
+/* =========================================================
+   ONLINE SPHERE — MAIN JAVASCRIPT
+   Version: Advanced UI
+   ========================================================= */
 
-function saveAccount() {
-    localStorage.setItem(
-        "onlineSphereAccount",
-        JSON.stringify(account)
-    );
-}
+document.addEventListener("DOMContentLoaded", () => {
+    "use strict";
 
-function updateDisplay() {
+    /* ---------------------------------------------------------
+       HELPERS
+    --------------------------------------------------------- */
 
-    const balanceElements = [
-        "balance",
-        "accountBalance",
-        "dashboardBalance"
-    ];
+    const $ = (selector, parent = document) =>
+        parent.querySelector(selector);
 
-    balanceElements.forEach(id => {
-        const element = document.getElementById(id);
+    const $$ = (selector, parent = document) =>
+        [...parent.querySelectorAll(selector)];
 
-        if (element) {
-            element.textContent =
-                Number(account.balance).toFixed(2);
-        }
-    });
+    /* ---------------------------------------------------------
+       PAGE LOADER
+    --------------------------------------------------------- */
 
-    const depositElements = [
-        "totalDeposits",
-        "dashboardDeposits"
-    ];
+    const pageLoader = $(".page-loader");
 
-    depositElements.forEach(id => {
-        const element = document.getElementById(id);
+    if (pageLoader) {
+        setTimeout(() => {
+            pageLoader.classList.add("hidden");
 
-        if (element) {
-            element.textContent =
-                Number(account.deposits).toFixed(2);
-        }
-    });
-
-    const bonusElements = [
-        "bonus",
-        "dashboardBonus"
-    ];
-
-    bonusElements.forEach(id => {
-        const element = document.getElementById(id);
-
-        if (element) {
-            element.textContent =
-                Number(account.bonus).toFixed(2);
-        }
-    });
-
-    const nameElement =
-        document.getElementById("displayName");
-
-    if (nameElement) {
-        nameElement.textContent = account.name;
+            setTimeout(() => {
+                pageLoader.style.display = "none";
+            }, 500);
+        }, 700);
     }
 
-    const count =
-        document.getElementById("transactionCount");
+    /* ---------------------------------------------------------
+       MOBILE MENU
+    --------------------------------------------------------- */
 
-    if (count) {
-        count.textContent =
-            account.transactions.length;
-    }
+    const menuBtn = $(".menu-btn");
+    const nav = $("nav");
 
-    renderTransactions();
-}
+    if (menuBtn && nav) {
+        menuBtn.addEventListener("click", () => {
+            nav.classList.toggle("active");
+            menuBtn.classList.toggle("active");
+        });
 
-function enterPortal() {
-
-    const input =
-        document.getElementById("memberName");
-
-    if (!input) return;
-
-    const name =
-        input.value.trim();
-
-    if (!name) {
-        alert("Please enter your name.");
-        return;
-    }
-
-    account.name = name;
-
-    saveAccount();
-
-    const screen =
-        document.getElementById("securityScreen");
-
-    if (screen) {
-        screen.style.display = "none";
-    }
-
-    updateDisplay();
-}
-
-function toggleMenu() {
-
-    const navigation =
-        document.getElementById("navigation");
-
-    if (navigation) {
-        navigation.classList.toggle("active");
-    }
-}
-
-function showSection(id) {
-
-    const section =
-        document.getElementById(id);
-
-    if (section) {
-        section.scrollIntoView({
-            behavior: "smooth"
+        $$("nav a").forEach(link => {
+            link.addEventListener("click", () => {
+                nav.classList.remove("active");
+                menuBtn.classList.remove("active");
+            });
         });
     }
-}
 
-function openModal(id) {
+    /* ---------------------------------------------------------
+       THEME SWITCHER
+    --------------------------------------------------------- */
 
-    const modal =
-        document.getElementById(id);
+    const themeButton = $(".theme-button");
 
-    if (modal) {
+    const savedTheme =
+        localStorage.getItem("onlineSphereTheme");
+
+    if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+    }
+
+    function updateThemeIcon() {
+        if (!themeButton) return;
+
+        const lightMode =
+            document.body.classList.contains("light-theme");
+
+        themeButton.textContent = lightMode ? "☀️" : "🌙";
+
+        themeButton.setAttribute(
+            "aria-label",
+            lightMode
+                ? "Switch to dark mode"
+                : "Switch to light mode"
+        );
+    }
+
+    updateThemeIcon();
+
+    if (themeButton) {
+        themeButton.addEventListener("click", () => {
+
+            document.body.classList.toggle("light-theme");
+
+            const isLight =
+                document.body.classList.contains("light-theme");
+
+            localStorage.setItem(
+                "onlineSphereTheme",
+                isLight ? "light" : "dark"
+            );
+
+            updateThemeIcon();
+
+            showToast(
+                "Theme Updated",
+                isLight
+                    ? "Light mode enabled."
+                    : "Dark mode enabled."
+            );
+        });
+    }
+
+    /* ---------------------------------------------------------
+       SMOOTH SCROLLING
+    --------------------------------------------------------- */
+
+    $$('a[href^="#"]').forEach(link => {
+
+        link.addEventListener("click", event => {
+
+            const targetId =
+                link.getAttribute("href");
+
+            if (!targetId || targetId === "#") return;
+
+            const target =
+                document.querySelector(targetId);
+
+            if (target) {
+                event.preventDefault();
+
+                target.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        });
+
+    });
+
+    /* ---------------------------------------------------------
+       BACK TO TOP
+    --------------------------------------------------------- */
+
+    const backToTop = $(".back-to-top");
+
+    function updateBackToTop() {
+
+        if (!backToTop) return;
+
+        if (window.scrollY > 500) {
+            backToTop.classList.add("visible");
+        } else {
+            backToTop.classList.remove("visible");
+        }
+    }
+
+    window.addEventListener(
+        "scroll",
+        updateBackToTop,
+        { passive: true }
+    );
+
+    updateBackToTop();
+
+    if (backToTop) {
+        backToTop.addEventListener("click", () => {
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        });
+    }
+
+    /* ---------------------------------------------------------
+       TOAST NOTIFICATION
+    --------------------------------------------------------- */
+
+    const toast = $(".toast");
+    const toastTitle = toast
+        ? $("strong", toast)
+        : null;
+
+    const toastMessage = toast
+        ? $("p", toast)
+        : null;
+
+    const toastClose = toast
+        ? $("button", toast)
+        : null;
+
+    let toastTimer;
+
+    function showToast(
+        title = "Online Sphere",
+        message = "Action completed.",
+        type = "success"
+    ) {
+
+        if (!toast) return;
+
+        if (toastTitle) {
+            toastTitle.textContent = title;
+        }
+
+        if (toastMessage) {
+            toastMessage.textContent = message;
+        }
+
+        toast.classList.remove("warning");
+
+        if (type === "warning") {
+            toast.classList.add("warning");
+        }
+
+        toast.classList.add("show");
+
+        clearTimeout(toastTimer);
+
+        toastTimer = setTimeout(() => {
+            toast.classList.remove("show");
+        }, 4000);
+    }
+
+    if (toastClose) {
+        toastClose.addEventListener("click", () => {
+            toast.classList.remove("show");
+        });
+    }
+
+    /* ---------------------------------------------------------
+       MODALS
+    --------------------------------------------------------- */
+
+    const modals = $$(".modal");
+
+    function openModal(selector) {
+
+        const modal = $(selector);
+
+        if (!modal) return;
+
         modal.classList.add("active");
+
+        document.body.classList.add("modal-open");
     }
-}
 
-function closeModal(id) {
+    function closeModal(modal) {
 
-    const modal =
-        document.getElementById(id);
+        if (!modal) return;
 
-    if (modal) {
         modal.classList.remove("active");
-    }
-}
 
-function processDeposit() {
+        const anotherOpen =
+            modals.some(item =>
+                item.classList.contains("active")
+            );
 
-    const amount =
-        Number(
-            document.getElementById(
-                "depositAmount"
-            )?.value
-        );
-
-    const phone =
-        document.getElementById(
-            "mpesaNumber"
-        )?.value.trim();
-
-    if (!amount || amount <= 0) {
-        alert("Enter a valid deposit amount.");
-        return;
+        if (!anotherOpen) {
+            document.body.classList.remove("modal-open");
+        }
     }
 
-    if (!phone) {
-        alert("Enter your M-Pesa number.");
-        return;
-    }
+    /* Close buttons */
 
-    account.balance += amount;
-    account.deposits += amount;
+    $$(".modal-close").forEach(button => {
 
-    account.transactions.unshift({
-        type: "Deposit",
-        amount: amount,
-        date: new Date().toLocaleString()
+        button.addEventListener("click", () => {
+
+            closeModal(
+                button.closest(".modal")
+            );
+
+        });
+
     });
 
-    saveAccount();
-    updateDisplay();
+    /* Click outside modal */
 
-    closeModal("depositModal");
+    $$(".modal-overlay").forEach(overlay => {
 
-    alert(
-        "Deposit recorded successfully. M-Pesa integration can be connected to the backend later."
-    );
-}
+        overlay.addEventListener("click", () => {
 
-function processWithdrawal() {
+            closeModal(
+                overlay.closest(".modal")
+            );
 
-    const amount =
-        Number(
-            document.getElementById(
-                "withdrawAmount"
-            )?.value
-        );
+        });
 
-    const phone =
-        document.getElementById(
-            "withdrawNumber"
-        )?.value.trim();
-
-    if (!amount || amount <= 0) {
-        alert("Enter a valid withdrawal amount.");
-        return;
-    }
-
-    if (!phone) {
-        alert("Enter your M-Pesa number.");
-        return;
-    }
-
-    if (amount > account.balance) {
-        alert("Insufficient balance.");
-        return;
-    }
-
-    account.balance -= amount;
-
-    account.transactions.unshift({
-        type: "Withdrawal",
-        amount: amount,
-        date: new Date().toLocaleString()
     });
 
-    saveAccount();
-    updateDisplay();
+    /* Escape key */
 
-    closeModal("withdrawModal");
+    document.addEventListener("keydown", event => {
 
-    alert(
-        "Withdrawal request recorded successfully."
-    );
-}
+        if (event.key === "Escape") {
 
-function processDashboardDeposit() {
+            modals.forEach(modal => {
+                closeModal(modal);
+            });
 
-    const input =
-        document.getElementById(
-            "dashboardDepositAmount"
-        );
+        }
 
-    const amount =
-        Number(input?.value);
-
-    if (!amount || amount <= 0) {
-        alert("Enter a valid amount.");
-        return;
-    }
-
-    account.balance += amount;
-    account.deposits += amount;
-
-    account.transactions.unshift({
-        type: "Deposit",
-        amount: amount,
-        date: new Date().toLocaleString()
     });
 
-    saveAccount();
-    updateDisplay();
+    /* ---------------------------------------------------------
+       DEPOSIT / WITHDRAW BUTTONS
+    --------------------------------------------------------- */
 
-    closeModal("depositModal");
+    const depositButton =
+        $(".deposit-action");
 
-    alert("Deposit recorded.");
-}
+    const withdrawButton =
+        $(".withdraw-action");
 
-function processDashboardWithdrawal() {
+    if (depositButton) {
 
-    const input =
-        document.getElementById(
-            "dashboardWithdrawAmount"
+        depositButton.addEventListener(
+            "click",
+            () => {
+
+                openModal("#depositModal");
+
+            }
         );
 
-    const amount =
-        Number(input?.value);
-
-    if (!amount || amount <= 0) {
-        alert("Enter a valid amount.");
-        return;
     }
 
-    if (amount > account.balance) {
-        alert("Insufficient balance.");
-        return;
-    }
+    if (withdrawButton) {
 
-    account.balance -= amount;
+        withdrawButton.addEventListener(
+            "click",
+            () => {
 
-    account.transactions.unshift({
-        type: "Withdrawal",
-        amount: amount,
-        date: new Date().toLocaleString()
-    });
+                openModal("#withdrawModal");
 
-    saveAccount();
-    updateDisplay();
-
-    closeModal("withdrawModal");
-
-    alert("Withdrawal request recorded.");
-}
-
-function renderTransactions() {
-
-    const container =
-        document.getElementById(
-            "transactionList"
+            }
         );
 
-    if (!container) return;
+    }
+
+    /* ---------------------------------------------------------
+       DEMO DEPOSIT FORM
+       NOTE:
+       This interface does NOT process real payments.
+    --------------------------------------------------------- */
+
+    const depositForm =
+        $("#depositForm");
+
+    if (depositForm) {
+
+        depositForm.addEventListener(
+            "submit",
+            event => {
+
+                event.preventDefault();
+
+                const modal =
+                    depositForm.closest(".modal");
+
+                closeModal(modal);
+
+                showToast(
+                    "Request Received",
+                    "This is a demonstration interface. No payment was processed."
+                );
+
+                depositForm.reset();
+
+            }
+        );
+
+    }
+
+    /* ---------------------------------------------------------
+       DEMO WITHDRAW FORM
+       NOTE:
+       This interface does NOT process real withdrawals.
+    --------------------------------------------------------- */
+
+    const withdrawForm =
+        $("#withdrawForm");
+
+    if (withdrawForm) {
+
+        withdrawForm.addEventListener(
+            "submit",
+            event => {
+
+                event.preventDefault();
+
+                const modal =
+                    withdrawForm.closest(".modal");
+
+                closeModal(modal);
+
+                showToast(
+                    "Request Received",
+                    "This is a demonstration interface. No withdrawal was processed.",
+                    "warning"
+                );
+
+                withdrawForm.reset();
+
+            }
+        );
+
+    }
+
+    /* ---------------------------------------------------------
+       SECURITY SCREEN
+    --------------------------------------------------------- */
+
+    const securityScreen =
+        $(".security-screen");
+
+    const securityForm =
+        $("#securityForm");
+
+    const accessGranted =
+        localStorage.getItem(
+            "onlineSphereAccess"
+        );
 
     if (
-        !account.transactions ||
-        account.transactions.length === 0
+        securityScreen &&
+        accessGranted === "granted"
     ) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div>📋</div>
-                <p>No transactions yet.</p>
-            </div>
-        `;
 
-        return;
+        securityScreen.classList.add(
+            "security-hidden"
+        );
+
     }
 
-    container.innerHTML =
-        account.transactions
-            .slice(0, 10)
-            .map(transaction => `
-                <div style="
-                    width:100%;
-                    padding:20px;
-                    display:flex;
-                    justify-content:space-between;
-                    border-bottom:1px solid #e2e8f0;
-                ">
-                    <div>
-                        <strong>
-                            ${transaction.type}
-                        </strong>
+    if (securityForm) {
 
-                        <small style="
-                            display:block;
-                            color:#64748b;
-                        ">
-                            ${transaction.date}
-                        </small>
-                    </div>
+        securityForm.addEventListener(
+            "submit",
+            event => {
 
-                    <strong>
-                        KSh ${Number(
-                            transaction.amount
-                        ).toFixed(2)}
-                    </strong>
-                </div>
-            `)
-            .join("");
-}
+                event.preventDefault();
 
-function contactSupport() {
+                securityScreen?.classList.add(
+                    "security-hidden"
+                );
 
-    alert(
-        "Support contact details will be added here."
+                localStorage.setItem(
+                    "onlineSphereAccess",
+                    "granted"
+                );
+
+                showToast(
+                    "Access Granted",
+                    "Welcome to Online Sphere."
+                );
+
+            }
+        );
+
+    }
+
+    /* ---------------------------------------------------------
+       PROFILE BUTTON
+    --------------------------------------------------------- */
+
+    const profileButton =
+        $(".profile-button");
+
+    if (profileButton) {
+
+        profileButton.addEventListener(
+            "click",
+            () => {
+
+                showToast(
+                    "Profile",
+                    "Profile management will be available in the next update."
+                );
+
+            }
+        );
+
+    }
+
+    /* ---------------------------------------------------------
+       FEATURE LINKS
+    --------------------------------------------------------- */
+
+    $$(".feature-link").forEach(link => {
+
+        link.addEventListener(
+            "click",
+            event => {
+
+                const href =
+                    link.getAttribute("href");
+
+                if (!href || href === "#") {
+
+                    event.preventDefault();
+
+                    showToast(
+                        "Online Sphere",
+                        "This feature is ready for the next development stage."
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+    /* ---------------------------------------------------------
+       ACTION BUTTONS
+    --------------------------------------------------------- */
+
+    $$(".primary-btn, .secondary-btn, .primary-small, .outline-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    const href =
+                        button.getAttribute("href");
+
+                    const text =
+                        button.textContent
+                            .trim()
+                            .toLowerCase();
+
+                    /*
+                     * Don't interfere with actual links.
+                     */
+
+                    if (
+                        href &&
+                        href !== "#"
+                    ) {
+                        return;
+                    }
+
+                    /*
+                     * Deposit and withdrawal
+                     * are handled separately.
+                     */
+
+                    if (
+                        button.classList.contains(
+                            "deposit-action"
+                        ) ||
+                        button.classList.contains(
+                            "withdraw-action"
+                        )
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    if (
+                        text.includes("support") ||
+                        text.includes("help")
+                    ) {
+
+                        showToast(
+                            "Support",
+                            "Support centre is ready for integration."
+                        );
+
+                    } else if (
+                        text.includes("explore")
+                    ) {
+
+                        const features =
+                            document.querySelector(
+                                "#features"
+                            );
+
+                        if (features) {
+
+                            features.scrollIntoView({
+                                behavior: "smooth"
+                            });
+
+                        }
+
+                    } else {
+
+                        showToast(
+                            "Online Sphere",
+                            "This feature is ready for the next development stage."
+                        );
+
+                    }
+
+                }
+            );
+
+        });
+
+    /* ---------------------------------------------------------
+       ACTIVE NAVIGATION
+    --------------------------------------------------------- */
+
+    const sections =
+        $$("section[id]");
+
+    const navLinks =
+        $$('nav a[href^="#"]');
+
+    function updateActiveNavigation() {
+
+        const scrollPosition =
+            window.scrollY + 180;
+
+        let currentSection = "";
+
+        sections.forEach(section => {
+
+            const sectionTop =
+                section.offsetTop;
+
+            const sectionHeight =
+                section.offsetHeight;
+
+            if (
+                scrollPosition >= sectionTop &&
+                scrollPosition <
+                    sectionTop + sectionHeight
+            ) {
+
+                currentSection =
+                    section.getAttribute("id");
+
+            }
+
+        });
+
+        navLinks.forEach(link => {
+
+            link.classList.remove("active");
+
+            const href =
+                link.getAttribute("href");
+
+            if (
+                currentSection &&
+                href === `#${currentSection}`
+            ) {
+
+                link.classList.add("active");
+
+            }
+
+        });
+
+    }
+
+    window.addEventListener(
+        "scroll",
+        updateActiveNavigation,
+        { passive: true }
     );
-}
 
-document.addEventListener(
-    "DOMContentLoaded",
-    updateDisplay
-);
+    updateActiveNavigation();
+
+    /* ---------------------------------------------------------
+       NUMBER COUNTER ANIMATION
+    --------------------------------------------------------- */
+
+    const counters =
+        $$(".counter");
+
+    function animateCounter(element) {
+
+        const target =
+            Number(
+                element.dataset.target ||
+                element.textContent.replace(
+                    /[^0-9.]/g,
+                    ""
+                )
+            );
+
+        if (!target) return;
+
+        const duration = 1200;
+
+        const startTime =
+            performance.now();
+
+        function update(currentTime) {
+
+            const progress =
+                Math.min(
+                    (currentTime - startTime) /
+                    duration,
+                    1
+                );
+
+            const value =
+                Math.floor(
+                    progress * target
+                );
+
+            element.textContent =
+                value.toLocaleString();
+
+            if (progress < 1) {
+
+                requestAnimationFrame(update);
+
+            } else {
+
+                element.textContent =
+                    target.toLocaleString();
+
+            }
+
+        }
+
+        requestAnimationFrame(update);
+    }
+
+    /* ---------------------------------------------------------
+       INTERSECTION OBSERVER
+    --------------------------------------------------------- */
+
+    if ("IntersectionObserver" in window) {
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (
+                            entry.isIntersecting
+                        ) {
+
+                            entry.target.classList.add(
+                                "in-view"
+                            );
+
+                            if (
+                                entry.target.classList
+                                    .contains("counter")
+                            ) {
+
+                                if (
+                                    !entry.target.dataset.animated
+                                ) {
+
+                                    entry.target.dataset.animated =
+                                        "true";
+
+                                    animateCounter(
+                                        entry.target
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.15
+                }
+            );
+
+        $$(
+            ".feature-card, .quick-stat, .security-item, .counter"
+        ).forEach(element => {
+
+            observer.observe(element);
+
+        });
+
+    }
+
+    /* ---------------------------------------------------------
+       AMOUNT INPUT FORMATTING
+    --------------------------------------------------------- */
+
+    $$(".amount-input").forEach(input => {
+
+        input.addEventListener(
+            "input",
+            () => {
+
+                let value =
+                    input.value.replace(
+                        /[^0-9]/g,
+                        ""
+                    );
+
+                if (value) {
+
+                    value =
+                        Number(value)
+                            .toLocaleString(
+                                "en-KE"
+                            );
+
+                }
+
+                /*
+                 * Keep cursor-friendly simple value.
+                 */
+
+                input.dataset.rawValue =
+                    value.replace(
+                        /,/g,
+                        ""
+                    );
+
+            }
+        );
+
+    });
+
+    /* ---------------------------------------------------------
+       PREVENT DOUBLE SUBMISSIONS
+    --------------------------------------------------------- */
+
+    $$("form").forEach(form => {
+
+        form.addEventListener(
+            "submit",
+            () => {
+
+                const submitButton =
+                    form.querySelector(
+                        'button[type="submit"]'
+                    );
+
+                if (!submitButton) return;
+
+                submitButton.dataset.originalText =
+                    submitButton.textContent;
+
+                submitButton.disabled = true;
+
+                submitButton.textContent =
+                    "Processing...";
+
+                setTimeout(() => {
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        submitButton.dataset.originalText ||
+                        "Submit";
+
+                }, 1500);
+
+            }
+        );
+
+    });
+
+    /* ---------------------------------------------------------
+       CURRENT YEAR
+    --------------------------------------------------------- */
+
+    const yearElements =
+        $$(".current-year");
+
+    yearElements.forEach(element => {
+
+        element.textContent =
+            new Date().getFullYear();
+
+    });
+
+    /* ---------------------------------------------------------
+       ONLINE STATUS
+    --------------------------------------------------------- */
+
+    function updateOnlineStatus() {
+
+        const status =
+            $(".account-status");
+
+        if (!status) return;
+
+        const statusText =
+            status.querySelector("span:last-child");
+
+        if (navigator.onLine) {
+
+            if (statusText) {
+                statusText.textContent =
+                    "Online";
+            }
+
+            status.classList.remove(
+                "offline"
+            );
+
+        } else {
+
+            if (statusText) {
+                statusText.textContent =
+                    "Offline";
+            }
+
+            status.classList.add(
+                "offline"
+            );
+
+        }
+
+    }
+
+    window.addEventListener(
+        "online",
+        updateOnlineStatus
+    );
+
+    window.addEventListener(
+        "offline",
+        updateOnlineStatus
+    );
+
+    updateOnlineStatus();
+
+    /* ---------------------------------------------------------
+       INITIAL READY MESSAGE
+    --------------------------------------------------------- */
+
+    setTimeout(() => {
+
+        if (
+            !sessionStorage.getItem(
+                "onlineSphereWelcome"
+            )
+        ) {
+
+            showToast(
+                "Online Sphere",
+                "Welcome to your advanced digital platform."
+            );
+
+            sessionStorage.setItem(
+                "onlineSphereWelcome",
+                "true"
+            );
+
+        }
+
+    }, 1800);
+
+});
