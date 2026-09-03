@@ -3,1189 +3,2971 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#075E54">
-<title>BENNY CONNECT</title>
+<meta name="theme-color" content="#0a2e5c">
+<title>Online Sphere Commerce | Member Portal</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
-}
+/* =========================================================
+   ONLINE SPHERE COMMERCE
+   COMPLETE SINGLE-FILE INTERACTIVE MEMBER PORTAL
+   ========================================================= */
 
 :root{
-    --primary:#075E54;
-    --secondary:#128C7E;
-    --accent:#25D366;
-    --bg:#f4f7f6;
-    --card:#ffffff;
-    --text:#17201e;
-    --muted:#7a8582;
-    --border:#e5e9e8;
-    --sent:#dcf8c6;
+    --primary:#0a2e5c;
+    --secondary:#0d3d7a;
+    --accent:#1dbf73;
+    --whatsapp:#25D366;
+    --gold:#d4af37;
+    --danger:#e63946;
+    --warning:#f08c00;
+    --info:#3b82f6;
+    --white:#ffffff;
+    --bg:#f4f7fa;
+    --surface:#ffffff;
+    --surface2:#f1f5f9;
+    --text:#1e293b;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --shadow:0 18px 50px rgba(15,23,42,.10);
+    --radius:28px;
+    --header:linear-gradient(135deg,#071d3a,#0a2e5c 55%,#0d3d7a);
+}
+
+[data-theme="dark"]{
+    --bg:#07111f;
+    --surface:#101d2e;
+    --surface2:#162538;
+    --white:#101d2e;
+    --text:#f1f5f9;
+    --muted:#9aaabd;
+    --border:#26384d;
+    --shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
 }
 
 body{
-    background:#dfe7e5;
-    color:var(--text);
-    min-height:100vh;
-}
-
-.app{
-    width:100%;
-    max-width:480px;
-    height:100vh;
-    margin:auto;
+    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
     background:var(--bg);
-    position:relative;
-    overflow:hidden;
+    color:var(--text);
+    line-height:1.6;
+    overflow-x:hidden;
 }
 
-/* HEADER */
-.header{
-    height:70px;
-    background:linear-gradient(135deg,var(--primary),var(--secondary));
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 18px;
+button,
+input,
+select,
+textarea{
+    font:inherit;
 }
 
-.logo{
-    font-size:21px;
-    font-weight:800;
-    letter-spacing:.5px;
-}
-
-.header-actions{
-    display:flex;
-    gap:16px;
-}
-
-.icon-btn{
-    border:0;
-    background:none;
-    color:white;
-    font-size:21px;
+button{
     cursor:pointer;
 }
 
-/* SEARCH */
-.search-box{
-    padding:12px;
-    background:white;
+a{
+    text-decoration:none;
 }
 
-.search-box input{
-    width:100%;
-    border:none;
-    outline:none;
-    background:#f0f3f2;
-    padding:13px 16px;
-    border-radius:25px;
-    font-size:15px;
+.container{
+    width:min(1160px,calc(100% - 32px));
+    margin:auto;
 }
 
-/* PAGES */
-.page{
-    display:none;
-    height:calc(100vh - 135px);
-    overflow-y:auto;
-}
+/* =========================================================
+   LOADING SCREEN
+   ========================================================= */
 
-.page.active{
-    display:block;
-}
-
-/* CHAT LIST */
-.chat{
-    display:flex;
-    align-items:center;
-    padding:15px;
-    background:var(--card);
-    border-bottom:1px solid var(--border);
-    cursor:pointer;
-}
-
-.chat:hover{
-    background:#f2f6f5;
-}
-
-.avatar{
-    width:52px;
-    height:52px;
-    border-radius:50%;
+#loadingScreen{
+    position:fixed;
+    inset:0;
+    z-index:9999999;
+    background:var(--header);
+    color:white;
     display:flex;
     align-items:center;
     justify-content:center;
-    color:white;
-    font-weight:bold;
-    font-size:18px;
-    margin-right:13px;
-    flex-shrink:0;
-    background:linear-gradient(135deg,#128C7E,#25D366);
+    flex-direction:column;
+    gap:20px;
 }
 
-.chat-info{
-    flex:1;
-    min-width:0;
+.loader{
+    width:55px;
+    height:55px;
+    border:5px solid rgba(255,255,255,.2);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
 }
 
-.chat-top{
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+#gatewayOverlay{
+    position:fixed;
+    inset:0;
+    z-index:999999;
+    background:
+        radial-gradient(circle at 20% 20%,rgba(29,191,115,.18),transparent 30%),
+        linear-gradient(135deg,#020712,#0a2e5c);
     display:flex;
-    justify-content:space-between;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
 
-.name{
-    font-weight:700;
+.auth-card{
+    width:min(440px,100%);
+    background:var(--surface);
+    border-radius:38px;
+    padding:42px 32px;
+    box-shadow:0 35px 100px rgba(0,0,0,.45);
+    text-align:center;
 }
 
-.time{
-    font-size:11px;
-    color:var(--muted);
-}
-
-.preview{
-    margin-top:6px;
-    color:var(--muted);
-    font-size:13px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+.logo-mark{
+    width:72px;
+    height:72px;
+    margin:0 auto 18px;
+    border-radius:22px;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:28px;
+    font-weight:900;
 }
 
 .badge{
-    background:var(--accent);
-    color:white;
-    border-radius:20px;
-    font-size:11px;
-    padding:3px 7px;
-}
-
-/* BOTTOM NAV */
-.bottom-nav{
-    height:65px;
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    background:white;
-    border-top:1px solid var(--border);
-    display:flex;
-    justify-content:space-around;
-    align-items:center;
-}
-
-.nav-btn{
-    border:0;
-    background:none;
-    color:#7b8582;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-    font-size:11px;
-    cursor:pointer;
-}
-
-.nav-btn span{
-    font-size:22px;
-}
-
-.nav-btn.active{
-    color:var(--primary);
-    font-weight:bold;
-}
-
-/* CONTACTS */
-.section-title{
-    padding:18px 15px 10px;
-    color:var(--muted);
-    font-size:13px;
-    text-transform:uppercase;
-    font-weight:bold;
-}
-
-.contact{
-    display:flex;
-    align-items:center;
-    padding:14px 15px;
-    background:white;
-    border-bottom:1px solid var(--border);
-}
-
-.contact-info{
-    flex:1;
-}
-
-.contact-name{
-    font-weight:bold;
-}
-
-.contact-status{
-    font-size:12px;
-    color:var(--muted);
-    margin-top:4px;
-}
-
-.add-btn{
-    border:0;
-    background:var(--primary);
-    color:white;
-    padding:8px 14px;
-    border-radius:18px;
-    cursor:pointer;
-}
-
-/* PROFILE */
-.profile{
-    padding:30px 20px;
-    text-align:center;
-}
-
-.profile .avatar{
-    width:95px;
-    height:95px;
-    margin:0 auto 15px;
-    font-size:32px;
-}
-
-.profile h2{
-    margin-bottom:6px;
-}
-
-.profile p{
-    color:var(--muted);
-}
-
-.settings-card{
-    background:white;
-    margin:15px;
-    border-radius:14px;
-    overflow:hidden;
-}
-
-.setting{
-    display:flex;
-    align-items:center;
-    padding:17px;
-    border-bottom:1px solid var(--border);
-    cursor:pointer;
-}
-
-.setting:last-child{
-    border-bottom:none;
-}
-
-.setting-icon{
-    width:35px;
-    font-size:20px;
-}
-
-.setting-text{
-    flex:1;
-}
-
-.setting-title{
-    font-weight:bold;
-}
-
-.setting-description{
-    font-size:12px;
-    color:var(--muted);
-    margin-top:3px;
-}
-
-/* CHAT SCREEN */
-.chat-screen{
-    display:none;
-    position:absolute;
-    inset:0;
-    background:#e5ddd5;
-    z-index:20;
-}
-
-.chat-screen.active{
-    display:flex;
-    flex-direction:column;
-}
-
-.chat-header{
-    height:65px;
-    background:linear-gradient(135deg,var(--primary),var(--secondary));
-    color:white;
-    display:flex;
-    align-items:center;
-    padding:0 12px;
-    gap:10px;
-}
-
-.back{
-    border:0;
-    background:none;
-    color:white;
-    font-size:25px;
-    cursor:pointer;
-}
-
-.chat-user{
-    flex:1;
-}
-
-.chat-user strong{
-    display:block;
-}
-
-.chat-user small{
-    opacity:.8;
-}
-
-.messages{
-    flex:1;
-    overflow-y:auto;
-    padding:15px;
-}
-
-.message{
-    max-width:78%;
-    padding:9px 11px;
-    border-radius:9px;
-    margin-bottom:9px;
-    font-size:14px;
-    position:relative;
-}
-
-.received{
-    background:white;
-    margin-right:auto;
-}
-
-.sent{
-    background:var(--sent);
-    margin-left:auto;
-}
-
-.message-time{
-    font-size:9px;
-    color:#777;
-    text-align:right;
-    margin-top:4px;
-}
-
-.input-area{
-    background:#f0f0f0;
-    padding:8px;
-    display:flex;
+    display:inline-flex;
     align-items:center;
     gap:7px;
-}
-
-.input-area input{
-    flex:1;
-    border:none;
-    outline:none;
-    border-radius:25px;
-    padding:13px;
-}
-
-.send{
-    width:44px;
-    height:44px;
-    border:none;
-    border-radius:50%;
-    background:var(--primary);
-    color:white;
-    font-size:18px;
-    cursor:pointer;
-}
-
-/* EMPTY */
-.empty{
-    text-align:center;
-    padding:60px 20px;
-    color:var(--muted);
-}
-
-.empty-icon{
-    font-size:50px;
+    padding:8px 15px;
+    border-radius:50px;
+    background:rgba(29,191,115,.12);
+    color:var(--accent);
+    font-weight:900;
+    font-size:12px;
     margin-bottom:15px;
 }
 
-/* DARK MODE */
-body.dark{
-    --bg:#111817;
-    --card:#18201f;
-    --text:#eeeeee;
-    --muted:#9ba6a3;
-    --border:#293331;
-    --sent:#164d35;
+.auth-card h1{
+    font-size:30px;
+    color:var(--text);
+    margin-bottom:8px;
 }
 
-body.dark .search-box,
-body.dark .bottom-nav,
-body.dark .settings-card,
-body.dark .contact{
-    background:#18201f;
+.auth-card p{
+    color:var(--muted);
+    font-size:14px;
 }
 
-body.dark .chat:hover{
-    background:#202a28;
+.field{
+    width:100%;
+    padding:16px 17px;
+    margin-top:14px;
+    border:1.5px solid var(--border);
+    background:var(--surface2);
+    color:var(--text);
+    border-radius:15px;
+    outline:none;
 }
 
-body.dark .search-box input{
-    background:#26302e;
-    color:white;
+.field:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 4px rgba(29,191,115,.12);
 }
 
-body.dark .input-area{
-    background:#202927;
+.password-wrap{
+    position:relative;
 }
 
-body.dark .input-area input{
-    background:#303b38;
-    color:white;
+.password-wrap .field{
+    padding-right:55px;
 }
 
-body.dark .received{
-    background:#26302e;
+.eye{
+    position:absolute;
+    right:15px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:0;
+    color:var(--muted);
 }
 
-/* RESPONSIVE */
-@media(min-width:481px){
-    .app{
-        box-shadow:0 0 30px rgba(0,0,0,.15);
+.main-btn{
+    width:100%;
+    border:0;
+    border-radius:15px;
+    padding:16px 20px;
+    margin-top:15px;
+    color:#fff;
+    background:var(--primary);
+    font-weight:900;
+    letter-spacing:.6px;
+    transition:.25s;
+}
+
+.main-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(10,46,92,.2);
+}
+
+.green-btn{
+    background:var(--accent);
+}
+
+.gold-btn{
+    background:var(--gold);
+}
+
+.warning-btn{
+    background:var(--warning);
+}
+
+.small-note{
+    margin-top:18px;
+    font-size:12px;
+    color:var(--muted);
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+#mainContent{
+    display:none;
+}
+
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:8000;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid var(--border);
+}
+
+[data-theme="dark"] .navbar{
+    background:rgba(16,29,46,.92);
+}
+
+.nav-inner{
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.brand{
+    font-size:18px;
+    font-weight:950;
+    color:var(--primary);
+}
+
+[data-theme="dark"] .brand{
+    color:#fff;
+}
+
+.brand span{
+    color:var(--accent);
+}
+
+.nav-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.icon-btn{
+    width:43px;
+    height:43px;
+    border:1px solid var(--border);
+    border-radius:13px;
+    background:var(--surface);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+
+.notification-dot{
+    position:absolute;
+    width:9px;
+    height:9px;
+    background:var(--danger);
+    border-radius:50%;
+    top:8px;
+    right:8px;
+}
+
+.logout{
+    border:1px solid rgba(230,57,70,.3);
+    color:var(--danger);
+    background:transparent;
+    padding:10px 14px;
+    border-radius:12px;
+    font-weight:900;
+}
+
+/* =========================================================
+   MOBILE NAV
+   ========================================================= */
+
+.mobile-nav{
+    display:none;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:9000;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    grid-template-columns:repeat(5,1fr);
+}
+
+.mobile-nav button{
+    background:none;
+    border:0;
+    color:var(--muted);
+    padding:7px 3px;
+    font-size:10px;
+    font-weight:800;
+}
+
+.mobile-nav button.active{
+    color:var(--accent);
+}
+
+.mobile-nav span{
+    display:block;
+    font-size:19px;
+    margin-bottom:2px;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero{
+    background:var(--header);
+    color:#fff;
+    padding:68px 0 110px;
+    border-radius:0 0 55px 55px;
+}
+
+.hero-content{
+    text-align:center;
+}
+
+.hero .badge{
+    background:rgba(255,255,255,.12);
+    color:#fff;
+}
+
+.hero h1{
+    font-size:clamp(35px,7vw,65px);
+    line-height:1;
+    letter-spacing:-3px;
+    font-weight:950;
+}
+
+.hero p{
+    margin:17px auto 0;
+    max-width:650px;
+    opacity:.85;
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:24px;
+    margin-top:-58px;
+    position:relative;
+    z-index:2;
+}
+
+.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px;
+}
+
+.member-card{
+    color:#fff;
+    background:linear-gradient(135deg,#162a43,#020914);
+    border:0;
+}
+
+.member-top{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    align-items:flex-start;
+}
+
+.member-label{
+    text-transform:uppercase;
+    font-size:11px;
+    opacity:.7;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.member-number{
+    font-size:28px;
+    font-weight:950;
+    margin-top:4px;
+}
+
+.status{
+    background:rgba(29,191,115,.16);
+    color:#61e6a0;
+    border:1px solid rgba(29,191,115,.3);
+    padding:6px 10px;
+    border-radius:50px;
+    font-size:10px;
+    font-weight:900;
+}
+
+.progress{
+    height:11px;
+    background:rgba(255,255,255,.1);
+    border-radius:20px;
+    overflow:hidden;
+    margin:30px 0 10px;
+}
+
+.progress-fill{
+    width:15%;
+    height:100%;
+    background:var(--accent);
+    border-radius:20px;
+    box-shadow:0 0 15px var(--accent);
+}
+
+.member-bottom{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    font-weight:900;
+    opacity:.8;
+}
+
+.balance-card{
+    text-align:center;
+}
+
+.balance-label{
+    color:var(--muted);
+    text-transform:uppercase;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.balance{
+    color:var(--danger);
+    font-size:38px;
+    font-weight:950;
+    margin:7px 0 18px;
+}
+
+.two-btn{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.two-btn button{
+    border:0;
+    border-radius:13px;
+    padding:13px 10px;
+    color:#fff;
+    font-weight:900;
+}
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.section{
+    padding:60px 0 0;
+}
+
+.section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:end;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.section-head h2{
+    color:var(--primary);
+    font-size:27px;
+    font-weight:950;
+}
+
+[data-theme="dark"] .section-head h2{
+    color:#fff;
+}
+
+.section-head p{
+    color:var(--muted);
+    font-size:14px;
+}
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+.quick-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.quick{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text);
+    border-radius:20px;
+    padding:20px;
+    text-align:center;
+    box-shadow:var(--shadow);
+}
+
+.quick-icon{
+    font-size:27px;
+    margin-bottom:8px;
+}
+
+.quick strong{
+    display:block;
+    font-size:13px;
+}
+
+.quick small{
+    color:var(--muted);
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.stat{
+    padding:22px;
+    border-radius:22px;
+    background:var(--surface);
+    border:1px solid var(--border);
+}
+
+.stat-icon{
+    font-size:22px;
+}
+
+.stat-value{
+    font-size:25px;
+    font-weight:950;
+    margin-top:5px;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   CALCULATOR
+   ========================================================= */
+
+.calculator{
+    border-top:5px solid var(--primary);
+}
+
+.slider{
+    width:100%;
+    margin:28px 0;
+    accent-color:var(--accent);
+}
+
+.calc-results{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.calc-box{
+    background:var(--surface2);
+    padding:20px;
+    border-radius:18px;
+    text-align:center;
+}
+
+.calc-box small{
+    color:var(--muted);
+    font-weight:900;
+}
+
+.calc-box strong{
+    display:block;
+    color:var(--accent);
+    font-size:24px;
+    margin-top:4px;
+}
+
+/* =========================================================
+   TASK CENTER
+   ========================================================= */
+
+.task-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.task{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:22px;
+    box-shadow:var(--shadow);
+}
+
+.task-tag{
+    display:inline-block;
+    font-size:10px;
+    font-weight:900;
+    padding:5px 9px;
+    border-radius:50px;
+    background:rgba(29,191,115,.12);
+    color:var(--accent);
+}
+
+.task h3{
+    margin:12px 0 5px;
+}
+
+.task p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.task-footer{
+    margin-top:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.task-reward{
+    font-weight:950;
+    color:var(--accent);
+}
+
+.task button{
+    border:0;
+    padding:9px 13px;
+    border-radius:10px;
+    background:var(--primary);
+    color:#fff;
+    font-weight:900;
+}
+
+/* =========================================================
+   PACKAGES
+   ========================================================= */
+
+.package-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+}
+
+.package{
+    background:var(--surface);
+    border:2px solid transparent;
+    border-radius:28px;
+    padding:30px;
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.package.featured{
+    border-color:var(--gold);
+    transform:translateY(-8px);
+}
+
+.recommended{
+    display:inline-block;
+    background:var(--gold);
+    color:#fff;
+    padding:6px 13px;
+    border-radius:50px;
+    font-size:10px;
+    font-weight:900;
+}
+
+.price{
+    font-size:42px;
+    font-weight:950;
+    color:var(--primary);
+    margin:18px 0;
+}
+
+[data-theme="dark"] .price{
+    color:#fff;
+}
+
+.package ul{
+    list-style:none;
+    color:var(--muted);
+    line-height:2;
+    font-size:13px;
+    margin-bottom:20px;
+}
+
+.package li::first-letter{
+    color:var(--accent);
+}
+
+/* =========================================================
+   PAYOUT DEMO
+   ========================================================= */
+
+.demo-note{
+    background:rgba(240,140,0,.1);
+    color:#b45309;
+    border:1px solid rgba(240,140,0,.25);
+    padding:12px 15px;
+    border-radius:13px;
+    font-size:12px;
+    margin-bottom:15px;
+}
+
+[data-theme="dark"] .demo-note{
+    color:#fbbf24;
+}
+
+.payout-table{
+    overflow:hidden;
+    border-radius:22px;
+    border:1px solid var(--border);
+}
+
+.table-head,
+.payout-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    padding:16px 20px;
+    gap:10px;
+}
+
+.table-head{
+    background:var(--primary);
+    color:#fff;
+    font-weight:900;
+    font-size:11px;
+    text-transform:uppercase;
+}
+
+.payout-row{
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+}
+
+.payout-row:last-child{
+    border-bottom:0;
+}
+
+.amount{
+    color:var(--accent);
+    font-weight:900;
+}
+
+/* =========================================================
+   TRANSACTIONS
+   ========================================================= */
+
+.transaction-list{
+    display:flex;
+    flex-direction:column;
+}
+
+.transaction{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:17px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.transaction:last-child{
+    border-bottom:0;
+}
+
+.transaction-left{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.transaction-icon{
+    width:42px;
+    height:42px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--surface2);
+}
+
+.transaction small{
+    color:var(--muted);
+    display:block;
+}
+
+.positive{
+    color:var(--accent);
+    font-weight:900;
+}
+
+.pending{
+    color:var(--warning);
+    font-weight:900;
+}
+
+/* =========================================================
+   SUPPORT
+   ========================================================= */
+
+.support{
+    background:var(--primary);
+    color:#fff;
+    border-radius:30px;
+    padding:35px;
+}
+
+.support h2{
+    margin-bottom:8px;
+}
+
+.support p{
+    opacity:.75;
+}
+
+.support-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-top:25px;
+}
+
+.support-link{
+    color:#fff;
+    padding:17px;
+    border-radius:15px;
+    text-align:center;
+    font-weight:900;
+}
+
+.whatsapp{
+    background:var(--whatsapp);
+}
+
+.email{
+    background:#3b82f6;
+}
+
+/* =========================================================
+   FAQ
+   ========================================================= */
+
+.faq{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.faq-item{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:17px;
+    overflow:hidden;
+}
+
+.faq-question{
+    width:100%;
+    padding:18px;
+    background:none;
+    color:var(--text);
+    border:0;
+    display:flex;
+    justify-content:space-between;
+    text-align:left;
+    font-weight:900;
+}
+
+.faq-answer{
+    display:none;
+    padding:0 18px 18px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* =========================================================
+   MODALS
+   ========================================================= */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    backdrop-filter:blur(8px);
+    z-index:20000;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+}
+
+.modal-card{
+    width:min(500px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:var(--surface);
+    color:var(--text);
+    border-radius:28px;
+    padding:28px;
+    box-shadow:0 30px 100px rgba(0,0,0,.4);
+}
+
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.close{
+    border:0;
+    background:var(--surface2);
+    color:var(--text);
+    width:38px;
+    height:38px;
+    border-radius:12px;
+}
+
+/* =========================================================
+   NOTIFICATION PANEL
+   ========================================================= */
+
+.notification{
+    padding:15px 0;
+    border-bottom:1px solid var(--border);
+}
+
+.notification strong{
+    display:block;
+}
+
+.notification small{
+    color:var(--muted);
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+#toast{
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translate(-50%,120px);
+    background:#111827;
+    color:#fff;
+    padding:14px 20px;
+    border-radius:14px;
+    z-index:99999;
+    opacity:0;
+    transition:.35s;
+    font-size:13px;
+    box-shadow:0 15px 40px rgba(0,0,0,.25);
+}
+
+#toast.show{
+    transform:translate(-50%,0);
+    opacity:1;
+}
+
+/* =========================================================
+   FLOATING THEME BUTTON
+   ========================================================= */
+
+.theme{
+    position:fixed;
+    right:22px;
+    bottom:25px;
+    width:53px;
+    height:53px;
+    border:0;
+    border-radius:50%;
+    background:var(--primary);
+    color:#fff;
+    z-index:7000;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+}
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+
+.activation{
+    margin-top:40px;
+    padding:35px;
+    border:2px dashed var(--warning);
+    border-radius:28px;
+    background:rgba(240,140,0,.07);
+    text-align:center;
+}
+
+.timer{
+    font-size:45px;
+    color:var(--danger);
+    font-family:monospace;
+    font-weight:950;
+    margin:10px 0;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer{
+    text-align:center;
+    padding:70px 0 100px;
+    color:var(--muted);
+    font-size:12px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:900px){
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    .quick-grid,
+    .stats-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .task-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .package-grid{
+        grid-template-columns:1fr;
+    }
+
+    .package.featured{
+        transform:none;
+    }
+
+    .theme{
+        bottom:85px;
+    }
+
+    .mobile-nav{
+        display:grid;
+    }
+
+    footer{
+        padding-bottom:120px;
+    }
+}
+
+@media(max-width:600px){
+    .container{
+        width:min(100% - 22px,1160px);
+    }
+
+    .nav-inner{
+        min-height:64px;
+    }
+
+    .brand{
+        font-size:15px;
+    }
+
+    .logout{
+        font-size:10px;
+        padding:8px 10px;
+    }
+
+    .hero{
+        padding:50px 0 95px;
+        border-radius:0 0 35px 35px;
+    }
+
+    .hero h1{
+        letter-spacing:-2px;
+    }
+
+    .dashboard-grid{
+        margin-top:-45px;
+    }
+
+    .card{
+        padding:21px;
+        border-radius:23px;
+    }
+
+    .member-number{
+        font-size:23px;
+    }
+
+    .balance{
+        font-size:32px;
+    }
+
+    .quick-grid,
+    .stats-grid,
+    .task-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .section{
+        padding-top:45px;
+    }
+
+    .section-head{
+        display:block;
+    }
+
+    .section-head p{
+        margin-top:4px;
+    }
+
+    .calc-results,
+    .support-grid{
+        grid-template-columns:1fr;
+    }
+
+    .table-head,
+    .payout-row{
+        grid-template-columns:1fr 1fr 1fr;
+        padding:13px 10px;
+        font-size:10px;
+    }
+
+    .activation{
+        padding:25px 18px;
     }
 }
 </style>
 </head>
 
-<body>
+<body data-theme="light">
 
-<div class="app">
-
-<!-- HEADER -->
-<header class="header">
-    <div class="logo">BENNY CONNECT</div>
-
-    <div class="header-actions">
-        <button class="icon-btn" onclick="toggleSearch()">⌕</button>
-        <button class="icon-btn" onclick="showPage('settings')">⋮</button>
-    </div>
-</header>
-
-<!-- SEARCH -->
-<div class="search-box" id="searchBox" style="display:none;">
-    <input
-        type="text"
-        id="searchInput"
-        placeholder="Search conversations..."
-        oninput="searchChats()">
+<!-- =======================================================
+     LOADING
+======================================================= -->
+<div id="loadingScreen">
+    <div class="loader"></div>
+    <strong>ONLINE SPHERE COMMERCE</strong>
+    <small>Loading portal...</small>
 </div>
 
-<!-- CHATS -->
-<section class="page active" id="chatsPage">
+<!-- =======================================================
+     LOGIN
+======================================================= -->
+<div id="gatewayOverlay">
 
-    <div class="chat"
-         data-name="Brian">
-        <div class="avatar">B</div>
+    <div class="auth-card">
 
-        <div class="chat-info"
-             onclick="openChat('Brian')">
-            <div class="chat-top">
-                <span class="name">Brian</span>
-                <span class="time">12:45</span>
-            </div>
+        <div class="logo-mark">OS</div>
 
-            <div class="preview">
-                Hey Benny, how are you?
-            </div>
-        </div>
+        <div class="badge">🔒 SPHERE SECURITY VERIFIED</div>
 
-        <span class="badge">2</span>
-    </div>
+        <h1>Member Portal</h1>
 
-    <div class="chat"
-         data-name="Agnes">
-
-        <div class="avatar">A</div>
-
-        <div class="chat-info"
-             onclick="openChat('Agnes')">
-
-            <div class="chat-top">
-                <span class="name">Agnes</span>
-                <span class="time">11:20</span>
-            </div>
-
-            <div class="preview">
-                I will call you later ❤️
-            </div>
-
-        </div>
-    </div>
-
-    <div class="chat"
-         data-name="David">
-
-        <div class="avatar">D</div>
-
-        <div class="chat-info"
-             onclick="openChat('David')">
-
-            <div class="chat-top">
-                <span class="name">David</span>
-                <span class="time">Yesterday</span>
-            </div>
-
-            <div class="preview">
-                Send me the files.
-            </div>
-
-        </div>
-    </div>
-
-</section>
-
-<!-- CONTACTS -->
-<section class="page" id="contactsPage">
-
-    <div class="section-title">
-        People on BENNY CONNECT
-    </div>
-
-    <div class="contact">
-        <div class="avatar">J</div>
-
-        <div class="contact-info">
-            <div class="contact-name">John</div>
-            <div class="contact-status">Available</div>
-        </div>
-
-        <button class="add-btn"
-                onclick="openChat('John')">
-            Chat
-        </button>
-    </div>
-
-    <div class="contact">
-        <div class="avatar">M</div>
-
-        <div class="contact-info">
-            <div class="contact-name">Mary</div>
-            <div class="contact-status">Online</div>
-        </div>
-
-        <button class="add-btn"
-                onclick="openChat('Mary')">
-            Chat
-        </button>
-    </div>
-
-    <div class="contact">
-        <div class="avatar">K</div>
-
-        <div class="contact-info">
-            <div class="contact-name">Kevin</div>
-            <div class="contact-status">Last seen recently</div>
-        </div>
-
-        <button class="add-btn"
-                onclick="openChat('Kevin')">
-            Chat
-        </button>
-    </div>
-
-</section>
-
-<!-- PROFILE -->
-<section class="page" id="profilePage">
-
-    <div class="profile">
-
-        <div class="avatar">B</div>
-
-        <h2>Benny</h2>
-
-        <p>@benny</p>
-
-        <p style="margin-top:10px;">
-            Welcome to BENNY CONNECT
+        <p>
+            Access your digital workspace and member dashboard.
         </p>
 
-    </div>
+        <form id="loginForm">
 
-    <div class="settings-card">
+            <input
+                type="tel"
+                id="userPhone"
+                class="field"
+                placeholder="M-Pesa Number (e.g. 07...)"
+                maxlength="10"
+                required
+            >
 
-        <div class="setting">
-            <div class="setting-icon">👤</div>
+            <div class="password-wrap">
 
-            <div class="setting-text">
-                <div class="setting-title">
-                    Edit Profile
-                </div>
+                <input
+                    type="password"
+                    id="userPass"
+                    class="field"
+                    placeholder="Access Password"
+                    required
+                >
 
-                <div class="setting-description">
-                    Change your name, photo and bio
-                </div>
-            </div>
-
-            <span>›</span>
-        </div>
-
-        <div class="setting">
-            <div class="setting-icon">🔒</div>
-
-            <div class="setting-text">
-                <div class="setting-title">
-                    Privacy
-                </div>
-
-                <div class="setting-description">
-                    Control your privacy
-                </div>
-            </div>
-
-            <span>›</span>
-        </div>
-
-    </div>
-
-</section>
-
-<!-- SETTINGS -->
-<section class="page" id="settingsPage">
-
-    <div class="section-title">
-        Settings
-    </div>
-
-    <div class="settings-card">
-
-        <div class="setting"
-             onclick="toggleDarkMode()">
-
-            <div class="setting-icon">🌙</div>
-
-            <div class="setting-text">
-
-                <div class="setting-title">
-                    Dark Mode
-                </div>
-
-                <div class="setting-description">
-                    Change application appearance
-                </div>
+                <button
+                    type="button"
+                    class="eye"
+                    onclick="togglePassword()"
+                >👁</button>
 
             </div>
 
-            <span id="darkStatus">OFF</span>
+            <button
+                type="submit"
+                class="main-btn"
+            >
+                AUTHORIZE LOGIN
+            </button>
 
-        </div>
+        </form>
 
-        <div class="setting">
-
-            <div class="setting-icon">🔔</div>
-
-            <div class="setting-text">
-
-                <div class="setting-title">
-                    Notifications
-                </div>
-
-                <div class="setting-description">
-                    Message notifications
-                </div>
-
-            </div>
-
-            <span>›</span>
-
-        </div>
-
-        <div class="setting">
-
-            <div class="setting-icon">🛡️</div>
-
-            <div class="setting-text">
-
-                <div class="setting-title">
-                    Security
-                </div>
-
-                <div class="setting-description">
-                    Account and security settings
-                </div>
-
-            </div>
-
-            <span>›</span>
-
-        </div>
-
-        <div class="setting">
-
-            <div class="setting-icon">ℹ️</div>
-
-            <div class="setting-text">
-
-                <div class="setting-title">
-                    About BENNY CONNECT
-                </div>
-
-                <div class="setting-description">
-                    Version 1.0.0
-                </div>
-
-            </div>
-
-            <span>›</span>
-
+        <div class="small-note">
+            Demo interface: connect a secure backend before using this
+            for real member authentication.
         </div>
 
     </div>
 
-</section>
+</div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
+<!-- =======================================================
+     MAIN APPLICATION
+======================================================= -->
+<div id="mainContent">
 
-    <button class="nav-btn active"
-            onclick="showPage('chats')">
+    <!-- NAVBAR -->
+    <nav class="navbar">
 
-        <span>💬</span>
-        Chats
+        <div class="container nav-inner">
 
+            <div class="brand">
+                ONLINE SPHERE <span>COMMERCE</span>
+            </div>
+
+            <div class="nav-actions">
+
+                <button
+                    class="icon-btn"
+                    onclick="openModal('notificationModal')"
+                    aria-label="Notifications"
+                >
+                    🔔
+                    <span class="notification-dot"></span>
+                </button>
+
+                <button
+                    class="icon-btn"
+                    onclick="openModal('profileModal')"
+                    aria-label="Profile"
+                >
+                    👤
+                </button>
+
+                <button
+                    class="logout"
+                    onclick="logout()"
+                >
+                    LOGOUT
+                </button>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+
+        <div class="container hero-content">
+
+            <div class="badge">
+                ⭐ MEMBER WORKSPACE ACTIVE
+            </div>
+
+            <h1>WORKSPACE ACTIVE</h1>
+
+            <p>
+                Welcome to your Online Sphere Commerce member dashboard.
+                Manage your account, explore available tasks and monitor
+                your activity from one place.
+            </p>
+
+        </div>
+
+    </header>
+
+    <main class="container">
+
+        <!-- DASHBOARD -->
+        <section class="dashboard-grid">
+
+            <div class="card member-card" id="profile-card">
+
+                <div class="member-top">
+
+                    <div>
+
+                        <div class="member-label">
+                            Official Member
+                        </div>
+
+                        <div
+                            class="member-number"
+                            id="displayNum"
+                        >
+                            07XXXXXXXX
+                        </div>
+
+                    </div>
+
+                    <div class="status">
+                        ● ACTIVE
+                    </div>
+
+                </div>
+
+                <div class="progress">
+                    <div
+                        class="progress-fill"
+                        id="levelProgress"
+                    ></div>
+                </div>
+
+                <div class="member-bottom">
+
+                    <span>
+                        LEVEL 1: NEWBIE
+                    </span>
+
+                    <span id="experience">
+                        EXP: 15%
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="card balance-card" id="balance-card">
+
+                <div class="balance-label">
+                    Available Balance
+                </div>
+
+                <div class="balance" id="balance">
+                    KES 0.00
+                </div>
+
+                <div class="two-btn">
+
+                    <button
+                        class="green-btn"
+                        onclick="scrollToSection('packages-section')"
+                    >
+                        DEPOSIT
+                    </button>
+
+                    <button
+                        class="main-btn"
+                        style="margin:0"
+                        onclick="showToast('Account activation required for withdrawals.')"
+                    >
+                        WITHDRAW
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- QUICK ACTIONS -->
+        <section class="section">
+
+            <div class="section-head">
+
+                <div>
+                    <h2>Quick Actions</h2>
+                    <p>Access your most-used portal features.</p>
+                </div>
+
+            </div>
+
+            <div class="quick-grid">
+
+                <button
+                    class="quick"
+                    onclick="scrollToSection('tasks-section')"
+                >
+                    <div class="quick-icon">📋</div>
+                    <strong>Task Center</strong>
+                    <small>View tasks</small>
+                </button>
+
+                <button
+                    class="quick"
+                    onclick="scrollToSection('calculator-section')"
+                >
+                    <div class="quick-icon">📊</div>
+                    <strong>Calculator</strong>
+                    <small>View projection</small>
+                </button>
+
+                <button
+                    class="quick"
+                    onclick="openModal('transactionModal')"
+                >
+                    <div class="quick-icon">🧾</div>
+                    <strong>Transactions</strong>
+                    <small>View activity</small>
+                </button>
+
+                <button
+                    class="quick"
+                    onclick="openModal('profileModal')"
+                >
+                    <div class="quick-icon">⚙️</div>
+                    <strong>Settings</strong>
+                    <small>Manage account</small>
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- STATISTICS -->
+        <section class="section">
+
+            <div class="stats-grid">
+
+                <div class="stat">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-value" id="tasksCompleted">0</div>
+                    <div class="stat-label">Tasks Completed</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value">15%</div>
+                    <div class="stat-label">Level Progress</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-icon">💳</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Withdrawals</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-value">L1</div>
+                    <div class="stat-label">Current Level</div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- CALCULATOR -->
+        <section
+            class="section"
+            id="calculator-section"
+        >
+
+            <div class="card calculator">
+
+                <div class="section-head">
+
+                    <div>
+                        <h2>Weekly Earning Projections</h2>
+                        <p>
+                            Adjust task volume to view a simple projection.
+                            This is not a guaranteed payout.
+                        </p>
+                    </div>
+
+                </div>
+
+                <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    value="8"
+                    class="slider"
+                    id="taskSlider"
+                >
+
+                <div class="calc-results">
+
+                    <div class="calc-box">
+
+                        <small>DAILY TASKS</small>
+
+                        <strong id="labelTasks">
+                            8 Tasks
+                        </strong>
+
+                    </div>
+
+                    <div class="calc-box">
+
+                        <small>WEEKLY PROJECTION</small>
+
+                        <strong id="labelPayout">
+                            KES 5,600
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ACTIVATION TIMER -->
+        <section class="section">
+
+            <div class="activation">
+
+                <h2>🎁 NEW MEMBER BONUS</h2>
+
+                <p style="margin-top:8px">
+                    Step in, work smart and grow.
+                    Activate your account within the next 15 minutes
+                    to receive a <strong>KES 250 Activation Bonus!</strong>
+                </p>
+
+                <div
+                    class="timer"
+                    id="mainTimer"
+                >
+                    15:00
+                </div>
+
+                <button
+                    class="main-btn warning-btn"
+                    style="max-width:300px;margin:15px auto 0"
+                    onclick="scrollToSection('packages-section')"
+                >
+                    CLAIM MY BONUS NOW
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- TASK CENTER -->
+        <section
+            class="section"
+            id="tasks-section"
+        >
+
+            <div class="section-head">
+
+                <div>
+                    <h2>Task Center</h2>
+                    <p>
+                        Interactive task interface for your member workspace.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="task-grid">
+
+                <div class="task">
+
+                    <span class="task-tag">
+                        AVAILABLE
+                    </span>
+
+                    <h3>Ad Verification</h3>
+
+                    <p>
+                        Review advertising content according to the
+                        provided task instructions.
+                    </p>
+
+                    <div class="task-footer">
+
+                        <span class="task-reward">
+                            KES 100
+                        </span>
+
+                        <button onclick="completeTask(this)">
+                            START
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="task">
+
+                    <span class="task-tag">
+                        AVAILABLE
+                    </span>
+
+                    <h3>Content Review</h3>
+
+                    <p>
+                        Review sample content and submit the requested
+                        feedback.
+                    </p>
+
+                    <div class="task-footer">
+
+                        <span class="task-reward">
+                            KES 150
+                        </span>
+
+                        <button onclick="completeTask(this)">
+                            START
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="task">
+
+                    <span class="task-tag">
+                        AVAILABLE
+                    </span>
+
+                    <h3>Digital Survey</h3>
+
+                    <p>
+                        Complete a short sample survey for the member
+                        workspace.
+                    </p>
+
+                    <div class="task-footer">
+
+                        <span class="task-reward">
+                            KES 200
+                        </span>
+
+                        <button onclick="completeTask(this)">
+                            START
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PACKAGES -->
+        <section
+            class="section"
+            id="packages-section"
+        >
+
+            <div class="section-head">
+
+                <div>
+                    <h2>Activate Your Account</h2>
+                    <p>
+                        Select a membership tier to unlock your task directory.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="package-grid">
+
+                <!-- STARTER -->
+                <div class="package">
+
+                    <div>
+
+                        <h3>STARTER</h3>
+
+                        <div class="price">
+                            KES 500
+                        </div>
+
+                        <ul>
+                            <li>✓ Weekly M-Pesa Withdrawals</li>
+                            <li>✓ Basic Ad Verification Tasks</li>
+                            <li>✓ Standard Support Access</li>
+                            <li>✓ Level 1 Progression</li>
+                        </ul>
+
+                    </div>
+
+                    <button
+                        class="main-btn"
+                        onclick="initializeMpesa(500,'STARTER')"
+                    >
+                        CHOOSE STARTER
+                    </button>
+
+                </div>
+
+                <!-- EXECUTIVE -->
+                <div class="package featured">
+
+                    <div>
+
+                        <span class="recommended">
+                            RECOMMENDED
+                        </span>
+
+                        <h3 style="margin-top:12px">
+                            EXECUTIVE
+                        </h3>
+
+                        <div class="price">
+                            KES 2,500
+                        </div>
+
+                        <ul>
+                            <li>✓ Instant Daily Withdrawals</li>
+                            <li>✓ Priority High-Pay Task Batches</li>
+                            <li>✓ 5% Lifetime Task Bonus</li>
+                            <li>✓ VIP WhatsApp Group Entry</li>
+                            <li>✓ Dedicated Account Manager</li>
+                        </ul>
+
+                    </div>
+
+                    <button
+                        class="main-btn green-btn"
+                        onclick="initializeMpesa(2500,'EXECUTIVE')"
+                    >
+                        CHOOSE EXECUTIVE
+                    </button>
+
+                </div>
+
+                <!-- PRO -->
+                <div class="package">
+
+                    <div>
+
+                        <h3>PRO</h3>
+
+                        <div class="price">
+                            KES 1,500
+                        </div>
+
+                        <ul>
+                            <li>✓ Daily M-Pesa Withdrawals</li>
+                            <li>✓ Full Directory Task Access</li>
+                            <li>✓ Priority Email Support</li>
+                            <li>✓ Level 2 Progression Jump</li>
+                        </ul>
+
+                    </div>
+
+                    <button
+                        class="main-btn"
+                        onclick="initializeMpesa(1500,'PRO')"
+                    >
+                        CHOOSE PRO
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- PAYOUT GALLERY -->
+        <section class="section">
+
+            <div class="section-head">
+
+                <div>
+                    <h2>Member Activity Gallery</h2>
+                    <p>
+                        Sample interface showing how verified transaction
+                        records can appear.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="demo-note">
+                ⚠️ DEMO DATA: The records below are sample interface data,
+                not proof of actual withdrawals.
+            </div>
+
+            <div class="payout-table">
+
+                <div class="table-head">
+                    <div>Recipient</div>
+                    <div>Amount</div>
+                    <div>Reference</div>
+                </div>
+
+                <div id="payoutTicker"></div>
+
+            </div>
+
+        </section>
+
+        <!-- TRANSACTIONS -->
+        <section class="section">
+
+            <div class="card">
+
+                <div class="section-head">
+
+                    <div>
+                        <h2>Recent Activity</h2>
+                        <p>Your local demo activity history.</p>
+                    </div>
+
+                    <button
+                        class="main-btn"
+                        style="width:auto;margin:0;padding:10px 15px"
+                        onclick="openModal('transactionModal')"
+                    >
+                        VIEW ALL
+                    </button>
+
+                </div>
+
+                <div
+                    class="transaction-list"
+                    id="recentTransactions"
+                >
+
+                    <div class="transaction">
+
+                        <div class="transaction-left">
+
+                            <div class="transaction-icon">
+                                👤
+                            </div>
+
+                            <div>
+                                <strong>Account Login</strong>
+                                <small>Today</small>
+                            </div>
+
+                        </div>
+
+                        <span class="positive">
+                            ACTIVE
+                        </span>
+
+                    </div>
+
+                    <div class="transaction">
+
+                        <div class="transaction-left">
+
+                            <div class="transaction-icon">
+                                📋
+                            </div>
+
+                            <div>
+                                <strong>Task Center</strong>
+                                <small>Ready</small>
+                            </div>
+
+                        </div>
+
+                        <span class="pending">
+                            READY
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- SUPPORT -->
+        <section class="section">
+
+            <div class="support">
+
+                <h2>Official Support Center</h2>
+
+                <p>
+                    Contact the support team through the available channels.
+                </p>
+
+                <div class="support-grid">
+
+                    <a
+                        href="https://wa.me/254741723223"
+                        class="support-link whatsapp"
+                    >
+                        💬 WHATSAPP SUPPORT
+                    </a>
+
+                    <a
+                        href="mailto:support@onlinesphere.co.ke"
+                        class="support-link email"
+                    >
+                        📧 EMAIL HELP DESK
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- FAQ -->
+        <section class="section">
+
+            <div class="section-head">
+
+                <div>
+                    <h2>Frequently Asked Questions</h2>
+                    <p>Quick answers about the member portal.</p>
+                </div>
+
+            </div>
+
+            <div class="faq">
+
+                <div class="faq-item">
+
+                    <button
+                        class="faq-question"
+                        onclick="toggleFaq(this)"
+                    >
+                        What is the member portal?
+                        <span>＋</span>
+                    </button>
+
+                    <div class="faq-answer">
+                        The portal is the member-facing dashboard where
+                        account information, tasks, activity and other
+                        features can be presented.
+                    </div>
+
+                </div>
+
+                <div class="faq-item">
+
+                    <button
+                        class="faq-question"
+                        onclick="toggleFaq(this)"
+                    >
+                        Are the earnings shown guaranteed?
+                        <span>＋</span>
+                    </button>
+
+                    <div class="faq-answer">
+                        No. The calculator displays projections based on
+                        the values entered. Actual earnings depend on
+                        available work, eligibility and the applicable
+                        terms.
+                    </div>
+
+                </div>
+
+                <div class="faq-item">
+
+                    <button
+                        class="faq-question"
+                        onclick="toggleFaq(this)"
+                    >
+                        Is the M-Pesa integration live?
+                        <span>＋</span>
+                    </button>
+
+                    <div class="faq-answer">
+                        The current interface preserves the M-Pesa package
+                        details from the original design. A real payment
+                        integration should be connected through a secure
+                        backend before accepting real payments.
+                    </div>
+
+                </div>
+
+                <div class="faq-item">
+
+                    <button
+                        class="faq-question"
+                        onclick="toggleFaq(this)"
+                    >
+                        Can I use this website on my phone?
+                        <span>＋</span>
+                    </button>
+
+                    <div class="faq-answer">
+                        Yes. The interface is responsive and includes a
+                        mobile navigation bar for smaller screens.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer>
+
+            <p>
+                © 2026 Online Sphere Commerce Company.
+                All Rights Reserved.
+            </p>
+
+            <p style="margin-top:7px">
+                Member Portal Interface
+            </p>
+
+        </footer>
+
+    </main>
+
+</div>
+
+<!-- =======================================================
+     MOBILE NAV
+======================================================= -->
+
+<div class="mobile-nav">
+
+    <button
+        class="active"
+        onclick="scrollToTop()"
+    >
+        <span>🏠</span>
+        Home
     </button>
 
-    <button class="nav-btn"
-            onclick="showPage('contacts')">
-
-        <span>👥</span>
-        Contacts
-
+    <button
+        onclick="scrollToSection('tasks-section')"
+    >
+        <span>📋</span>
+        Tasks
     </button>
 
-    <button class="nav-btn"
-            onclick="showPage('profile')">
+    <button
+        onclick="scrollToSection('packages-section')"
+    >
+        <span>💳</span>
+        Plans
+    </button>
 
+    <button
+        onclick="openModal('transactionModal')"
+    >
+        <span>🧾</span>
+        Activity
+    </button>
+
+    <button
+        onclick="openModal('profileModal')"
+    >
         <span>👤</span>
         Profile
-
     </button>
 
-    <button class="nav-btn"
-            onclick="showPage('settings')">
+</div>
 
-        <span>⚙️</span>
-        Settings
+<!-- =======================================================
+     PROFILE MODAL
+======================================================= -->
 
-    </button>
+<div
+    class="modal"
+    id="profileModal"
+    onclick="closeOutside(event,'profileModal')"
+>
 
-</nav>
+    <div class="modal-card">
 
+        <div class="modal-head">
 
-<!-- CHAT WINDOW -->
-<div class="chat-screen" id="chatScreen">
+            <h2>Account Settings</h2>
 
-    <div class="chat-header">
+            <button
+                class="close"
+                onclick="closeModal('profileModal')"
+            >
+                ✕
+            </button>
 
-        <button class="back"
-                onclick="closeChat()">
-            ‹
-        </button>
-
-        <div class="avatar"
-             style="width:42px;height:42px;margin:0;">
-            <span id="chatAvatar">B</span>
         </div>
 
-        <div class="chat-user">
+        <label>Member Number</label>
 
-            <strong id="chatName">
-                User
-            </strong>
+        <input
+            class="field"
+            id="profilePhone"
+            readonly
+        >
+
+        <label style="display:block;margin-top:15px">
+            Display Name
+        </label>
+
+        <input
+            class="field"
+            id="profileName"
+            placeholder="Your name"
+        >
+
+        <button
+            class="main-btn green-btn"
+            onclick="saveProfile()"
+        >
+            SAVE PROFILE
+        </button>
+
+        <button
+            class="main-btn"
+            onclick="toggleInterfaceMode()"
+        >
+            🌓 TOGGLE DARK MODE
+        </button>
+
+    </div>
+
+</div>
+
+<!-- =======================================================
+     NOTIFICATION MODAL
+======================================================= -->
+
+<div
+    class="modal"
+    id="notificationModal"
+    onclick="closeOutside(event,'notificationModal')"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+
+            <h2>Notifications</h2>
+
+            <button
+                class="close"
+                onclick="closeModal('notificationModal')"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div class="notification">
+
+            <strong>Welcome to your workspace</strong>
 
             <small>
-                online
+                Your dashboard is ready.
             </small>
 
         </div>
 
-        <button class="icon-btn">
-            📞
-        </button>
+        <div class="notification">
 
-        <button class="icon-btn">
-            ⋮
-        </button>
+            <strong>Task Center available</strong>
 
-    </div>
+            <small>
+                Sample tasks are available for the demo interface.
+            </small>
 
-    <div class="messages"
-         id="messages">
+        </div>
 
-    </div>
+        <div class="notification">
 
-    <div class="input-area">
+            <strong>Account status</strong>
 
-        <button
-            style="border:0;background:none;font-size:22px;">
-            😊
-        </button>
+            <small>
+                Your current demo status is Active.
+            </small>
 
-        <button
-            style="border:0;background:none;font-size:20px;">
-            📎
-        </button>
-
-        <input
-            id="messageInput"
-            type="text"
-            placeholder="Type a message..."
-            onkeydown="handleEnter(event)">
-
-        <button
-            class="send"
-            onclick="sendMessage()">
-            ➤
-        </button>
+        </div>
 
     </div>
 
 </div>
 
+<!-- =======================================================
+     TRANSACTION MODAL
+======================================================= -->
+
+<div
+    class="modal"
+    id="transactionModal"
+    onclick="closeOutside(event,'transactionModal')"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+
+            <h2>Transaction History</h2>
+
+            <button
+                class="close"
+                onclick="closeModal('transactionModal')"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div id="fullTransactions">
+
+            <div class="transaction">
+
+                <div class="transaction-left">
+
+                    <div class="transaction-icon">
+                        👤
+                    </div>
+
+                    <div>
+                        <strong>Login</strong>
+                        <small>Account access</small>
+                    </div>
+
+                </div>
+
+                <span class="positive">
+                    SUCCESS
+                </span>
+
+            </div>
+
+            <div class="transaction">
+
+                <div class="transaction-left">
+
+                    <div class="transaction-icon">
+                        📋
+                    </div>
+
+                    <div>
+                        <strong>Task Center</strong>
+                        <small>Opened</small>
+                    </div>
+
+                </div>
+
+                <span class="pending">
+                    READY
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
+<!-- =======================================================
+     TOAST
+======================================================= -->
+
+<div id="toast"></div>
+
+<!-- =======================================================
+     THEME BUTTON
+======================================================= -->
+
+<button
+    class="theme"
+    onclick="toggleInterfaceMode()"
+    aria-label="Toggle theme"
+>
+    🌓
+</button>
 
 <script>
 
-let currentUser = "";
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
 
-const chats = {
-    Brian: [
-        {
-            text:"Hey Benny, how are you?",
-            type:"received",
-            time:"12:44"
-        },
-        {
-            text:"I'm good! How about you?",
-            type:"sent",
-            time:"12:45"
+let currentPhone = "";
+let timerInterval = null;
+let taskCount = 0;
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+window.addEventListener("load", () => {
+
+    setTimeout(() => {
+
+        document.getElementById("loadingScreen").style.display = "none";
+
+        const savedTheme =
+            localStorage.getItem("sphere_portal_theme");
+
+        if(savedTheme){
+            document.body.setAttribute(
+                "data-theme",
+                savedTheme
+            );
         }
-    ],
 
-    Agnes:[
-        {
-            text:"Hello ❤️",
-            type:"received",
-            time:"11:18"
-        },
-        {
-            text:"Hey Agnes 😊",
-            type:"sent",
-            time:"11:19"
-        }
-    ],
+    },700);
 
-    David:[
-        {
-            text:"Send me the files.",
-            type:"received",
-            time:"Yesterday"
-        }
-    ]
-};
+});
 
+/* =========================================================
+   LOGIN
+========================================================= */
 
-/* PAGE NAVIGATION */
+document
+.getElementById("loginForm")
+.addEventListener("submit", function(event){
 
-function showPage(page){
+    event.preventDefault();
 
-    document.querySelectorAll(".page")
-    .forEach(p => p.classList.remove("active"));
+    const phone =
+        document.getElementById("userPhone").value.trim();
 
-    document.getElementById(page+"Page")
-    .classList.add("active");
+    const password =
+        document.getElementById("userPass").value;
 
-    document.querySelectorAll(".nav-btn")
-    .forEach(btn => btn.classList.remove("active"));
+    if(!/^0\d{9}$/.test(phone)){
 
-    const index = {
-        chats:0,
-        contacts:1,
-        profile:2,
-        settings:3
-    };
-
-    document.querySelectorAll(".nav-btn")
-    [index[page]]
-    .classList.add("active");
-}
-
-
-/* SEARCH */
-
-function toggleSearch(){
-
-    const box = document.getElementById("searchBox");
-
-    box.style.display =
-        box.style.display === "none"
-        ? "block"
-        : "none";
-}
-
-
-function searchChats(){
-
-    const query =
-        document.getElementById("searchInput")
-        .value
-        .toLowerCase();
-
-    document.querySelectorAll(".chat")
-    .forEach(chat => {
-
-        const name =
-            chat.dataset.name.toLowerCase();
-
-        chat.style.display =
-            name.includes(query)
-            ? "flex"
-            : "none";
-
-    });
-}
-
-
-/* OPEN CHAT */
-
-function openChat(name){
-
-    currentUser = name;
-
-    document.getElementById("chatScreen")
-    .classList.add("active");
-
-    document.getElementById("chatName")
-    .textContent = name;
-
-    document.getElementById("chatAvatar")
-    .textContent = name.charAt(0);
-
-    loadMessages();
-}
-
-
-function closeChat(){
-
-    document.getElementById("chatScreen")
-    .classList.remove("active");
-
-}
-
-
-/* LOAD MESSAGES */
-
-function loadMessages(){
-
-    const container =
-        document.getElementById("messages");
-
-    container.innerHTML = "";
-
-    let saved =
-        localStorage.getItem(
-            "chat_"+currentUser
+        showToast(
+            "Enter a valid 10-digit Kenyan phone number."
         );
 
-    let messages =
-        saved
-        ? JSON.parse(saved)
-        : (chats[currentUser] || []);
+        return;
+    }
 
-    messages.forEach(message => {
+    if(password.length < 4){
 
-        const div =
-            document.createElement("div");
-
-        div.className =
-            "message " + message.type;
-
-        div.innerHTML = `
-            ${escapeHTML(message.text)}
-            <div class="message-time">
-                ${message.time}
-                ${message.type === "sent" ? " ✓✓" : ""}
-            </div>
-        `;
-
-        container.appendChild(div);
-
-    });
-
-    container.scrollTop =
-        container.scrollHeight;
-}
-
-
-/* SEND MESSAGE */
-
-function sendMessage(){
-
-    const input =
-        document.getElementById("messageInput");
-
-    const text =
-        input.value.trim();
-
-    if(!text) return;
-
-    let saved =
-        localStorage.getItem(
-            "chat_"+currentUser
+        showToast(
+            "Password must contain at least 4 characters."
         );
 
-    let messages =
-        saved
-        ? JSON.parse(saved)
-        : (chats[currentUser] || []);
+        return;
+    }
 
-    const now =
-        new Date();
-
-    const time =
-        now.getHours()
-        + ":"
-        + String(now.getMinutes()).padStart(2,"0");
-
-    messages.push({
-        text:text,
-        type:"sent",
-        time:time
-    });
+    currentPhone = phone;
 
     localStorage.setItem(
-        "chat_"+currentUser,
-        JSON.stringify(messages)
+        "sphere_member_phone",
+        phone
     );
 
-    input.value = "";
+    document.getElementById("gatewayOverlay").style.display =
+        "none";
 
-    loadMessages();
+    document.getElementById("mainContent").style.display =
+        "block";
 
-    setTimeout(autoReply,800);
+    document.getElementById("displayNum").textContent =
+        phone;
+
+    document.getElementById("profilePhone").value =
+        phone;
+
+    generatePayoutTicker();
+
+    startUrgencyTimer(900);
+
+    loadProfile();
+
+    showToast("Welcome to your member workspace.");
+
+});
+
+/* =========================================================
+   PASSWORD
+========================================================= */
+
+function togglePassword(){
+
+    const input =
+        document.getElementById("userPass");
+
+    input.type =
+        input.type === "password"
+        ? "text"
+        : "password";
+
 }
 
+/* =========================================================
+   LOGOUT
+========================================================= */
 
-function handleEnter(event){
+function logout(){
 
-    if(event.key === "Enter"){
-        sendMessage();
+    if(
+        confirm("Are you sure you want to logout?")
+    ){
+
+        document.getElementById("mainContent").style.display =
+            "none";
+
+        document.getElementById("gatewayOverlay").style.display =
+            "flex";
+
+        document.getElementById("userPass").value = "";
+
+        showToast("Logged out.");
+
     }
 
 }
 
+/* =========================================================
+   THEME
+========================================================= */
 
-/* DEMO AUTO REPLY */
+function toggleInterfaceMode(){
 
-function autoReply(){
+    const body =
+        document.body;
 
-    if(!currentUser) return;
+    const current =
+        body.getAttribute("data-theme");
 
-    const replies = [
-        "Okay 😊",
-        "Nice!",
-        "I understand.",
-        "Sure, no problem.",
-        "That's great ❤️",
-        "I'll get back to you.",
-        "Alright 👍"
-    ];
+    const next =
+        current === "light"
+        ? "dark"
+        : "light";
 
-    const reply =
-        replies[
-            Math.floor(
-                Math.random()*replies.length
-            )
-        ];
+    body.setAttribute(
+        "data-theme",
+        next
+    );
 
-    let saved =
-        localStorage.getItem(
-            "chat_"+currentUser
-        );
+    localStorage.setItem(
+        "sphere_portal_theme",
+        next
+    );
 
-    let messages =
-        saved
-        ? JSON.parse(saved)
-        : [];
+}
 
-    const now = new Date();
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-    const time =
-        now.getHours()
-        + ":"
-        + String(now.getMinutes()).padStart(2,"0");
+function scrollToSection(id){
 
-    messages.push({
-        text:reply,
-        type:"received",
-        time:time
+    const element =
+        document.getElementById(id);
+
+    if(element){
+
+        element.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+
+    }
+
+}
+
+function scrollToTop(){
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
     });
 
-    localStorage.setItem(
-        "chat_"+currentUser,
-        JSON.stringify(messages)
+}
+
+/* =========================================================
+   CALCULATOR
+========================================================= */
+
+const slider =
+    document.getElementById("taskSlider");
+
+slider.addEventListener("input", function(){
+
+    runEarningsLogic(
+        Number(this.value)
     );
 
-    loadMessages();
+});
+
+function runEarningsLogic(tasksPerDay){
+
+    const weekly =
+        tasksPerDay * 100 * 7;
+
+    document.getElementById(
+        "labelTasks"
+    ).textContent =
+        tasksPerDay + " Tasks";
+
+    document.getElementById(
+        "labelPayout"
+    ).textContent =
+        "KES " +
+        weekly.toLocaleString();
+
 }
 
+/* =========================================================
+   TIMER
+========================================================= */
 
-/* DARK MODE */
+function startUrgencyTimer(seconds){
 
-function toggleDarkMode(){
+    clearInterval(timerInterval);
 
-    document.body.classList.toggle("dark");
+    let remaining =
+        seconds;
 
-    const enabled =
-        document.body.classList.contains("dark");
+    const display =
+        document.getElementById("mainTimer");
 
-    localStorage.setItem(
-        "darkMode",
-        enabled
+    function update(){
+
+        const minutes =
+            Math.floor(remaining / 60)
+            .toString()
+            .padStart(2,"0");
+
+        const secs =
+            (remaining % 60)
+            .toString()
+            .padStart(2,"0");
+
+        display.textContent =
+            minutes + ":" + secs;
+
+    }
+
+    update();
+
+    timerInterval =
+        setInterval(() => {
+
+            remaining--;
+
+            if(remaining <= 0){
+
+                remaining = 0;
+
+                clearInterval(
+                    timerInterval
+                );
+
+                display.textContent =
+                    "00:00";
+
+                return;
+
+            }
+
+            update();
+
+        },1000);
+
+}
+
+/* =========================================================
+   TASKS
+========================================================= */
+
+function completeTask(button){
+
+    if(
+        button.dataset.completed === "true"
+    ){
+
+        showToast(
+            "This task has already been completed."
+        );
+
+        return;
+
+    }
+
+    button.dataset.completed =
+        "true";
+
+    button.textContent =
+        "DONE";
+
+    button.style.background =
+        "var(--accent)";
+
+    taskCount++;
+
+    document.getElementById(
+        "tasksCompleted"
+    ).textContent =
+        taskCount;
+
+    addTransaction(
+        "Task Completed",
+        "Demo task activity",
+        "COMPLETED"
     );
 
-    document.getElementById("darkStatus")
-    .textContent =
-        enabled ? "ON" : "OFF";
-}
-
-
-if(localStorage.getItem("darkMode") === "true"){
-
-    document.body.classList.add("dark");
-
-    document.getElementById("darkStatus")
-    .textContent = "ON";
+    showToast(
+        "Demo task completed."
+    );
 
 }
 
+/* =========================================================
+   DEMO PAYOUT TABLE
+========================================================= */
 
-/* SECURITY */
+function generatePayoutTicker(){
 
-function escapeHTML(text){
+    const container =
+        document.getElementById(
+            "payoutTicker"
+        );
 
-    const div =
+    const records = [
+
+        ["0722***410","KES 1,200","DEMO-001"],
+        ["0718***834","KES 2,500","DEMO-002"],
+        ["0798***112","KES 800","DEMO-003"],
+        ["0704***556","KES 1,500","DEMO-004"],
+        ["0112***921","KES 600","DEMO-005"],
+        ["0741***728","KES 2,000","DEMO-006"]
+
+    ];
+
+    container.innerHTML =
+        records.map(record => `
+
+            <div class="payout-row">
+
+                <div>${record[0]}</div>
+
+                <div class="amount">
+                    ${record[1]}
+                </div>
+
+                <div>
+                    ${record[2]}
+                </div>
+
+            </div>
+
+        `).join("");
+
+}
+
+/* =========================================================
+   M-PESA BUTTONS
+========================================================= */
+
+function initializeMpesa(amount, packageName){
+
+    /*
+      M-PESA DETAILS ARE KEPT AS REQUESTED.
+
+      This function currently represents the existing
+      frontend behaviour. A real Daraja STK Push should
+      eventually be handled by a secure server/backend.
+    */
+
+    showToast(
+        "Initializing M-Pesa STK Push for KES " +
+        amount.toLocaleString() +
+        " (" + packageName + ")..."
+    );
+
+    setTimeout(() => {
+
+        alert(
+            "Initializing M-Pesa STK Push for KES " +
+            amount.toLocaleString() +
+            "..."
+        );
+
+    },300);
+
+}
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+function openModal(id){
+
+    document.getElementById(id).style.display =
+        "flex";
+
+}
+
+function closeModal(id){
+
+    document.getElementById(id).style.display =
+        "none";
+
+}
+
+function closeOutside(event,id){
+
+    if(event.target.id === id){
+
+        closeModal(id);
+
+    }
+
+}
+
+/* =========================================================
+   FAQ
+========================================================= */
+
+function toggleFaq(button){
+
+    const answer =
+        button.nextElementSibling;
+
+    const icon =
+        button.querySelector("span");
+
+    const isOpen =
+        answer.style.display === "block";
+
+    document
+        .querySelectorAll(".faq-answer")
+        .forEach(item => {
+            item.style.display = "none";
+        });
+
+    document
+        .querySelectorAll(".faq-question span")
+        .forEach(item => {
+            item.textContent = "＋";
+        });
+
+    if(!isOpen){
+
+        answer.style.display =
+            "block";
+
+        icon.textContent =
+            "−";
+
+    }
+
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer;
+
+function showToast(message){
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.textContent =
+        message;
+
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer =
+        setTimeout(() => {
+
+            toast.classList.remove(
+                "show"
+            );
+
+        },3000);
+
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+function loadProfile(){
+
+    const savedName =
+        localStorage.getItem(
+            "sphere_member_name"
+        );
+
+    if(savedName){
+
+        document.getElementById(
+            "profileName"
+        ).value =
+            savedName;
+
+    }
+
+}
+
+function saveProfile(){
+
+    const name =
+        document.getElementById(
+            "profileName"
+        ).value.trim();
+
+    if(!name){
+
+        showToast(
+            "Enter a display name."
+        );
+
+        return;
+
+    }
+
+    localStorage.setItem(
+        "sphere_member_name",
+        name
+    );
+
+    showToast(
+        "Profile saved successfully."
+    );
+
+    closeModal(
+        "profileModal"
+    );
+
+}
+
+/* =========================================================
+   TRANSACTIONS
+========================================================= */
+
+function addTransaction(
+    title,
+    description,
+    status
+){
+
+    const list =
+        document.getElementById(
+            "recentTransactions"
+        );
+
+    const item =
         document.createElement("div");
 
-    div.textContent = text;
+    item.className =
+        "transaction";
 
-    return div.innerHTML;
+    item.innerHTML = `
+
+        <div class="transaction-left">
+
+            <div class="transaction-icon">
+                📋
+            </div>
+
+            <div>
+
+                <strong>
+                    ${title}
+                </strong>
+
+                <small>
+                    ${description}
+                </small>
+
+            </div>
+
+        </div>
+
+        <span class="positive">
+            ${status}
+        </span>
+
+    `;
+
+    list.prepend(item);
+
 }
+
+/* =========================================================
+   KEYBOARD SHORTCUT
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Escape"){
+
+            document
+                .querySelectorAll(".modal")
+                .forEach(modal => {
+
+                    modal.style.display =
+                        "none";
+
+                });
+
+        }
+
+    }
+);
 
 </script>
 
