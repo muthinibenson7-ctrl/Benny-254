@@ -1,1 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#07111f"
+    >
+
+    <title>Online Sphere | Account Access</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body class="auth-page">
+
+    <main class="auth-container">
+
+        <div class="auth-card">
+
+            <!-- LOGO -->
+
+            <a
+                href="index.html"
+                class="auth-logo"
+            >
+                <span class="brand-logo">
+                    OS
+                </span>
+
+                <span class="brand-text">
+                    <strong>ONLINE</strong>
+                    <span>SPHERE</span>
+                </span>
+            </a>
+
+
+            <!-- LOGIN -->
+
+            <section
+                class="auth-panel active"
+                id="loginPanel"
+            >
+
+                <span class="section-label">
+                    ACCOUNT ACCESS
+                </span>
+
+                <h1>
+                    Welcome back
+                </h1>
+
+                <p class="auth-description">
+                    Sign in to access your Online Sphere
+                    account.
+                </p>
+
+
+                <form id="loginForm">
+
+                    <div class="form-group">
+
+                        <label for="loginEmail">
+                            Email Address
+                        </label>
+
+                        <input
+                            id="loginEmail"
+                            type="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="loginPassword">
+                            Password
+                        </label>
+
+                        <input
+                            id="loginPassword"
+                            type="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="modal-primary auth-submit"
+                        type="submit"
+                    >
+                        Sign In
+                    </button>
+
+                </form>
+
+
+                <p class="auth-switch">
+                    Don't have an account?
+
+                    <button
+                        type="button"
+                        id="showRegister"
+                    >
+                        Create one
+                    </button>
+                </p>
+
+            </section>
+
+
+            <!-- REGISTER -->
+
+            <section
+                class="auth-panel"
+                id="registerPanel"
+            >
+
+                <span class="section-label">
+                    CREATE ACCOUNT
+                </span>
+
+                <h1>
+                    Join Online Sphere
+                </h1>
+
+                <p class="auth-description">
+                    Create your digital account in
+                    a few simple steps.
+                </p>
+
+
+                <form id="registerForm">
+
+                    <div class="form-group">
+
+                        <label for="registerName">
+                            Full Name
+                        </label>
+
+                        <input
+                            id="registerName"
+                            type="text"
+                            placeholder="Your full name"
+                            autocomplete="name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="registerEmail">
+                            Email Address
+                        </label>
+
+                        <input
+                            id="registerEmail"
+                            type="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="registerPhone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            id="registerPhone"
+                            type="tel"
+                            placeholder="07XXXXXXXX"
+                            autocomplete="tel"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="registerPassword">
+                            Password
+                        </label>
+
+                        <input
+                            id="registerPassword"
+                            type="password"
+                            placeholder="At least 8 characters"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        class="modal-primary auth-submit"
+                        type="submit"
+                    >
+                        Create Account
+                    </button>
+
+                </form>
+
+
+                <p class="auth-switch">
+                    Already have an account?
+
+                    <button
+                        type="button"
+                        id="showLogin"
+                    >
+                        Sign in
+                    </button>
+                </p>
+
+            </section>
+
+
+            <!-- SECURITY NOTICE -->
+
+            <div class="auth-security">
+
+                🔐 Your password is securely
+                processed by the server.
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- TOAST -->
+
+    <div class="toast">
+
+        <div class="toast-icon">
+            ✓
+        </div>
+
+        <div>
+
+            <strong>
+                Online Sphere
+            </strong>
+
+            <p>
+                Welcome.
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            aria-label="Close notification"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+<script>
+
+/* =========================================================
+   ONLINE SPHERE AUTHENTICATION
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const loginPanel =
+            document.getElementById(
+                "loginPanel"
+            );
+
+        const registerPanel =
+            document.getElementById(
+                "registerPanel"
+            );
+
+        const showRegister =
+            document.getElementById(
+                "showRegister"
+            );
+
+        const showLogin =
+            document.getElementById(
+                "showLogin"
+            );
+
+
+        /* -------------------------------------------------
+           PANEL SWITCHING
+        ------------------------------------------------- */
+
+        showRegister.addEventListener(
+            "click",
+            () => {
+
+                loginPanel.classList.remove(
+                    "active"
+                );
+
+                registerPanel.classList.add(
+                    "active"
+                );
+
+            }
+        );
+
+
+        showLogin.addEventListener(
+            "click",
+            () => {
+
+                registerPanel.classList.remove(
+                    "active"
+                );
+
+                loginPanel.classList.add(
+                    "active"
+                );
+
+            }
+        );
+
+
+        /* -------------------------------------------------
+           TOAST
+        ------------------------------------------------- */
+
+        const toast =
+            document.querySelector(
+                ".toast"
+            );
+
+        const toastTitle =
+            toast.querySelector(
+                "strong"
+            );
+
+        const toastMessage =
+            toast.querySelector(
+                "p"
+            );
+
+        const toastClose =
+            toast.querySelector(
+                "button"
+            );
+
+
+        let toastTimer;
+
+
+        function showToast(
+            title,
+            message,
+            warning = false
+        ) {
+
+            toastTitle.textContent =
+                title;
+
+            toastMessage.textContent =
+                message;
+
+            toast.classList.toggle(
+                "warning",
+                warning
+            );
+
+            toast.classList.add(
+                "show"
+            );
+
+            clearTimeout(
+                toastTimer
+            );
+
+            toastTimer =
+                setTimeout(
+                    () => {
+
+                        toast.classList.remove(
+                            "show"
+                        );
+
+                    },
+                    4000
+                );
+
+        }
+
+
+        toastClose.addEventListener(
+            "click",
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            }
+        );
+
+
+        /* -------------------------------------------------
+           REGISTER
+        ------------------------------------------------- */
+
+        const registerForm =
+            document.getElementById(
+                "registerForm"
+            );
+
+
+        registerForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+
+                const fullName =
+                    document.getElementById(
+                        "registerName"
+                    ).value.trim();
+
+
+                const email =
+                    document.getElementById(
+                        "registerEmail"
+                    ).value.trim();
+
+
+                const phone =
+                    document.getElementById(
+                        "registerPhone"
+                    ).value.trim();
+
+
+                const password =
+                    document.getElementById(
+                        "registerPassword"
+                    ).value;
+
+
+                const submitButton =
+                    registerForm.querySelector(
+                        "button[type='submit']"
+                    );
+
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Creating...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/register",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        fullName,
+                                        email,
+                                        phone,
+                                        password
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            "Registration failed."
+                        );
+
+                    }
+
+
+                    localStorage.setItem(
+                        "onlineSphereToken",
+                        data.token
+                    );
+
+
+                    showToast(
+                        "Account Created",
+                        "Your Online Sphere account is ready."
+                    );
+
+
+                    setTimeout(
+                        () => {
+
+                            window.location.href =
+                                "index.html";
+
+                        },
+                        1200
+                    );
+
+
+                } catch (error) {
+
+                    showToast(
+                        "Registration Failed",
+                        error.message,
+                        true
+                    );
+
+                } finally {
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        "Create Account";
+
+                }
+
+            }
+        );
+
+
+        /* -------------------------------------------------
+           LOGIN
+        ------------------------------------------------- */
+
+        const loginForm =
+            document.getElementById(
+                "loginForm"
+            );
+
+
+        loginForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+
+                const email =
+                    document.getElementById(
+                        "loginEmail"
+                    ).value.trim();
+
+
+                const password =
+                    document.getElementById(
+                        "loginPassword"
+                    ).value;
+
+
+                const submitButton =
+                    loginForm.querySelector(
+                        "button[type='submit']"
+                    );
+
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.textContent =
+                    "Signing in...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/login",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        email,
+                                        password
+                                    })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            "Login failed."
+                        );
+
+                    }
+
+
+                    localStorage.setItem(
+                        "onlineSphereToken",
+                        data.token
+                    );
+
+
+                    showToast(
+                        "Login Successful",
+                        "Welcome back to Online Sphere."
+                    );
+
+
+                    setTimeout(
+                        () => {
+
+                            window.location.href =
+                                "index.html";
+
+                        },
+                        1000
+                    );
+
+
+                } catch (error) {
+
+                    showToast(
+                        "Login Failed",
+                        error.message,
+                        true
+                    );
+
+                } finally {
+
+                    submitButton.disabled =
+                        false;
+
+                    submitButton.textContent =
+                        "Sign In";
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
