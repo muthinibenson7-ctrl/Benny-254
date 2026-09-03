@@ -367,7 +367,7 @@ img{
 
 
 /* =========================================================
-   FLOATING TRUST STRIP
+   TRUST STRIP
 ========================================================= */
 
 .trust-strip{
@@ -636,7 +636,7 @@ img{
 
 
 /* =========================================================
-   IMAGE + TEXT SECTION
+   IMAGE + TEXT
 ========================================================= */
 
 .split-section{
@@ -1135,6 +1135,167 @@ footer{
     background:none;
     color:var(--primary);
     font-weight:900;
+}
+
+
+/* =========================================================
+   M-PESA PAYMENT
+========================================================= */
+
+.payment-summary{
+
+    background:#f8fafc;
+
+    border:1px solid var(--border);
+
+    border-radius:15px;
+
+    padding:16px;
+
+    margin-bottom:20px;
+
+}
+
+.payment-summary-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:6px 0;
+
+    font-size:14px;
+
+}
+
+.payment-summary-row span:first-child{
+
+    color:var(--muted);
+
+}
+
+.payment-summary-row strong{
+
+    color:var(--dark);
+
+}
+
+.mpesa-logo{
+
+    width:58px;
+
+    height:58px;
+
+    margin:0 auto 15px;
+
+    border-radius:16px;
+
+    display:grid;
+
+    place-items:center;
+
+    background:#16a34a;
+
+    color:white;
+
+    font-size:25px;
+
+}
+
+.payment-status{
+
+    display:none;
+
+    margin-top:18px;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+.payment-status.show{
+
+    display:block;
+
+}
+
+.payment-status.waiting{
+
+    background:#fff7ed;
+
+    color:#9a3412;
+
+    border:1px solid #fed7aa;
+
+}
+
+.payment-status.success{
+
+    background:#f0fdf4;
+
+    color:#166534;
+
+    border:1px solid #bbf7d0;
+
+}
+
+.payment-status.error{
+
+    background:#fef2f2;
+
+    color:#991b1b;
+
+    border:1px solid #fecaca;
+
+}
+
+.payment-spinner{
+
+    width:18px;
+
+    height:18px;
+
+    border:3px solid #fed7aa;
+
+    border-top-color:#ea580c;
+
+    border-radius:50%;
+
+    display:inline-block;
+
+    vertical-align:middle;
+
+    margin-right:7px;
+
+    animation:spin .8s linear infinite;
+
+}
+
+@keyframes spin{
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+.mpesa-help{
+
+    margin-top:13px;
+
+    color:var(--muted);
+
+    font-size:11px;
+
+    text-align:center;
+
 }
 
 
@@ -2173,7 +2334,7 @@ Apply through appropriate platforms or clients.
 
 
 <!-- =====================================================
-     ABOUT / IMAGE SECTION
+     ABOUT
 ===================================================== -->
 
 <section class="section" id="about">
@@ -2293,6 +2454,8 @@ you want to access.
 <div class="pricing">
 
 
+<!-- BRONZE -->
+
 <div class="price-card">
 
 <h3>
@@ -2335,7 +2498,7 @@ Member support
 
 <button
 class="btn btn-outline btn-full"
-onclick="choosePackage('Bronze','1,000')">
+onclick="choosePackage('Bronze',1000)">
 
 Choose Bronze
 
@@ -2344,6 +2507,8 @@ Choose Bronze
 </div>
 
 
+
+<!-- SILVER -->
 
 <div class="price-card featured">
 
@@ -2391,7 +2556,7 @@ Additional tools
 
 <button
 class="btn btn-primary btn-full"
-onclick="choosePackage('Silver','1,750')">
+onclick="choosePackage('Silver',1750)">
 
 Choose Silver
 
@@ -2400,6 +2565,8 @@ Choose Silver
 </div>
 
 
+
+<!-- GOLD -->
 
 <div class="price-card">
 
@@ -2443,7 +2610,7 @@ Advanced tools
 
 <button
 class="btn btn-outline btn-full"
-onclick="choosePackage('Gold','2,500')">
+onclick="choosePackage('Gold',2500)">
 
 Choose Gold
 
@@ -2654,11 +2821,11 @@ How It Works
 Account
 </h4>
 
-<a href="#" onclick="openModal('login')">
+<a href="#" onclick="openModal('login');return false;">
 Login
 </a>
 
-<a href="#" onclick="openModal('register')">
+<a href="#" onclick="openModal('register');return false;">
 Create Account
 </a>
 
@@ -2731,7 +2898,7 @@ Work
 Plans
 </a>
 
-<a href="#" onclick="openModal('login')">
+<a href="#" onclick="openModal('login');return false;">
 <span>👤</span>
 Account
 </a>
@@ -2945,6 +3112,111 @@ Login
 
 
 <!-- =====================================================
+     M-PESA ACTIVATION MODAL
+===================================================== -->
+
+<div class="modal" id="paymentModal">
+
+<div class="modal-box">
+
+<button
+class="close"
+onclick="closePaymentModal()">
+×
+</button>
+
+
+<div class="mpesa-logo">
+M
+</div>
+
+
+<h2>
+Activate Membership
+</h2>
+
+<p class="modal-sub">
+Complete your activation using M-Pesa.
+</p>
+
+
+<div class="payment-summary">
+
+<div class="payment-summary-row">
+
+<span>
+Membership
+</span>
+
+<strong id="paymentPackage">
+Bronze
+</strong>
+
+</div>
+
+
+<div class="payment-summary-row">
+
+<span>
+Activation Fee
+</span>
+
+<strong id="paymentAmount">
+KSh 1,000
+</strong>
+
+</div>
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+M-Pesa Phone Number
+</label>
+
+<input
+type="tel"
+id="mpesaPhone"
+placeholder="0712345678"
+inputmode="numeric"
+autocomplete="tel"
+maxlength="13">
+
+</div>
+
+
+<button
+class="btn btn-primary btn-full"
+id="mpesaButton"
+onclick="startMpesaPayment()">
+
+📱 Send M-Pesa STK Push
+
+</button>
+
+
+<div
+class="payment-status"
+id="paymentStatus">
+</div>
+
+
+<div class="mpesa-help">
+
+You will receive an M-Pesa prompt on your phone.
+Enter your M-Pesa PIN to complete the Sandbox payment.
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
      OPPORTUNITY MODAL
 ===================================================== -->
 
@@ -3145,6 +3417,7 @@ email:email,
 phone:phone,
 password:password,
 package:packageName,
+membershipStatus:"INACTIVE",
 
 createdAt:
 new Date().toISOString()
@@ -3163,6 +3436,37 @@ closeModal();
 showToast(
 "Account created successfully."
 );
+
+
+/*
+   If a package was selected during registration,
+   open the M-Pesa activation window.
+*/
+
+if(
+packageName === "Bronze" ||
+packageName === "Silver" ||
+packageName === "Gold"
+){
+
+let amount =
+
+packageName === "Bronze"
+? 1000
+: packageName === "Silver"
+? 1750
+: 2500;
+
+setTimeout(function(){
+
+choosePackage(
+packageName,
+amount
+);
+
+},500);
+
+}
 
 }
 
@@ -3221,17 +3525,34 @@ showToast(
 }
 
 
+/* =========================================================
+   MEMBERSHIP / M-PESA
+========================================================= */
+
+let selectedPackageName = "";
+
+let selectedPackageAmount = 0;
+
+let currentPaymentId = null;
+
+let paymentPolling = null;
+
+
 /* ---------------------------------------------------------
-   PACKAGE
+   CHOOSE PACKAGE
 --------------------------------------------------------- */
 
-function choosePackage(name,price){
+function choosePackage(name, amount){
 
 const user =
 JSON.parse(
 localStorage.getItem("onlineSphereUser") || "null"
 );
 
+
+/*
+   User must have an account before activation.
+*/
 
 if(!user){
 
@@ -3242,7 +3563,7 @@ document
 .value = name;
 
 showToast(
-"Create an account first."
+"Create your account first, then continue to activation."
 );
 
 return;
@@ -3250,16 +3571,641 @@ return;
 }
 
 
-user.package = name;
+/*
+   Store selected package.
+*/
+
+selectedPackageName =
+name;
+
+selectedPackageAmount =
+Number(amount);
+
+
+/*
+   Open payment modal.
+*/
+
+document
+.getElementById("paymentPackage")
+textContent =
+name;
+
+document
+.getElementById("paymentAmount")
+textContent =
+"KSh " +
+Number(amount).toLocaleString();
+
+
+/*
+   Pre-fill registered phone.
+*/
+
+document
+.getElementById("mpesaPhone")
+value =
+user.phone || "";
+
+
+/*
+   Reset status.
+*/
+
+resetPaymentStatus();
+
+
+document
+.getElementById("paymentModal")
+.classList.add("show");
+
+}
+
+
+/* ---------------------------------------------------------
+   CLOSE PAYMENT MODAL
+--------------------------------------------------------- */
+
+function closePaymentModal(){
+
+if(paymentPolling){
+
+clearTimeout(paymentPolling);
+
+paymentPolling = null;
+
+}
+
+document
+.getElementById("paymentModal")
+.classList.remove("show");
+
+}
+
+
+/* ---------------------------------------------------------
+   NORMALIZE PHONE
+--------------------------------------------------------- */
+
+function normalizeKenyanPhone(phone){
+
+phone =
+String(phone || "")
+.replace(/\D/g,"");
+
+
+if(phone.startsWith("07") &&
+phone.length === 10){
+
+return "254" +
+phone.substring(1);
+
+}
+
+
+if(phone.startsWith("01") &&
+phone.length === 10){
+
+return "254" +
+phone.substring(1);
+
+}
+
+
+if(phone.startsWith("254") &&
+phone.length === 12){
+
+return phone;
+
+}
+
+
+if(phone.startsWith("254") === false &&
+phone.length === 9){
+
+return "254" + phone;
+
+}
+
+
+throw new Error(
+"Enter a valid Kenyan M-Pesa number, e.g. 0712345678"
+);
+
+}
+
+
+/* ---------------------------------------------------------
+   PAYMENT STATUS
+--------------------------------------------------------- */
+
+function setPaymentStatus(message,type){
+
+const status =
+document.getElementById("paymentStatus");
+
+status.innerHTML =
+message;
+
+status.className =
+"payment-status show " + type;
+
+}
+
+
+function resetPaymentStatus(){
+
+const status =
+document.getElementById("paymentStatus");
+
+status.innerHTML =
+"";
+
+status.className =
+"payment-status";
+
+const button =
+document.getElementById("mpesaButton");
+
+button.disabled =
+false;
+
+button.innerHTML =
+"📱 Send M-Pesa STK Push";
+
+}
+
+
+/* ---------------------------------------------------------
+   START M-PESA PAYMENT
+--------------------------------------------------------- */
+
+async function startMpesaPayment(){
+
+const phoneInput =
+document.getElementById("mpesaPhone");
+
+const phone =
+phoneInput.value.trim();
+
+
+if(!selectedPackageName){
+
+setPaymentStatus(
+"Please select a membership package.",
+"error"
+);
+
+return;
+
+}
+
+
+let normalizedPhone;
+
+try{
+
+normalizedPhone =
+normalizeKenyanPhone(phone);
+
+}catch(error){
+
+setPaymentStatus(
+error.message,
+"error"
+);
+
+return;
+
+}
+
+
+/*
+   Get current user.
+*/
+
+const user =
+JSON.parse(
+localStorage.getItem("onlineSphereUser") || "null"
+);
+
+
+if(!user){
+
+closePaymentModal();
+
+openModal("register");
+
+showToast(
+"Please create an account first."
+);
+
+return;
+
+}
+
+
+/*
+   Save the selected package to the user.
+*/
+
+user.package =
+selectedPackageName;
+
+user.membershipStatus =
+"PENDING_PAYMENT";
+
+user.mpesaPhone =
+normalizedPhone;
 
 localStorage.setItem(
 "onlineSphereUser",
 JSON.stringify(user)
 );
 
-showToast(
-name + " package selected."
+
+/*
+   Disable button while request is processing.
+*/
+
+const button =
+document.getElementById("mpesaButton");
+
+button.disabled =
+true;
+
+button.innerHTML =
+"Processing M-Pesa...";
+
+
+setPaymentStatus(
+'<span class="payment-spinner"></span> Connecting to M-Pesa...',
+"waiting"
 );
+
+
+try{
+
+/*
+   IMPORTANT:
+   This request goes to your Node.js backend.
+
+   Your backend must contain:
+
+   POST /api/mpesa/stkpush
+
+   The Daraja Consumer Key and Secret
+   MUST remain on the backend.
+*/
+
+const response =
+await fetch(
+"/api/mpesa/stkpush",
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:
+JSON.stringify({
+
+phone:
+normalizedPhone,
+
+package:
+selectedPackageName.toLowerCase(),
+
+amount:
+selectedPackageAmount
+
+})
+
+});
+
+
+let data;
+
+try{
+
+data =
+await response.json();
+
+}catch(error){
+
+throw new Error(
+"Server returned an invalid response."
+);
+
+}
+
+
+if(
+!response.ok ||
+!data.success
+){
+
+throw new Error(
+data.message ||
+"Unable to initiate M-Pesa payment."
+);
+
+}
+
+
+/*
+   Store payment ID.
+*/
+
+currentPaymentId =
+data.paymentId;
+
+
+/*
+   Update UI.
+*/
+
+button.innerHTML =
+"Waiting for Payment...";
+
+
+setPaymentStatus(
+
+'<span class="payment-spinner"></span> STK Push sent. Check your phone and enter your M-Pesa PIN.',
+
+"waiting"
+
+);
+
+
+/*
+   Begin checking payment status.
+*/
+
+pollPaymentStatus();
+
+
+}catch(error){
+
+console.error(
+"M-Pesa error:",
+error
+);
+
+
+button.disabled =
+false;
+
+button.innerHTML =
+"📱 Send M-Pesa STK Push";
+
+
+setPaymentStatus(
+
+"❌ " +
+(error.message ||
+"Unable to start M-Pesa payment."),
+
+"error"
+
+);
+
+}
+
+}
+
+
+/* ---------------------------------------------------------
+   POLL PAYMENT STATUS
+--------------------------------------------------------- */
+
+function pollPaymentStatus(){
+
+if(!currentPaymentId){
+
+return;
+
+}
+
+
+if(paymentPolling){
+
+clearTimeout(paymentPolling);
+
+}
+
+
+paymentPolling =
+setTimeout(
+async function(){
+
+try{
+
+const response =
+await fetch(
+
+"/api/mpesa/status/" +
+encodeURIComponent(
+currentPaymentId
+)
+
+);
+
+
+const data =
+await response.json();
+
+
+if(
+!response.ok ||
+!data.success
+){
+
+pollPaymentStatus();
+
+return;
+
+}
+
+
+const payment =
+data.payment;
+
+
+/*
+   SUCCESS
+*/
+
+if(payment.status === "PAID"){
+
+activateMembership(
+payment
+);
+
+return;
+
+}
+
+
+/*
+   FAILED
+*/
+
+if(payment.status === "FAILED"){
+
+document
+.getElementById("mpesaButton")
+.disabled =
+false;
+
+document
+.getElementById("mpesaButton")
+.innerHTML =
+"📱 Try M-Pesa Again";
+
+
+setPaymentStatus(
+
+"❌ " +
+(
+payment.resultDescription ||
+"Payment was not completed."
+),
+
+"error"
+
+);
+
+return;
+
+}
+
+
+/*
+   Still pending.
+*/
+
+pollPaymentStatus();
+
+
+}catch(error){
+
+console.error(
+"Payment status error:",
+error
+);
+
+pollPaymentStatus();
+
+}
+
+},
+3000
+);
+
+}
+
+
+/* ---------------------------------------------------------
+   ACTIVATE MEMBERSHIP
+--------------------------------------------------------- */
+
+function activateMembership(payment){
+
+const user =
+JSON.parse(
+localStorage.getItem("onlineSphereUser") || "null"
+);
+
+
+if(user){
+
+user.package =
+payment.package;
+
+user.membershipStatus =
+"ACTIVE";
+
+user.membershipActivatedAt =
+new Date().toISOString();
+
+user.mpesaReceipt =
+payment.receiptNumber || null;
+
+user.activationAmount =
+payment.amount || selectedPackageAmount;
+
+localStorage.setItem(
+"onlineSphereUser",
+JSON.stringify(user)
+);
+
+}
+
+
+/*
+   Update button.
+*/
+
+const button =
+document.getElementById("mpesaButton");
+
+button.disabled =
+true;
+
+button.innerHTML =
+"✓ Membership Activated";
+
+
+/*
+   Display success.
+*/
+
+setPaymentStatus(
+
+"✓ Payment confirmed! Your " +
+payment.package +
+" membership is now active." +
+(
+payment.receiptNumber
+?
+"<br><br>M-Pesa Receipt: <strong>" +
+payment.receiptNumber +
+"</strong>"
+:
+""
+),
+
+"success"
+
+);
+
+
+/*
+   Notify user.
+*/
+
+showToast(
+payment.package +
+" membership activated successfully."
+);
+
+
+/*
+   Stop polling.
+*/
+
+if(paymentPolling){
+
+clearTimeout(paymentPolling);
+
+paymentPolling =
+null;
+
+}
 
 }
 
@@ -3333,7 +4279,8 @@ function showToast(message){
 const toast =
 document.getElementById("toast");
 
-toast.textContent = message;
+toast.textContent =
+message;
 
 toast.classList.add("show");
 
@@ -3350,12 +4297,14 @@ toast.classList.remove("show");
 
 
 /* ---------------------------------------------------------
-   CLOSE MODALS BY CLICKING BACKDROP
+   CLOSE AUTH MODAL BY BACKDROP
 --------------------------------------------------------- */
 
 document
 .getElementById("authModal")
-.addEventListener("click",function(event){
+.addEventListener(
+"click",
+function(event){
 
 if(event.target === this){
 
@@ -3366,9 +4315,34 @@ closeModal();
 });
 
 
+/* ---------------------------------------------------------
+   CLOSE PAYMENT MODAL BY BACKDROP
+--------------------------------------------------------- */
+
+document
+.getElementById("paymentModal")
+.addEventListener(
+"click",
+function(event){
+
+if(event.target === this){
+
+closePaymentModal();
+
+}
+
+});
+
+
+/* ---------------------------------------------------------
+   CLOSE OPPORTUNITY MODAL BY BACKDROP
+--------------------------------------------------------- */
+
 document
 .getElementById("opportunityModal")
-.addEventListener("click",function(event){
+.addEventListener(
+"click",
+function(event){
 
 if(event.target === this){
 
@@ -3398,7 +4372,9 @@ entries.forEach(entry => {
 if(entry.isIntersecting){
 
 entry.target.style.opacity="1";
-entry.target.style.transform="translateY(0)";
+
+entry.target.style.transform=
+"translateY(0)";
 
 }
 
@@ -3414,13 +4390,16 @@ threshold:.08
 revealElements.forEach(element => {
 
 element.style.opacity="0";
-element.style.transform="translateY(20px)";
-element.style.transition="opacity .6s ease, transform .6s ease";
+
+element.style.transform=
+"translateY(20px)";
+
+element.style.transition=
+"opacity .6s ease, transform .6s ease";
 
 observer.observe(element);
 
 });
-
 
 </script>
 
