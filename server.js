@@ -1,402 +1,751 @@
--- =========================================================
--- ONLINE SPHERE DATABASE
--- EARNING OPPORTUNITIES + MEMBERSHIP + WALLET
--- =========================================================
+require("dotenv").config();
 
-PRAGMA foreign_keys = ON;
+const express = require("express");
+const axios = require("axios");
+const path = require("path");
 
--- =========================================================
--- USERS
--- =========================================================
+const app = express();
 
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    full_name TEXT NOT NULL,
+app.use(express.static(path.join(__dirname, "public")));
 
-    email TEXT UNIQUE NOT NULL,
+const PORT = process.env.PORT || 3000;
 
-    phone TEXT UNIQUE,
+const MPESA_CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY;
+const MPESA_CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET;
+const MPESA_SHORTCODE = process.env.MPESA_SHORTCODE;
+const MPESA_PASSKEY = process.env.MPESA_PASSKEY;
+const BASE_URL = process.env.BASE_URL;
 
-    password_hash TEXT NOT NULL,
+const IS_SANDBOX = process.env.MPESA_ENV !== "production";
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+const MPESA_BASE_URL = IS_SANDBOX
+    ? "https://sandbox.safaricom.co.ke"
+    : "https://api.safaricom.co.ke";
 
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
 
+/* =========================================================
+   BASIC VALIDATION
+========================================================= */
 
--- =========================================================
--- USER ACCOUNTS
--- =========================================================
+function checkConfiguration() {
+    const missing = [];
 
-CREATE TABLE IF NOT EXISTS accounts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    if (!MPESA_CONSUMER_KEY) missing.push("MPESA_CONSUMER_KEY");
+    if (!MPESA_CONSUMER_SECRET) missing.push("MPESA_CONSUMER_SECRET");
+    if (!MPESA_SHORTCODE) missing.push("MPESA_SHORTCODE");
+    if (!MPESA_PASSKEY) missing.push("MPESA_PASSKEY");
+    if (!BASE_URL) missing.push("BASE_URL");
 
-    user_id INTEGER NOT NULL UNIQUE,
+    if (missing.length > 0) {
+        console.warn(
+            "Missing environment variables:",
+            missing.join(", ")
+        );
+    }
+}
 
-    account_number TEXT UNIQUE NOT NULL,
+checkConfiguration();
 
-    package TEXT DEFAULT NULL,
 
-    activation_fee INTEGER DEFAULT 0,
+/* =========================================================
+   MEMBERSHIP PACKAGES
+========================================================= */
 
-    status TEXT DEFAULT 'inactive',
+const PACKAGES = {
+    bronze: {
+        name: "Bronze",
+        amount: 1000
+    },
 
-    balance INTEGER DEFAULT 0,
+    silver: {
+        name: "Silver",
+        amount: 1750
+    },
 
-    total_earned INTEGER DEFAULT 0,
+    gold: {
+        name: "Gold",
+        amount: 2500
+    }
+};
 
-    total_withdrawn INTEGER DEFAULT 0,
 
-    pending_withdrawal INTEGER DEFAULT 0,
+/* =========================================================
+   TEMPORARY PAYMENT STORAGE
+   ---------------------------------------------------------
+   This is suitable for testing only.
 
-    currency TEXT DEFAULT 'KES',
+   In production replace this with a real database.
+========================================================= */
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+const payments = new Map();
 
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
+/* =========================================================
+   FORMAT KENYAN PHONE NUMBER
+========================================================= */
 
+function normalizePhone(phone) {
+    if (!phone) return null;
 
--- =========================================================
--- MEMBERSHIP PACKAGES
--- =========================================================
+    let cleaned = String(phone).replace(/\s+/g, "").replace(/-/g, "");
 
-CREATE TABLE IF NOT EXISTS packages (
+    if (cleaned.startsWith("+254")) {
+        cleaned = cleaned.substring(1);
+    }
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    if (cleaned.startsWith("07") || cleaned.startsWith("01")) {
+        cleaned = "254" + cleaned.substring(1);
+    }
 
-    name TEXT UNIQUE NOT NULL,
+    if (/^2547\d{8}$/.test(cleaned)) {
+        return cleaned;
+    }
 
-    activation_fee INTEGER NOT NULL,
+    if (/^2541\d{8}$/.test(cleaned)) {
+        return cleaned;
+    }
 
-    description TEXT,
+    return null;
+}
 
-    status TEXT DEFAULT 'active',
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+/* =========================================================
+   GET DARAJA ACCESS TOKEN
+========================================================= */
 
+async function getAccessToken() {
 
--- =========================================================
--- TRANSACTIONS
--- =========================================================
+    const credentials = Buffer
+        .from(
+            `${MPESA_CONSUMER_KEY}:${MPESA_CONSUMER_SECRET}`
+        )
+        .toString("base64");
 
-CREATE TABLE IF NOT EXISTS transactions (
+    const response = await axios.get(
+        `${MPESA_BASE_URL}/oauth/v1/generate?grant_type=client_credentials`,
+        {
+            headers: {
+                Authorization: `Basic ${credentials}`
+            },
+            timeout: 20000
+        }
+    );
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    return response.data.access_token;
+}
 
-    user_id INTEGER NOT NULL,
 
-    account_id INTEGER NOT NULL,
+/* =========================================================
+   GENERATE STK PASSWORD
+========================================================= */
 
-    type TEXT NOT NULL,
+function generateTimestamp() {
 
-    amount INTEGER NOT NULL,
+    const now = new Date();
 
-    status TEXT DEFAULT 'pending',
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hour = String(now.getHours()).padStart(2, "0");
+    const minute = String(now.getMinutes()).padStart(2, "0");
+    const second = String(now.getSeconds()).padStart(2, "0");
 
-    reference TEXT UNIQUE,
+    return `${year}${month}${day}${hour}${minute}${second}`;
+}
 
-    description TEXT,
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+function generatePassword(timestamp) {
 
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
+    return Buffer
+        .from(
+            `${MPESA_SHORTCODE}${MPESA_PASSKEY}${timestamp}`
+        )
+        .toString("base64");
+}
 
-    FOREIGN KEY (account_id)
-        REFERENCES accounts(id)
-        ON DELETE CASCADE
-);
 
+/* =========================================================
+   CREATE UNIQUE PAYMENT ID
+========================================================= */
 
--- =========================================================
--- EARNING OPPORTUNITIES
--- =========================================================
+function createPaymentId() {
 
-CREATE TABLE IF NOT EXISTS opportunities (
+    return (
+        "OS-" +
+        Date.now() +
+        "-" +
+        Math.random()
+            .toString(36)
+            .substring(2, 8)
+            .toUpperCase()
+    );
+}
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-    title TEXT NOT NULL,
+/* =========================================================
+   HEALTH CHECK
+========================================================= */
 
-    category TEXT NOT NULL,
+app.get("/api/health", (req, res) => {
 
-    description TEXT NOT NULL,
+    res.json({
+        success: true,
+        service: "ONLINE SPHERE COMMERCE",
+        environment: IS_SANDBOX ? "sandbox" : "production",
+        time: new Date().toISOString()
+    });
 
-    difficulty TEXT DEFAULT 'Beginner',
+});
 
-    earning_model TEXT,
 
-    requirements TEXT,
+/* =========================================================
+   GET MEMBERSHIP PACKAGES
+========================================================= */
 
-    platform_name TEXT,
+app.get("/api/packages", (req, res) => {
 
-    external_url TEXT,
+    res.json({
+        success: true,
+        packages: PACKAGES
+    });
 
-    risk_level TEXT DEFAULT 'Low',
+});
 
-    featured INTEGER DEFAULT 0,
 
-    status TEXT DEFAULT 'active',
+/* =========================================================
+   INITIATE M-PESA STK PUSH
+========================================================= */
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+app.post("/api/stkpush", async (req, res) => {
 
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    try {
 
+        const {
+            phone,
+            packageId
+        } = req.body;
 
--- =========================================================
--- SAVED OPPORTUNITIES
--- =========================================================
 
-CREATE TABLE IF NOT EXISTS saved_opportunities (
+        /* -------------------------------
+           Validate package
+        -------------------------------- */
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        if (!packageId || !PACKAGES[packageId]) {
 
-    user_id INTEGER NOT NULL,
+            return res.status(400).json({
+                success: false,
+                message: "Invalid membership package."
+            });
 
-    opportunity_id INTEGER NOT NULL,
+        }
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE(user_id, opportunity_id),
+        /* -------------------------------
+           Validate phone
+        -------------------------------- */
 
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
+        const normalizedPhone = normalizePhone(phone);
 
-    FOREIGN KEY (opportunity_id)
-        REFERENCES opportunities(id)
-        ON DELETE CASCADE
-);
+        if (!normalizedPhone) {
 
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Enter a valid Kenyan M-PESA number, e.g. 0712345678."
+            });
 
--- =========================================================
--- WITHDRAWAL REQUESTS
--- =========================================================
+        }
 
-CREATE TABLE IF NOT EXISTS withdrawals (
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        /* -------------------------------
+           Configuration check
+        -------------------------------- */
 
-    user_id INTEGER NOT NULL,
+        if (
+            !MPESA_CONSUMER_KEY ||
+            !MPESA_CONSUMER_SECRET ||
+            !MPESA_SHORTCODE ||
+            !MPESA_PASSKEY ||
+            !BASE_URL
+        ) {
 
-    account_id INTEGER NOT NULL,
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Daraja configuration is incomplete. Check your .env file."
+            });
 
-    amount INTEGER NOT NULL,
+        }
 
-    method TEXT NOT NULL,
 
-    phone TEXT,
+        const selectedPackage = PACKAGES[packageId];
 
-    reference TEXT UNIQUE,
+        const amount = selectedPackage.amount;
 
-    status TEXT DEFAULT 'pending',
+        const paymentId = createPaymentId();
 
-    notes TEXT,
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        /* -------------------------------
+           Create access token
+        -------------------------------- */
 
-    processed_at DATETIME,
+        const accessToken = await getAccessToken();
 
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
 
-    FOREIGN KEY (account_id)
-        REFERENCES accounts(id)
-        ON DELETE CASCADE
-);
+        /* -------------------------------
+           Timestamp
+        -------------------------------- */
 
+        const timestamp = generateTimestamp();
 
--- =========================================================
--- SESSIONS
--- =========================================================
 
-CREATE TABLE IF NOT EXISTS sessions (
+        /* -------------------------------
+           Password
+        -------------------------------- */
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+        const password = generatePassword(timestamp);
 
-    user_id INTEGER NOT NULL,
 
-    token_hash TEXT NOT NULL,
+        /* -------------------------------
+           Callback URL
+        -------------------------------- */
 
-    expires_at DATETIME NOT NULL,
+        const callbackUrl =
+            `${BASE_URL.replace(/\/$/, "")}/api/mpesa/callback`;
 
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
-);
+        /* -------------------------------
+           STK Push request
+        -------------------------------- */
 
+        const stkPayload = {
 
--- =========================================================
--- DEFAULT PACKAGES
--- =========================================================
+            BusinessShortCode: Number(MPESA_SHORTCODE),
 
-INSERT OR IGNORE INTO packages
-(name, activation_fee, description)
-VALUES
-(
-    'Bronze',
-    1000,
-    'Basic access to Online Sphere opportunities and learning resources.'
-);
+            Password: password,
 
-INSERT OR IGNORE INTO packages
-(name, activation_fee, description)
-VALUES
-(
-    'Silver',
-    1750,
-    'Expanded access to opportunities and advanced learning resources.'
-);
+            Timestamp: timestamp,
 
-INSERT OR IGNORE INTO packages
-(name, activation_fee, description)
-VALUES
-(
-    'Gold',
-    2500,
-    'Full access to the Online Sphere opportunity and learning library.'
-);
+            TransactionType: "CustomerPayBillOnline",
 
+            Amount: amount,
 
--- =========================================================
--- DEFAULT OPPORTUNITIES
--- =========================================================
+            PartyA: Number(normalizedPhone),
 
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Online Transcription',
-    'Transcription',
-    'Convert audio or video recordings into written text.',
-    'Beginner',
-    'Paid per task or audio minute',
-    'Good listening skills, typing and attention to detail.',
-    'Low',
-    1
-);
+            PartyB: Number(MPESA_SHORTCODE),
 
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Data Entry',
-    'Data Entry',
-    'Enter, organize and verify information using online tools.',
-    'Beginner',
-    'Paid per task or project',
-    'Basic computer skills and accuracy.',
-    'Low',
-    1
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Freelancing',
-    'Freelancing',
-    'Offer professional skills to clients locally or internationally.',
-    'Beginner-Advanced',
-    'Paid per project or contract',
-    'A marketable skill and a professional profile.',
-    'Low',
-    1
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Academic Writing',
-    'Academic Writing',
-    'Provide legitimate research and writing assistance while following academic integrity rules.',
-    'Intermediate',
-    'Paid per project',
-    'Strong writing, research and citation skills.',
-    'Medium',
-    0
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Online Gaming',
-    'Gaming',
-    'Explore legitimate gaming-related opportunities such as game testing, streaming and content creation.',
-    'Beginner',
-    'Task, contract, content or platform based',
-    'Gaming skills or content creation ability.',
-    'Medium',
-    0
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Content Creation',
-    'Content',
-    'Create useful digital content for websites and social platforms.',
-    'Beginner-Advanced',
-    'Paid per project, contract or platform',
-    'Writing, video, design or communication skills.',
-    'Low',
-    1
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Graphic Design',
-    'Design',
-    'Create logos, social media graphics, posters and other digital designs.',
-    'Intermediate',
-    'Paid per project',
-    'Design skills and suitable software.',
-    'Low',
-    0
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'AI-Assisted Work',
-    'AI',
-    'Explore legitimate work involving AI-assisted research, content, data and digital services.',
-    'Beginner-Advanced',
-    'Paid per task or project',
-    'Ability to use AI tools responsibly and verify results.',
-    'Medium',
-    1
-);
-
-INSERT OR IGNORE INTO opportunities
-(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
-VALUES
-(
-    'Remote Jobs',
-    'Remote Jobs',
-    'Find legitimate remote employment and contract opportunities.',
-    'Intermediate',
-    'Salary, contract or project payment',
-    'Skills and qualifications depend on the job.',
-    'Low',
-    1
-);
+            PhoneNumber: Number(normalizedPhone),
+
+            CallBackURL: callbackUrl,
+
+            AccountReference: paymentId,
+
+            TransactionDesc:
+                `${selectedPackage.name} Membership Activation`
+
+        };
+
+
+        const stkResponse = await axios.post(
+
+            `${MPESA_BASE_URL}/mpesa/stkpush/v1/processrequest`,
+
+            stkPayload,
+
+            {
+                headers: {
+                    Authorization:
+                        `Bearer ${accessToken}`,
+
+                    "Content-Type":
+                        "application/json"
+                },
+
+                timeout: 30000
+            }
+
+        );
+
+
+        const result = stkResponse.data;
+
+
+        /* -------------------------------
+           Save payment
+        -------------------------------- */
+
+        payments.set(paymentId, {
+
+            paymentId,
+
+            packageId,
+
+            packageName: selectedPackage.name,
+
+            amount,
+
+            phone: normalizedPhone,
+
+            merchantRequestId:
+                result.MerchantRequestID || null,
+
+            checkoutRequestId:
+                result.CheckoutRequestID || null,
+
+            responseCode:
+                result.ResponseCode || null,
+
+            status:
+                result.ResponseCode === "0"
+                    ? "pending"
+                    : "failed",
+
+            createdAt:
+                new Date().toISOString(),
+
+            updatedAt:
+                new Date().toISOString()
+
+        });
+
+
+        /* -------------------------------
+           Return response
+        -------------------------------- */
+
+        if (result.ResponseCode === "0") {
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "STK Push sent successfully. Check your phone and enter your M-PESA PIN.",
+
+                paymentId,
+
+                checkoutRequestId:
+                    result.CheckoutRequestID,
+
+                merchantRequestId:
+                    result.MerchantRequestID,
+
+                customerMessage:
+                    result.CustomerMessage ||
+
+                    "Please check your phone for the M-PESA prompt."
+
+            });
+
+        }
+
+
+        return res.status(400).json({
+
+            success: false,
+
+            message:
+                result.ResponseDescription ||
+                result.errorMessage ||
+                "M-PESA request was not accepted.",
+
+            data: result
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "STK PUSH ERROR:",
+            error.response?.data ||
+            error.message
+        );
+
+
+        return res.status(500).json({
+
+            success: false,
+
+            message:
+                error.response?.data?.errorMessage ||
+                error.response?.data?.ResponseDescription ||
+                "Unable to initiate M-PESA payment.",
+
+            error:
+                error.response?.data || null
+
+        });
+
+    }
+
+});
+
+
+/* =========================================================
+   M-PESA CALLBACK
+========================================================= */
+
+app.post("/api/mpesa/callback", (req, res) => {
+
+    try {
+
+        console.log(
+            "===================================="
+        );
+
+        console.log(
+            "M-PESA CALLBACK RECEIVED"
+        );
+
+        console.log(
+            JSON.stringify(
+                req.body,
+                null,
+                2
+            )
+        );
+
+        console.log(
+            "===================================="
+        );
+
+
+        const stkCallback =
+            req.body?.Body?.stkCallback;
+
+
+        if (!stkCallback) {
+
+            return res.json({
+                ResultCode: 0,
+                ResultDesc: "Accepted"
+            });
+
+        }
+
+
+        const checkoutRequestId =
+            stkCallback.CheckoutRequestID;
+
+
+        /* -------------------------------
+           Find payment
+        -------------------------------- */
+
+        let payment = null;
+
+        for (const item of payments.values()) {
+
+            if (
+                item.checkoutRequestId ===
+                checkoutRequestId
+            ) {
+
+                payment = item;
+
+                break;
+
+            }
+
+        }
+
+
+        /* -------------------------------
+           Payment cancelled / failed
+        -------------------------------- */
+
+        if (
+            Number(stkCallback.ResultCode) !== 0
+        ) {
+
+            if (payment) {
+
+                payment.status = "failed";
+
+                payment.resultCode =
+                    stkCallback.ResultCode;
+
+                payment.resultDescription =
+                    stkCallback.ResultDesc;
+
+                payment.updatedAt =
+                    new Date().toISOString();
+
+            }
+
+            return res.json({
+
+                ResultCode: 0,
+
+                ResultDesc: "Callback received"
+
+            });
+
+        }
+
+
+        /* -------------------------------
+           Successful payment
+        -------------------------------- */
+
+        const metadata =
+            stkCallback.CallbackMetadata?.Item || [];
+
+
+        const values = {};
+
+
+        for (const item of metadata) {
+
+            if (item.Name) {
+
+                values[item.Name] =
+                    item.Value;
+
+            }
+
+        }
+
+
+        if (payment) {
+
+            payment.status = "paid";
+
+            payment.resultCode =
+                stkCallback.ResultCode;
+
+            payment.resultDescription =
+                stkCallback.ResultDesc;
+
+            payment.mpesaReceiptNumber =
+                values.MpesaReceiptNumber || null;
+
+            payment.transactionDate =
+                values.TransactionDate || null;
+
+            payment.phoneNumber =
+                values.PhoneNumber || payment.phone;
+
+            payment.amountPaid =
+                values.Amount || payment.amount;
+
+            payment.updatedAt =
+                new Date().toISOString();
+
+        }
+
+
+        console.log(
+            "PAYMENT SUCCESS:",
+            payment
+        );
+
+
+        return res.json({
+
+            ResultCode: 0,
+
+            ResultDesc:
+                "Callback received successfully"
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "CALLBACK ERROR:",
+            error
+        );
+
+        return res.json({
+
+            ResultCode: 0,
+
+            ResultDesc:
+                "Callback received"
+
+        });
+
+    }
+
+});
+
+
+/* =========================================================
+   PAYMENT STATUS
+========================================================= */
+
+app.get("/api/payment/:paymentId", (req, res) => {
+
+    const payment =
+        payments.get(req.params.paymentId);
+
+
+    if (!payment) {
+
+        return res.status(404).json({
+
+            success: false,
+
+            message:
+                "Payment not found."
+
+        });
+
+    }
+
+
+    res.json({
+
+        success: true,
+
+        payment
+
+    });
+
+});
+
+
+/* =========================================================
+   FRONTEND FALLBACK
+========================================================= */
+
+app.get("*splat", (req, res) => {
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "index.html"
+        )
+    );
+
+});
+
+
+/* =========================================================
+   START SERVER
+========================================================= */
+
+app.listen(PORT, () => {
+
+    console.log(
+        `ONLINE SPHERE running on port ${PORT}`
+    );
+
+    console.log(
+        `M-PESA environment: ${
+            IS_SANDBOX
+                ? "SANDBOX"
+                : "PRODUCTION"
+        }`
+    );
+
+});
