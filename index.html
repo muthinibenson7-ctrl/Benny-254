@@ -4,28 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Online Sphere | Member Portal</title>
+<title>Online Sphere | Discover. Learn. Work.</title>
 
 <meta name="description"
-content="Online Sphere - Discover legitimate online work and digital opportunities.">
+content="Online Sphere helps you discover digital work opportunities, develop skills and explore online career opportunities.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://images.unsplash.com">
 
 <style>
+
+/* =========================================================
+   ONLINE SPHERE
+   PREMIUM RESPONSIVE SINGLE-PAGE DESIGN
+========================================================= */
+
 :root{
     --primary:#2563eb;
     --primary-dark:#1d4ed8;
     --secondary:#7c3aed;
+    --cyan:#06b6d4;
     --success:#16a34a;
     --warning:#f59e0b;
-    --danger:#dc2626;
-    --dark:#0f172a;
-    --dark2:#1e293b;
+
+    --dark:#07111f;
+    --dark2:#0f1c2e;
     --text:#334155;
     --muted:#64748b;
-    --light:#f8fafc;
+
+    --light:#f5f8fc;
     --white:#ffffff;
     --border:#e2e8f0;
-    --shadow:0 10px 30px rgba(15,23,42,.08);
-    --radius:18px;
+
+    --radius:22px;
+    --shadow:0 18px 50px rgba(15,23,42,.10);
 }
 
 *{
@@ -39,10 +51,18 @@ html{
 }
 
 body{
-    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
     background:var(--light);
     color:var(--text);
     line-height:1.6;
+    overflow-x:hidden;
 }
 
 button,
@@ -56,27 +76,120 @@ button{
 }
 
 a{
-    text-decoration:none;
     color:inherit;
+    text-decoration:none;
 }
 
-/* =========================
+img{
+    max-width:100%;
+    display:block;
+}
+
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+.container{
+    width:min(1180px,calc(100% - 40px));
+    margin:auto;
+}
+
+.section{
+    padding:90px 0;
+}
+
+.section-heading{
+    text-align:center;
+    max-width:720px;
+    margin:0 auto 50px;
+}
+
+.section-heading .eyebrow{
+    color:var(--primary);
+    font-size:13px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin-bottom:10px;
+}
+
+.section-heading h2{
+    color:var(--dark);
+    font-size:clamp(30px,4vw,45px);
+    line-height:1.1;
+    margin-bottom:14px;
+}
+
+.section-heading p{
+    color:var(--muted);
+}
+
+.btn{
+    border:none;
+    border-radius:13px;
+    padding:13px 20px;
+    font-weight:800;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    transition:.25s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-primary{
+    color:white;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    box-shadow:0 10px 25px rgba(37,99,235,.22);
+}
+
+.btn-white{
+    background:white;
+    color:var(--dark);
+}
+
+.btn-outline{
+    background:white;
+    color:var(--dark);
+    border:1px solid var(--border);
+}
+
+.btn-outline:hover{
+    color:var(--primary);
+    border-color:var(--primary);
+}
+
+.btn-full{
+    width:100%;
+}
+
+
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .header{
-    position:sticky;
+    position:fixed;
     top:0;
+    left:0;
+    right:0;
     z-index:1000;
-    background:rgba(255,255,255,.96);
-    backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--border);
+
+    background:rgba(255,255,255,.90);
+    backdrop-filter:blur(16px);
+
+    border-bottom:1px solid rgba(226,232,240,.8);
 }
 
 .nav{
-    max-width:1200px;
+    width:min(1180px,calc(100% - 40px));
+    height:72px;
     margin:auto;
-    padding:14px 20px;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -87,33 +200,37 @@ a{
     display:flex;
     align-items:center;
     gap:10px;
-    font-weight:800;
-    font-size:20px;
+
+    font-weight:900;
     color:var(--dark);
+    font-size:19px;
 }
 
-.logo-icon{
-    width:42px;
-    height:42px;
-    border-radius:13px;
+.logo-symbol{
+    width:43px;
+    height:43px;
+    border-radius:14px;
+
     display:grid;
     place-items:center;
+
     color:white;
-    font-weight:900;
-    background:linear-gradient(135deg,var(--primary),var(--secondary));
-    box-shadow:0 8px 20px rgba(37,99,235,.25);
+    background:
+        linear-gradient(135deg,var(--primary),var(--secondary));
+
+    box-shadow:0 8px 22px rgba(37,99,235,.25);
 }
 
 .nav-links{
     display:flex;
     align-items:center;
-    gap:25px;
+    gap:28px;
 }
 
 .nav-links a{
+    font-size:14px;
+    font-weight:700;
     color:var(--muted);
-    font-weight:600;
-    transition:.2s;
 }
 
 .nav-links a:hover{
@@ -122,108 +239,93 @@ a{
 
 .nav-actions{
     display:flex;
-    gap:10px;
+    gap:9px;
 }
 
-.btn{
-    border:0;
-    border-radius:12px;
-    padding:11px 17px;
-    font-weight:700;
-    transition:.2s;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-}
-
-.btn-primary{
-    background:var(--primary);
-    color:white;
-}
-
-.btn-primary:hover{
-    background:var(--primary-dark);
-    transform:translateY(-1px);
-}
-
-.btn-outline{
-    background:white;
-    border:1px solid var(--border);
-    color:var(--dark);
-}
-
-.btn-outline:hover{
-    border-color:var(--primary);
-    color:var(--primary);
-}
-
-.btn-success{
-    background:var(--success);
-    color:white;
-}
-
-.btn-danger{
-    background:var(--danger);
-    color:white;
-}
-
-.menu-btn{
+.menu-button{
     display:none;
-    border:0;
+    width:42px;
+    height:42px;
+    border:1px solid var(--border);
     background:white;
-    font-size:24px;
+    border-radius:12px;
+    font-size:22px;
 }
 
-/* =========================
+.mobile-menu{
+    display:none;
+}
+
+
+/* =========================================================
    HERO
-========================= */
+========================================================= */
 
 .hero{
-    background:
-        radial-gradient(circle at 10% 20%,rgba(37,99,235,.15),transparent 30%),
-        radial-gradient(circle at 90% 20%,rgba(124,58,237,.15),transparent 30%),
-        linear-gradient(180deg,#fff,#f8fafc);
-    padding:80px 20px 70px;
-}
+    min-height:760px;
+    padding-top:72px;
 
-.hero-inner{
-    max-width:1200px;
-    margin:auto;
-    display:grid;
-    grid-template-columns:1.15fr .85fr;
-    gap:50px;
+    display:flex;
     align-items:center;
+
+    position:relative;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(3,12,25,.94) 0%,
+            rgba(3,12,25,.82) 43%,
+            rgba(3,12,25,.28) 100%
+        ),
+        url("https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=2000&q=85")
+        center/cover no-repeat;
 }
 
-.badge{
+.hero-content{
+    width:min(1180px,calc(100% - 40px));
+    margin:auto;
+    color:white;
+}
+
+.hero-text{
+    max-width:700px;
+}
+
+.hero-badge{
     display:inline-flex;
-    padding:7px 12px;
-    border-radius:30px;
-    background:#eff6ff;
-    color:var(--primary);
+    align-items:center;
+    gap:8px;
+
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+
+    padding:8px 13px;
+    border-radius:50px;
+
+    font-size:12px;
     font-weight:800;
-    font-size:13px;
-    margin-bottom:18px;
+
+    margin-bottom:20px;
+
+    backdrop-filter:blur(8px);
 }
 
 .hero h1{
-    font-size:clamp(38px,6vw,66px);
-    line-height:1.05;
-    letter-spacing:-2px;
-    color:var(--dark);
-    margin-bottom:20px;
+    font-size:clamp(43px,7vw,76px);
+    line-height:.98;
+    letter-spacing:-3px;
+    margin-bottom:24px;
 }
 
 .hero h1 span{
-    color:var(--primary);
+    color:#60a5fa;
 }
 
-.hero p{
+.hero-description{
+    color:#dbeafe;
     font-size:18px;
-    color:var(--muted);
     max-width:650px;
-    margin-bottom:28px;
+    margin-bottom:30px;
 }
 
 .hero-buttons{
@@ -232,126 +334,407 @@ a{
     gap:12px;
 }
 
-.hero-card{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:26px;
-    padding:28px;
-    box-shadow:var(--shadow);
+.hero-stats{
+    margin-top:48px;
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
 }
 
-.hero-card-top{
+.hero-stat{
+    min-width:145px;
+
+    padding:15px 18px;
+
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.16);
+
+    border-radius:15px;
+
+    backdrop-filter:blur(10px);
+}
+
+.hero-stat strong{
+    display:block;
+    font-size:22px;
+}
+
+.hero-stat span{
+    color:#cbd5e1;
+    font-size:12px;
+}
+
+
+/* =========================================================
+   FLOATING TRUST STRIP
+========================================================= */
+
+.trust-strip{
+    background:white;
+    border-bottom:1px solid var(--border);
+}
+
+.trust-inner{
+    min-height:100px;
+
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:25px;
+    gap:20px;
 }
 
-.status{
-    display:inline-flex;
+.trust-item{
+    display:flex;
     align-items:center;
-    gap:6px;
-    color:var(--success);
-    background:#f0fdf4;
-    padding:6px 10px;
-    border-radius:30px;
-    font-size:12px;
-    font-weight:800;
+    gap:11px;
 }
 
-.dot{
-    width:7px;
-    height:7px;
-    border-radius:50%;
-    background:var(--success);
+.trust-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    background:#eff6ff;
+
+    display:grid;
+    place-items:center;
+
+    font-size:19px;
 }
 
-.mini-stat{
-    padding:18px;
-    background:var(--light);
-    border-radius:15px;
-    margin-bottom:12px;
-}
-
-.mini-stat strong{
+.trust-item strong{
     display:block;
     color:var(--dark);
-    font-size:25px;
+    font-size:14px;
 }
 
-/* =========================
-   GENERAL
-========================= */
-
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:0 20px;
-}
-
-.section{
-    padding:75px 0;
-}
-
-.section-title{
-    text-align:center;
-    margin-bottom:42px;
-}
-
-.section-title h2{
-    color:var(--dark);
-    font-size:34px;
-    margin-bottom:8px;
-}
-
-.section-title p{
+.trust-item span{
     color:var(--muted);
+    font-size:12px;
 }
 
-/* =========================
-   FEATURES
-========================= */
 
-.features{
+/* =========================================================
+   CATEGORY CARDS
+========================================================= */
+
+.category-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:18px;
 }
 
-.feature{
+.category-card{
+    position:relative;
+    min-height:250px;
+
+    overflow:hidden;
+    border-radius:var(--radius);
+
+    color:white;
+
+    box-shadow:var(--shadow);
+
+    transition:.3s;
+}
+
+.category-card:hover{
+    transform:translateY(-7px);
+}
+
+.category-card img{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    transition:.5s;
+}
+
+.category-card:hover img{
+    transform:scale(1.08);
+}
+
+.category-overlay{
+    position:absolute;
+    inset:0;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+
+    padding:22px;
+
+    background:
+        linear-gradient(
+            transparent 25%,
+            rgba(2,6,23,.9) 100%
+        );
+}
+
+.category-icon{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.category-card h3{
+    font-size:20px;
+}
+
+.category-card p{
+    color:#dbeafe;
+    font-size:12px;
+}
+
+
+/* =========================================================
+   FEATURED OPPORTUNITIES
+========================================================= */
+
+.featured-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+}
+
+.opportunity-card{
     background:white;
-    padding:25px;
     border:1px solid var(--border);
     border-radius:var(--radius);
-    box-shadow:0 5px 20px rgba(15,23,42,.04);
+    overflow:hidden;
+
+    box-shadow:0 8px 30px rgba(15,23,42,.06);
+
+    transition:.3s;
 }
 
-.feature-icon{
-    width:48px;
-    height:48px;
-    border-radius:14px;
-    display:grid;
-    place-items:center;
-    background:#eff6ff;
-    font-size:23px;
-    margin-bottom:17px;
+.opportunity-card:hover{
+    transform:translateY(-5px);
+    box-shadow:var(--shadow);
 }
 
-.feature h3{
+.opportunity-image{
+    height:200px;
+    position:relative;
+    overflow:hidden;
+}
+
+.opportunity-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.5s;
+}
+
+.opportunity-card:hover .opportunity-image img{
+    transform:scale(1.06);
+}
+
+.opportunity-category{
+    position:absolute;
+    top:15px;
+    left:15px;
+
+    padding:6px 10px;
+    border-radius:8px;
+
+    background:rgba(255,255,255,.94);
+
+    color:var(--primary);
+
+    font-size:11px;
+    font-weight:900;
+}
+
+.opportunity-body{
+    padding:21px;
+}
+
+.opportunity-body h3{
     color:var(--dark);
     margin-bottom:7px;
 }
 
-.feature p{
+.opportunity-body p{
     color:var(--muted);
-    font-size:14px;
+    font-size:13px;
+    margin-bottom:16px;
 }
 
-/* =========================
-   MEMBERSHIP
-========================= */
+.tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:17px;
+}
 
-.packages{
+.tag{
+    padding:5px 9px;
+    background:#f1f5f9;
+    color:var(--muted);
+    border-radius:7px;
+    font-size:10px;
+    font-weight:800;
+}
+
+
+/* =========================================================
+   HOW IT WORKS
+========================================================= */
+
+.how-section{
+    background:white;
+}
+
+.steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+}
+
+.step{
+    position:relative;
+    text-align:center;
+    padding:25px 15px;
+}
+
+.step-number{
+    width:65px;
+    height:65px;
+    margin:0 auto 18px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    color:white;
+    font-size:20px;
+    font-weight:900;
+
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--secondary)
+    );
+
+    box-shadow:0 10px 25px rgba(37,99,235,.22);
+}
+
+.step h3{
+    color:var(--dark);
+    margin-bottom:6px;
+}
+
+.step p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+
+/* =========================================================
+   IMAGE + TEXT SECTION
+========================================================= */
+
+.split-section{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:55px;
+    align-items:center;
+}
+
+.split-image{
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    position:relative;
+}
+
+.split-image img{
+    width:100%;
+    min-height:470px;
+    object-fit:cover;
+}
+
+.image-badge{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    right:20px;
+
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(10px);
+
+    padding:16px;
+    border-radius:15px;
+}
+
+.image-badge strong{
+    display:block;
+    color:var(--dark);
+}
+
+.image-badge span{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.split-content .eyebrow{
+    color:var(--primary);
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1.3px;
+}
+
+.split-content h2{
+    color:var(--dark);
+    font-size:clamp(30px,4vw,45px);
+    line-height:1.1;
+    margin:10px 0 18px;
+}
+
+.split-content>p{
+    color:var(--muted);
+    margin-bottom:22px;
+}
+
+.check-list{
+    list-style:none;
+    margin-bottom:25px;
+}
+
+.check-list li{
+    margin:11px 0;
+    display:flex;
+    align-items:flex-start;
+    gap:9px;
+}
+
+.check{
+    color:var(--success);
+    font-weight:900;
+}
+
+
+/* =========================================================
+   MEMBERSHIP
+========================================================= */
+
+.membership{
+    background:
+        radial-gradient(
+            circle at 10% 20%,
+            rgba(37,99,235,.09),
+            transparent 30%
+        ),
+        #f8fafc;
+}
+
+.pricing{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:22px;
@@ -359,165 +742,190 @@ a{
     margin:auto;
 }
 
-.package{
+.price-card{
     background:white;
     border:1px solid var(--border);
-    border-radius:22px;
-    padding:28px;
-    position:relative;
+    border-radius:24px;
+    padding:30px;
+
     box-shadow:var(--shadow);
+
+    position:relative;
 }
 
-.package.popular{
+.price-card.featured{
     border:2px solid var(--primary);
     transform:translateY(-7px);
 }
 
-.popular-label{
+.popular{
     position:absolute;
     top:-14px;
     left:50%;
     transform:translateX(-50%);
+
     background:var(--primary);
     color:white;
+
     padding:6px 15px;
-    border-radius:30px;
-    font-size:12px;
-    font-weight:800;
+    border-radius:50px;
+
+    font-size:11px;
+    font-weight:900;
 }
 
-.package h3{
+.price-card h3{
     color:var(--dark);
     font-size:24px;
 }
 
-.package-price{
+.price{
     margin:15px 0 20px;
 }
 
-.package-price strong{
-    font-size:35px;
+.price strong{
     color:var(--dark);
+    font-size:35px;
 }
 
-.package-price small{
+.price small{
     color:var(--muted);
 }
 
-.package ul{
+.price-features{
     list-style:none;
     margin-bottom:25px;
 }
 
-.package li{
-    margin:10px 0;
+.price-features li{
+    padding:9px 0;
     color:var(--text);
+    font-size:14px;
 }
 
-.package li::before{
+.price-features li::before{
     content:"✓";
     color:var(--success);
     font-weight:900;
     margin-right:8px;
 }
 
-/* =========================
-   OPPORTUNITIES
-========================= */
 
-.opportunity-controls{
+/* =========================================================
+   DASHBOARD PREVIEW
+========================================================= */
+
+.dashboard-preview{
+    display:grid;
+    grid-template-columns:1fr 1.25fr;
+    gap:25px;
+    align-items:center;
+}
+
+.dashboard-info h2{
+    color:var(--dark);
+    font-size:42px;
+    line-height:1.1;
+    margin:10px 0 16px;
+}
+
+.dashboard-info p{
+    color:var(--muted);
+    margin-bottom:22px;
+}
+
+.dashboard-window{
+    background:#0b1627;
+    border-radius:25px;
+    padding:14px;
+    box-shadow:0 25px 60px rgba(2,6,23,.25);
+}
+
+.window-top{
     display:flex;
+    gap:6px;
+    padding:6px 4px 12px;
+}
+
+.window-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#64748b;
+}
+
+.window-content{
+    background:#f8fafc;
+    border-radius:17px;
+    padding:18px;
+}
+
+.fake-dashboard{
+    display:grid;
+    grid-template-columns:75px 1fr;
+    gap:15px;
+}
+
+.fake-sidebar{
+    background:#0f1c2e;
+    border-radius:12px;
+    min-height:300px;
+}
+
+.fake-main{
+    display:grid;
     gap:12px;
-    margin-bottom:25px;
-    flex-wrap:wrap;
 }
 
-.search{
-    flex:1;
-    min-width:220px;
-    padding:13px 15px;
-    border:1px solid var(--border);
-    border-radius:12px;
+.fake-top{
+    height:65px;
     background:white;
-    outline:none;
-}
-
-.search:focus{
-    border-color:var(--primary);
-}
-
-.select{
-    padding:13px 15px;
-    border:1px solid var(--border);
     border-radius:12px;
-    background:white;
-    color:var(--text);
-    outline:none;
 }
 
-.opportunities{
+.fake-stats{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:18px;
+    gap:10px;
 }
 
-.opportunity{
+.fake-stat{
+    height:80px;
     background:white;
-    border:1px solid var(--border);
-    border-radius:18px;
-    padding:22px;
-    box-shadow:0 5px 18px rgba(15,23,42,.04);
+    border-radius:12px;
 }
 
-.opp-icon{
-    width:50px;
-    height:50px;
-    display:grid;
-    place-items:center;
-    background:#f1f5f9;
-    border-radius:14px;
-    font-size:24px;
-    margin-bottom:15px;
+.fake-chart{
+    height:135px;
+    background:white;
+    border-radius:12px;
 }
 
-.opportunity h3{
-    color:var(--dark);
-    margin-bottom:6px;
+.fake-table{
+    height:70px;
+    background:white;
+    border-radius:12px;
 }
 
-.opportunity p{
-    color:var(--muted);
-    font-size:14px;
-    margin-bottom:15px;
-}
 
-.tags{
-    display:flex;
-    flex-wrap:wrap;
-    gap:7px;
-    margin-bottom:18px;
-}
-
-.tag{
-    padding:5px 9px;
-    background:#f1f5f9;
-    border-radius:8px;
-    font-size:11px;
-    font-weight:700;
-    color:var(--muted);
-}
-
-/* =========================
-   SAFETY
-========================= */
+/* =========================================================
+   SAFETY NOTICE
+========================================================= */
 
 .notice{
+    max-width:950px;
+    margin:35px auto 0;
+
+    padding:20px;
+
     background:#fff7ed;
     border:1px solid #fed7aa;
-    border-radius:18px;
-    padding:22px;
+
+    border-radius:17px;
+
     color:#7c2d12;
-    margin-top:30px;
+
+    font-size:13px;
 }
 
 .notice strong{
@@ -525,20 +933,119 @@ a{
     margin-bottom:5px;
 }
 
-/* =========================
-   AUTH MODAL
-========================= */
+
+/* =========================================================
+   CTA
+========================================================= */
+
+.cta{
+    padding:75px 0;
+}
+
+.cta-box{
+    position:relative;
+    overflow:hidden;
+
+    padding:65px 40px;
+
+    text-align:center;
+
+    border-radius:30px;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(37,99,235,.94),
+            rgba(124,58,237,.94)
+        ),
+        url("https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1600&q=80")
+        center/cover;
+}
+
+.cta-box h2{
+    font-size:clamp(30px,5vw,48px);
+    line-height:1.1;
+    margin-bottom:13px;
+}
+
+.cta-box p{
+    max-width:650px;
+    margin:0 auto 25px;
+    color:#e0e7ff;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+    background:var(--dark);
+    color:#94a3b8;
+    padding:60px 0 25px;
+}
+
+.footer-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1fr;
+    gap:40px;
+}
+
+.footer-logo{
+    color:white;
+    font-size:20px;
+    font-weight:900;
+    margin-bottom:12px;
+}
+
+.footer-column h4{
+    color:white;
+    margin-bottom:13px;
+}
+
+.footer-column a{
+    display:block;
+    font-size:13px;
+    margin:8px 0;
+}
+
+.footer-column a:hover{
+    color:white;
+}
+
+.footer-bottom{
+    border-top:1px solid #243244;
+    margin-top:40px;
+    padding-top:20px;
+
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+
+    font-size:12px;
+}
+
+
+/* =========================================================
+   MODALS
+========================================================= */
 
 .modal{
     position:fixed;
     inset:0;
-    z-index:3000;
-    background:rgba(15,23,42,.65);
-    backdrop-filter:blur(5px);
+
+    z-index:5000;
+
     display:none;
     align-items:center;
     justify-content:center;
+
     padding:20px;
+
+    background:rgba(2,6,23,.72);
+    backdrop-filter:blur(7px);
 }
 
 .modal.show{
@@ -546,25 +1053,35 @@ a{
 }
 
 .modal-box{
-    background:white;
-    width:min(460px,100%);
-    border-radius:22px;
-    padding:28px;
-    position:relative;
+    width:min(470px,100%);
     max-height:90vh;
     overflow:auto;
+
+    background:white;
+    border-radius:23px;
+
+    padding:30px;
+
+    position:relative;
+
+    box-shadow:0 30px 80px rgba(0,0,0,.25);
 }
 
 .close{
     position:absolute;
-    right:18px;
     top:15px;
-    border:0;
-    background:#f1f5f9;
-    width:35px;
-    height:35px;
+    right:15px;
+
+    width:36px;
+    height:36px;
+
+    border:none;
     border-radius:50%;
-    font-size:18px;
+
+    background:#f1f5f9;
+    color:var(--dark);
+
+    font-size:20px;
 }
 
 .modal h2{
@@ -574,8 +1091,8 @@ a{
 
 .modal-sub{
     color:var(--muted);
-    margin-bottom:20px;
-    font-size:14px;
+    font-size:13px;
+    margin-bottom:22px;
 }
 
 .form-group{
@@ -584,18 +1101,20 @@ a{
 
 .form-group label{
     display:block;
-    margin-bottom:6px;
     color:var(--dark);
-    font-size:13px;
-    font-weight:700;
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:6px;
 }
 
 .form-group input,
 .form-group select{
     width:100%;
     padding:12px 13px;
+
     border:1px solid var(--border);
     border-radius:11px;
+
     outline:none;
 }
 
@@ -604,193 +1123,44 @@ a{
     border-color:var(--primary);
 }
 
-.full{
-    width:100%;
-}
-
-.switch-auth{
+.switch{
     text-align:center;
-    margin-top:18px;
     color:var(--muted);
-    font-size:14px;
+    font-size:13px;
+    margin-top:17px;
 }
 
-.switch-auth button{
-    border:0;
+.switch button{
+    border:none;
     background:none;
     color:var(--primary);
-    font-weight:800;
-}
-
-/* =========================
-   DASHBOARD
-========================= */
-
-.dashboard{
-    display:none;
-    padding:35px 0 80px;
-}
-
-.dashboard.show{
-    display:block;
-}
-
-.dashboard-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-    margin-bottom:25px;
-}
-
-.dashboard-header h2{
-    color:var(--dark);
-}
-
-.dashboard-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-}
-
-.dash-card{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:17px;
-    padding:20px;
-}
-
-.dash-card span{
-    color:var(--muted);
-    font-size:13px;
-}
-
-.dash-card strong{
-    display:block;
-    color:var(--dark);
-    font-size:26px;
-    margin-top:5px;
-}
-
-.dash-layout{
-    display:grid;
-    grid-template-columns:1.4fr .6fr;
-    gap:20px;
-    margin-top:20px;
-}
-
-.panel{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:18px;
-    padding:22px;
-}
-
-.panel h3{
-    color:var(--dark);
-    margin-bottom:18px;
-}
-
-.activity{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    padding:13px 0;
-    border-bottom:1px solid var(--border);
-}
-
-.activity:last-child{
-    border-bottom:0;
-}
-
-.activity small{
-    color:var(--muted);
-}
-
-.profile-row{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    margin-bottom:20px;
-}
-
-.avatar{
-    width:55px;
-    height:55px;
-    display:grid;
-    place-items:center;
-    border-radius:50%;
-    background:linear-gradient(135deg,var(--primary),var(--secondary));
-    color:white;
     font-weight:900;
-    font-size:20px;
 }
 
-/* =========================
-   FOOTER
-========================= */
 
-footer{
-    background:var(--dark);
-    color:#cbd5e1;
-    padding:45px 20px 25px;
-}
-
-.footer-inner{
-    max-width:1200px;
-    margin:auto;
-    display:grid;
-    grid-template-columns:2fr 1fr 1fr;
-    gap:40px;
-}
-
-footer h3{
-    color:white;
-    margin-bottom:10px;
-}
-
-footer p{
-    font-size:14px;
-    color:#94a3b8;
-}
-
-.footer-links{
-    display:flex;
-    flex-direction:column;
-    gap:7px;
-}
-
-.footer-links a{
-    font-size:14px;
-}
-
-.footer-bottom{
-    max-width:1200px;
-    margin:30px auto 0;
-    padding-top:20px;
-    border-top:1px solid #334155;
-    font-size:13px;
-    color:#94a3b8;
-}
-
-/* =========================
+/* =========================================================
    TOAST
-========================= */
+========================================================= */
 
 .toast{
     position:fixed;
-    bottom:25px;
-    right:25px;
-    z-index:5000;
+    right:20px;
+    bottom:20px;
+    z-index:6000;
+
     background:var(--dark);
     color:white;
-    padding:14px 18px;
+
+    padding:14px 17px;
+
     border-radius:12px;
+
     box-shadow:var(--shadow);
+
     transform:translateY(100px);
     opacity:0;
+
     transition:.3s;
-    max-width:320px;
 }
 
 .toast.show{
@@ -798,53 +1168,59 @@ footer p{
     opacity:1;
 }
 
-/* =========================
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-bottom{
+    display:none;
+}
+
+
+/* =========================================================
    RESPONSIVE
-========================= */
+========================================================= */
 
-@media(max-width:900px){
+@media(max-width:1000px){
 
-    .hero-inner{
+    .category-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .featured-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .steps{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .dashboard-preview{
         grid-template-columns:1fr;
     }
 
-    .features{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .opportunities{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .dashboard-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .dash-layout{
-        grid-template-columns:1fr;
-    }
-
-    .footer-inner{
-        grid-template-columns:1fr 1fr;
+    .footer-grid{
+        grid-template-columns:2fr 1fr 1fr;
     }
 }
 
-@media(max-width:680px){
+
+@media(max-width:750px){
 
     .nav-links,
     .nav-actions{
         display:none;
     }
 
-    .menu-btn{
+    .menu-button{
         display:block;
     }
 
     .mobile-menu{
-        display:none;
-        padding:10px 20px 20px;
         background:white;
         border-top:1px solid var(--border);
+        padding:10px 20px 18px;
     }
 
     .mobile-menu.show{
@@ -853,170 +1229,355 @@ footer p{
 
     .mobile-menu a,
     .mobile-menu button{
-        display:block;
         width:100%;
-        padding:12px;
+        display:block;
+
         text-align:left;
-        border:0;
+
+        border:none;
         background:white;
+
+        padding:11px 0;
+
         color:var(--text);
         font-weight:700;
     }
 
     .hero{
-        padding-top:55px;
+        min-height:730px;
     }
 
-    .features,
-    .packages,
-    .opportunities{
+    .hero h1{
+        letter-spacing:-2px;
+    }
+
+    .trust-inner{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        padding:22px 0;
+    }
+
+    .split-section{
+        grid-template-columns:1fr;
+        gap:30px;
+    }
+
+    .split-image img{
+        min-height:350px;
+    }
+
+    .pricing{
         grid-template-columns:1fr;
     }
 
-    .package.popular{
+    .price-card.featured{
         transform:none;
     }
 
-    .dashboard-grid{
+    .footer-grid{
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+
+@media(max-width:560px){
+
+    .container{
+        width:min(100% - 28px,1180px);
+    }
+
+    .section{
+        padding:65px 0;
+    }
+
+    .hero-content{
+        width:min(100% - 28px,1180px);
+    }
+
+    .hero{
+        background-position:58% center;
+    }
+
+    .hero-description{
+        font-size:15px;
+    }
+
+    .hero-stats{
+        display:grid;
         grid-template-columns:1fr 1fr;
     }
 
-    .footer-inner{
+    .hero-stat{
+        min-width:0;
+    }
+
+    .category-grid,
+    .featured-grid,
+    .steps{
         grid-template-columns:1fr;
     }
 
-    .dashboard-header{
+    .category-card{
+        min-height:230px;
+    }
+
+    .trust-inner{
+        grid-template-columns:1fr;
+    }
+
+    .dashboard-info h2{
+        font-size:33px;
+    }
+
+    .fake-dashboard{
+        grid-template-columns:1fr;
+    }
+
+    .fake-sidebar{
+        display:none;
+    }
+
+    .fake-stats{
+        grid-template-columns:1fr 1fr 1fr;
+    }
+
+    .footer-grid{
+        grid-template-columns:1fr;
+    }
+
+    .footer-bottom{
         flex-direction:column;
-        align-items:flex-start;
+    }
+
+    .mobile-bottom{
+        position:fixed;
+        display:flex;
+
+        left:10px;
+        right:10px;
+        bottom:10px;
+
+        z-index:2000;
+
+        background:rgba(255,255,255,.96);
+        backdrop-filter:blur(15px);
+
+        border:1px solid var(--border);
+
+        border-radius:18px;
+
+        box-shadow:0 15px 40px rgba(15,23,42,.16);
+
+        padding:8px;
+
+        justify-content:space-around;
+    }
+
+    .mobile-bottom a{
+        text-align:center;
+        color:var(--muted);
+        font-size:10px;
+        font-weight:800;
+        padding:5px 9px;
+    }
+
+    .mobile-bottom span{
+        display:block;
+        font-size:18px;
+        margin-bottom:2px;
     }
 }
+
 </style>
 </head>
 
+
 <body>
 
-<!-- =========================
-HEADER
-========================= -->
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <header class="header">
 
 <nav class="nav">
 
 <a href="#home" class="logo">
-    <div class="logo-icon">OS</div>
-    <span>Online Sphere</span>
+
+<div class="logo-symbol">
+OS
+</div>
+
+<span>Online Sphere</span>
+
 </a>
 
+
 <div class="nav-links">
-    <a href="#home">Home</a>
-    <a href="#opportunities">Opportunities</a>
-    <a href="#membership">Membership</a>
-    <a href="#about">About</a>
+
+<a href="#home">Home</a>
+<a href="#opportunities">Opportunities</a>
+<a href="#how">How It Works</a>
+<a href="#membership">Membership</a>
+<a href="#about">About</a>
+
 </div>
+
 
 <div class="nav-actions">
-    <button class="btn btn-outline" onclick="openAuth('login')">
-        Login
-    </button>
 
-    <button class="btn btn-primary" onclick="openAuth('register')">
-        Join Now
-    </button>
+<button
+class="btn btn-outline"
+onclick="openModal('login')">
+
+Login
+
+</button>
+
+<button
+class="btn btn-primary"
+onclick="openModal('register')">
+
+Join Now
+
+</button>
+
 </div>
 
-<button class="menu-btn" onclick="toggleMobileMenu()">☰</button>
+
+<button
+class="menu-button"
+onclick="toggleMenu()">
+
+☰
+
+</button>
 
 </nav>
 
+
 <div class="mobile-menu" id="mobileMenu">
-    <a href="#home" onclick="toggleMobileMenu()">Home</a>
-    <a href="#opportunities" onclick="toggleMobileMenu()">Opportunities</a>
-    <a href="#membership" onclick="toggleMobileMenu()">Membership</a>
-    <a href="#about" onclick="toggleMobileMenu()">About</a>
 
-    <button onclick="openAuth('login');toggleMobileMenu()">
-        Login
-    </button>
+<a href="#home" onclick="toggleMenu()">Home</a>
 
-    <button onclick="openAuth('register');toggleMobileMenu()">
-        Create Account
-    </button>
+<a href="#opportunities" onclick="toggleMenu()">
+Opportunities
+</a>
+
+<a href="#how" onclick="toggleMenu()">
+How It Works
+</a>
+
+<a href="#membership" onclick="toggleMenu()">
+Membership
+</a>
+
+<a href="#about" onclick="toggleMenu()">
+About
+</a>
+
+<button onclick="openModal('login');toggleMenu()">
+Login
+</button>
+
+<button onclick="openModal('register');toggleMenu()">
+Create Account
+</button>
+
 </div>
 
 </header>
 
 
-<!-- =========================
-HERO
-========================= -->
 
-<main id="home">
+<!-- =====================================================
+     HERO
+===================================================== -->
 
-<section class="hero">
+<section class="hero" id="home">
 
-<div class="hero-inner">
+<div class="hero-content">
 
-<div>
+<div class="hero-text">
 
-<span class="badge">
-🌐 Digital Opportunities Platform
-</span>
+<div class="hero-badge">
+🌐 Online Work & Digital Opportunities
+</div>
+
 
 <h1>
-Explore the world of
-<span>online work.</span>
+Discover.
+Learn.
+<span>Work Online.</span>
 </h1>
 
-<p>
-Online Sphere helps members discover digital work opportunities,
-freelancing platforms, remote tasks and other legitimate ways to
-develop online income skills.
+
+<p class="hero-description">
+
+Explore digital work opportunities, develop useful
+skills and discover platforms where you can build
+your online career.
+
 </p>
+
 
 <div class="hero-buttons">
 
-<button class="btn btn-primary"
-onclick="openAuth('register')">
-Create Free Account
+<button
+class="btn btn-primary"
+onclick="openModal('register')">
+
+🚀 Join Online Sphere
+
 </button>
 
-<a href="#opportunities"
-class="btn btn-outline">
-Explore Opportunities
+
+<a
+href="#opportunities"
+class="btn btn-white">
+
+💼 Explore Opportunities
+
 </a>
 
 </div>
 
-</div>
 
+<div class="hero-stats">
 
-<div class="hero-card">
+<div class="hero-stat">
 
-<div class="hero-card-top">
+<strong>25+</strong>
 
-<strong>Member Overview</strong>
-
-<span class="status">
-<span class="dot"></span>
-Platform Online
+<span>
+Opportunity listings
 </span>
 
 </div>
 
-<div class="mini-stat">
-<span>Available opportunities</span>
-<strong>25+</strong>
+
+<div class="hero-stat">
+
+<strong>8+</strong>
+
+<span>
+Digital categories
+</span>
+
 </div>
 
-<div class="mini-stat">
-<span>Opportunity categories</span>
-<strong>8</strong>
+
+<div class="hero-stat">
+
+<strong>24/7</strong>
+
+<span>
+Access to resources
+</span>
+
 </div>
 
-<div class="mini-stat">
-<span>Learning resources</span>
-<strong>Growing</strong>
 </div>
 
 </div>
@@ -1026,77 +1587,579 @@ Platform Online
 </section>
 
 
-<!-- =========================
-FEATURES
-========================= -->
+
+<!-- =====================================================
+     TRUST STRIP
+===================================================== -->
+
+<section class="trust-strip">
+
+<div class="container trust-inner">
+
+
+<div class="trust-item">
+
+<div class="trust-icon">
+💻
+</div>
+
+<div>
+
+<strong>Digital Opportunities</strong>
+
+<span>
+Explore different work categories
+</span>
+
+</div>
+
+</div>
+
+
+<div class="trust-item">
+
+<div class="trust-icon">
+🎯
+</div>
+
+<div>
+
+<strong>Skill Development</strong>
+
+<span>
+Learn and improve useful skills
+</span>
+
+</div>
+
+</div>
+
+
+<div class="trust-item">
+
+<div class="trust-icon">
+📱
+</div>
+
+<div>
+
+<strong>Mobile Friendly</strong>
+
+<span>
+Designed for your phone
+</span>
+
+</div>
+
+</div>
+
+
+<div class="trust-item">
+
+<div class="trust-icon">
+🔐
+</div>
+
+<div>
+
+<strong>Member Area</strong>
+
+<span>
+Manage your profile
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     CATEGORIES
+===================================================== -->
+
+<section class="section" id="opportunities">
+
+<div class="container">
+
+<div class="section-heading">
+
+<div class="eyebrow">
+Explore
+</div>
+
+<h2>
+Find Your Online Work Category
+</h2>
+
+<p>
+Discover different types of digital work and choose
+areas that match your skills and interests.
+</p>
+
+</div>
+
+
+<div class="category-grid">
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=80"
+alt="Freelancing">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+💼
+</div>
+
+<h3>Freelancing</h3>
+
+<p>
+Offer services to clients online.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=800&q=80"
+alt="Data entry">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+⌨️
+</div>
+
+<h3>Data Entry</h3>
+
+<p>
+Explore digital data tasks.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80"
+alt="Writing">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+✍️
+</div>
+
+<h3>Writing</h3>
+
+<p>
+Explore writing and editing work.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80"
+alt="Graphic design">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+🎨
+</div>
+
+<h3>Graphic Design</h3>
+
+<p>
+Create digital visual content.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=800&q=80"
+alt="Video editing">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+🎬
+</div>
+
+<h3>Video Editing</h3>
+
+<p>
+Create videos for digital platforms.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=80"
+alt="Marketing">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+📱
+</div>
+
+<h3>Social Media</h3>
+
+<p>
+Explore content and marketing work.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80"
+alt="Gaming">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+🎮
+</div>
+
+<h3>Gaming</h3>
+
+<p>
+Explore gaming-related opportunities.
+</p>
+
+</div>
+
+</div>
+
+
+<div class="category-card">
+
+<img
+src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80"
+alt="Research">
+
+<div class="category-overlay">
+
+<div class="category-icon">
+🔎
+</div>
+
+<h3>Research</h3>
+
+<p>
+Find information and research tasks.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FEATURED OPPORTUNITIES
+===================================================== -->
 
 <section class="section">
 
 <div class="container">
 
-<div class="section-title">
+<div class="section-heading">
 
-<h2>Everything in one place</h2>
-
-<p>
-Discover opportunities and organize your online-work journey.
-</p>
-
+<div class="eyebrow">
+Featured
 </div>
 
-<div class="features">
-
-<div class="feature">
-
-<div class="feature-icon">💼</div>
-
-<h3>Work Opportunities</h3>
+<h2>
+Popular Opportunities
+</h2>
 
 <p>
-Browse categories such as transcription, data entry,
-freelancing and digital services.
+Start by exploring areas that are commonly available
+across online-work platforms.
 </p>
 
 </div>
 
 
-<div class="feature">
+<div class="featured-grid">
 
-<div class="feature-icon">🎯</div>
 
-<h3>Skill Development</h3>
+<div class="opportunity-card">
+
+<div class="opportunity-image">
+
+<img
+src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80"
+alt="Transcription">
+
+<span class="opportunity-category">
+Transcription
+</span>
+
+</div>
+
+<div class="opportunity-body">
+
+<h3>
+Transcription Work
+</h3>
 
 <p>
-Find resources that can help you improve your digital
-and freelancing skills.
+Convert audio and video recordings into written text
+according to client requirements.
+</p>
+
+<div class="tags">
+<span class="tag">Typing</span>
+<span class="tag">Audio</span>
+<span class="tag">Remote</span>
+</div>
+
+<button
+class="btn btn-primary btn-full"
+onclick="viewOpportunity('Transcription')">
+
+View Opportunity
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<div class="opportunity-card">
+
+<div class="opportunity-image">
+
+<img
+src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80"
+alt="Freelancing">
+
+<span class="opportunity-category">
+Freelancing
+</span>
+
+</div>
+
+<div class="opportunity-body">
+
+<h3>
+Freelance Digital Services
+</h3>
+
+<p>
+Offer skills such as design, editing, writing,
+web development or virtual assistance.
+</p>
+
+<div class="tags">
+<span class="tag">Clients</span>
+<span class="tag">Digital</span>
+<span class="tag">Remote</span>
+</div>
+
+<button
+class="btn btn-primary btn-full"
+onclick="viewOpportunity('Freelancing')">
+
+View Opportunity
+
+</button>
+
+</div>
+
+</div>
+
+
+
+<div class="opportunity-card">
+
+<div class="opportunity-image">
+
+<img
+src="https://images.unsplash.com/photo-1456324504439-367cee3b3c32?auto=format&fit=crop&w=900&q=80"
+alt="Writing">
+
+<span class="opportunity-category">
+Writing
+</span>
+
+</div>
+
+<div class="opportunity-body">
+
+<h3>
+Writing & Editing
+</h3>
+
+<p>
+Explore content writing, editing and research-related
+digital opportunities.
+</p>
+
+<div class="tags">
+<span class="tag">Writing</span>
+<span class="tag">Research</span>
+<span class="tag">Editing</span>
+</div>
+
+<button
+class="btn btn-primary btn-full"
+onclick="viewOpportunity('Writing')">
+
+View Opportunity
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     HOW IT WORKS
+===================================================== -->
+
+<section class="section how-section" id="how">
+
+<div class="container">
+
+<div class="section-heading">
+
+<div class="eyebrow">
+Simple Process
+</div>
+
+<h2>
+How Online Sphere Works
+</h2>
+
+<p>
+A simple way to discover opportunities and organize
+your online-work journey.
 </p>
 
 </div>
 
 
-<div class="feature">
+<div class="steps">
 
-<div class="feature-icon">📊</div>
 
-<h3>Member Dashboard</h3>
+<div class="step">
+
+<div class="step-number">
+01
+</div>
+
+<h3>
+Create Account
+</h3>
 
 <p>
-Keep your profile, saved opportunities and activity
-organized in one place.
+Set up your Online Sphere member profile.
 </p>
 
 </div>
 
 
-<div class="feature">
+<div class="step">
 
-<div class="feature-icon">🔐</div>
+<div class="step-number">
+02
+</div>
 
-<h3>Member Area</h3>
+<h3>
+Explore
+</h3>
 
 <p>
-Access your account through a dedicated member portal
-designed for mobile devices.
+Browse different digital work categories.
+</p>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">
+03
+</div>
+
+<h3>
+Develop Skills
+</h3>
+
+<p>
+Improve the skills required by opportunities.
+</p>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">
+04
+</div>
+
+<h3>
+Apply & Work
+</h3>
+
+<p>
+Apply through appropriate platforms or clients.
 </p>
 
 </div>
@@ -1108,100 +2171,282 @@ designed for mobile devices.
 </section>
 
 
-<!-- =========================
-MEMBERSHIP
-========================= -->
 
-<section class="section" id="membership">
+<!-- =====================================================
+     ABOUT / IMAGE SECTION
+===================================================== -->
+
+<section class="section" id="about">
 
 <div class="container">
 
-<div class="section-title">
+<div class="split-section">
 
-<h2>Membership Packages</h2>
+
+<div class="split-image">
+
+<img
+src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1100&q=85"
+alt="Professional digital workspace">
+
+<div class="image-badge">
+
+<strong>
+Build Your Digital Future
+</strong>
+
+<span>
+Explore. Learn. Practice. Grow.
+</span>
+
+</div>
+
+</div>
+
+
+<div class="split-content">
+
+<div class="eyebrow">
+Why Online Sphere
+</div>
+
+<h2>
+One place to discover your next digital opportunity.
+</h2>
 
 <p>
-Choose a package according to the features and resources
+The internet offers many different ways to work remotely.
+Online Sphere helps organize these possibilities so members
+can explore them more easily.
+</p>
+
+
+<ul class="check-list">
+
+<li>
+<span class="check">✓</span>
+Explore multiple online-work categories.
+</li>
+
+<li>
+<span class="check">✓</span>
+Discover skills needed for different opportunities.
+</li>
+
+<li>
+<span class="check">✓</span>
+Keep interesting opportunities organized.
+</li>
+
+<li>
+<span class="check">✓</span>
+Access the platform from your mobile device.
+</li>
+
+</ul>
+
+
+<button
+class="btn btn-primary"
+onclick="openModal('register')">
+
+Create Your Account
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MEMBERSHIP
+===================================================== -->
+
+<section class="section membership" id="membership">
+
+<div class="container">
+
+<div class="section-heading">
+
+<div class="eyebrow">
+Membership
+</div>
+
+<h2>
+Choose Your Membership
+</h2>
+
+<p>
+Select the package that fits the features and resources
 you want to access.
 </p>
 
 </div>
 
 
-<div class="packages">
+<div class="pricing">
 
 
-<div class="package">
+<div class="price-card">
 
-<h3>Bronze</h3>
+<h3>
+Bronze
+</h3>
 
-<div class="package-price">
-<strong>KSh 1,000</strong>
-<small> activation</small>
+<div class="price">
+
+<strong>
+KSh 1,000
+</strong>
+
+<small>
+activation
+</small>
+
 </div>
 
-<ul>
-<li>Member dashboard</li>
-<li>Opportunity directory</li>
-<li>Basic resources</li>
-<li>Member support</li>
+
+<ul class="price-features">
+
+<li>
+Member dashboard
+</li>
+
+<li>
+Opportunity directory
+</li>
+
+<li>
+Basic resources
+</li>
+
+<li>
+Member support
+</li>
+
 </ul>
 
-<button class="btn btn-outline full"
-onclick="selectPackage('Bronze',1000)">
+
+<button
+class="btn btn-outline btn-full"
+onclick="choosePackage('Bronze','1,000')">
+
 Choose Bronze
+
 </button>
 
 </div>
 
 
-<div class="package popular">
 
-<span class="popular-label">
-POPULAR
-</span>
+<div class="price-card featured">
 
-<h3>Silver</h3>
-
-<div class="package-price">
-<strong>KSh 1,750</strong>
-<small> activation</small>
+<div class="popular">
+MOST POPULAR
 </div>
 
-<ul>
-<li>Everything in Bronze</li>
-<li>Expanded resources</li>
-<li>Priority opportunity updates</li>
-<li>Additional member tools</li>
+<h3>
+Silver
+</h3>
+
+<div class="price">
+
+<strong>
+KSh 1,750
+</strong>
+
+<small>
+activation
+</small>
+
+</div>
+
+
+<ul class="price-features">
+
+<li>
+Everything in Bronze
+</li>
+
+<li>
+Expanded resources
+</li>
+
+<li>
+Priority updates
+</li>
+
+<li>
+Additional tools
+</li>
+
 </ul>
 
-<button class="btn btn-primary full"
-onclick="selectPackage('Silver',1750)">
+
+<button
+class="btn btn-primary btn-full"
+onclick="choosePackage('Silver','1,750')">
+
 Choose Silver
+
 </button>
 
 </div>
 
 
-<div class="package">
 
-<h3>Gold</h3>
+<div class="price-card">
 
-<div class="package-price">
-<strong>KSh 2,500</strong>
-<small> activation</small>
+<h3>
+Gold
+</h3>
+
+<div class="price">
+
+<strong>
+KSh 2,500
+</strong>
+
+<small>
+activation
+</small>
+
 </div>
 
-<ul>
-<li>Everything in Silver</li>
-<li>Premium resources</li>
-<li>Priority support</li>
-<li>Advanced member tools</li>
+
+<ul class="price-features">
+
+<li>
+Everything in Silver
+</li>
+
+<li>
+Premium resources
+</li>
+
+<li>
+Priority support
+</li>
+
+<li>
+Advanced tools
+</li>
+
 </ul>
 
-<button class="btn btn-outline full"
-onclick="selectPackage('Gold',2500)">
+
+<button
+class="btn btn-outline btn-full"
+onclick="choosePackage('Gold','2,500')">
+
 Choose Gold
+
 </button>
 
 </div>
@@ -1211,72 +2456,15 @@ Choose Gold
 
 <div class="notice">
 
-<strong>⚠ Important information</strong>
+<strong>
+⚠ Important earning information
+</strong>
 
-Membership does not guarantee employment, tasks or earnings.
-Actual income depends on the opportunity, platform, skills,
-time, eligibility and work completed. Never pay anyone claiming
-they can guarantee you a specific income.
-
-</div>
-
-</div>
-
-</section>
-
-
-<!-- =========================
-OPPORTUNITIES
-========================= -->
-
-<section class="section" id="opportunities">
-
-<div class="container">
-
-<div class="section-title">
-
-<h2>Online Work Opportunities</h2>
-
-<p>
-Explore different categories of digital work.
-</p>
-
-</div>
-
-
-<div class="opportunity-controls">
-
-<input
-type="search"
-class="search"
-id="searchInput"
-placeholder="Search opportunities..."
-oninput="filterOpportunities()"
->
-
-<select
-class="select"
-id="categoryFilter"
-onchange="filterOpportunities()">
-
-<option value="all">All categories</option>
-<option value="Transcription">Transcription</option>
-<option value="Data Entry">Data Entry</option>
-<option value="Freelancing">Freelancing</option>
-<option value="Writing">Writing</option>
-<option value="Design">Design</option>
-<option value="Gaming">Gaming</option>
-<option value="Research">Research</option>
-<option value="Marketing">Marketing</option>
-
-</select>
-
-</div>
-
-
-<div class="opportunities" id="opportunityList">
-
-<!-- JS INSERTS OPPORTUNITIES -->
+Membership does not guarantee employment, tasks or income.
+Actual earnings, where applicable, depend on the specific
+opportunity, platform, skills, eligibility, client demand
+and work completed. Be cautious of anyone promising
+guaranteed earnings.
 
 </div>
 
@@ -1285,140 +2473,88 @@ onchange="filterOpportunities()">
 </section>
 
 
-<!-- =========================
-DASHBOARD
-========================= -->
 
-<section class="dashboard" id="dashboard">
+<!-- =====================================================
+     DASHBOARD PREVIEW
+===================================================== -->
+
+<section class="section">
 
 <div class="container">
 
-<div class="dashboard-header">
+<div class="dashboard-preview">
 
-<div>
 
-<h2 id="welcomeText">
-Welcome back
+<div class="dashboard-info">
+
+<div class="section-heading"
+style="text-align:left;margin:0">
+
+<div class="eyebrow">
+Member Dashboard
+</div>
+
+<h2>
+Manage your online-work journey.
 </h2>
 
-<p style="color:var(--muted)">
-Your Online Sphere member dashboard
+<p>
+Your future dashboard will bring your profile,
+saved opportunities, applications, membership information
+and activity together.
 </p>
 
-</div>
-
-<button class="btn btn-danger"
-onclick="logout()">
-Logout
-</button>
-
-</div>
-
-
-<div class="dashboard-grid">
-
-<div class="dash-card">
-
-<span>Membership</span>
-
-<strong id="memberPackage">
-Not activated
-</strong>
-
-</div>
-
-
-<div class="dash-card">
-
-<span>Opportunities saved</span>
-
-<strong id="savedCount">
-0
-</strong>
-
-</div>
-
-
-<div class="dash-card">
-
-<span>Applications</span>
-
-<strong id="applicationCount">
-0
-</strong>
-
-</div>
-
-
-<div class="dash-card">
-
-<span>Account status</span>
-
-<strong style="color:var(--success)">
-Active
-</strong>
-
-</div>
-
-</div>
-
-
-<div class="dash-layout">
-
-<div class="panel">
-
-<h3>Recent Activity</h3>
-
-<div id="activityList">
-
-<div class="activity">
-
-<div>
-<strong>Account created</strong>
-<br>
-<small>Your member profile is ready.</small>
-</div>
-
-<span>✓</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="panel">
-
-<h3>My Profile</h3>
-
-<div class="profile-row">
-
-<div class="avatar" id="avatar">
-OS
-</div>
-
-<div>
-
-<strong id="profileName">
-Member
-</strong>
-
-<br>
-
-<small id="profileEmail">
-member@example.com
-</small>
-
-</div>
-
-</div>
-
 <button
-class="btn btn-outline full"
-onclick="showToast('Profile editor will be available in the next version.')">
-Edit Profile
+class="btn btn-primary"
+onclick="openModal('login')">
+
+Open Member Area
+
 </button>
+
+</div>
+
+</div>
+
+
+<div class="dashboard-window">
+
+<div class="window-top">
+
+<div class="window-dot"></div>
+<div class="window-dot"></div>
+<div class="window-dot"></div>
+
+</div>
+
+
+<div class="window-content">
+
+<div class="fake-dashboard">
+
+<div class="fake-sidebar"></div>
+
+<div class="fake-main">
+
+<div class="fake-top"></div>
+
+<div class="fake-stats">
+
+<div class="fake-stat"></div>
+<div class="fake-stat"></div>
+<div class="fake-stat"></div>
+
+</div>
+
+<div class="fake-chart"></div>
+
+<div class="fake-table"></div>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
@@ -1429,58 +2565,33 @@ Edit Profile
 </section>
 
 
-<!-- =========================
-ABOUT
-========================= -->
 
-<section class="section" id="about">
+<!-- =====================================================
+     CTA
+===================================================== -->
+
+<section class="cta">
 
 <div class="container">
 
-<div class="section-title">
+<div class="cta-box">
 
-<h2>About Online Sphere</h2>
-
-<p>
-A platform for discovering digital opportunities.
-</p>
-
-</div>
-
-<div style="
-max-width:850px;
-margin:auto;
-background:white;
-padding:30px;
-border-radius:20px;
-border:1px solid var(--border);
-">
-
-<p style="margin-bottom:15px">
-
-Online Sphere is designed to bring different types of
-online-work opportunities into one organized environment.
-
-</p>
-
-<p style="margin-bottom:15px">
-
-Members can explore categories such as transcription,
-data entry, freelancing, academic and general writing,
-research, gaming-related opportunities, digital design
-and social-media work.
-
-</p>
+<h2>
+Ready to explore online opportunities?
+</h2>
 
 <p>
-
-Online Sphere does not promise guaranteed earnings.
-Members should independently evaluate every opportunity,
-understand its requirements and avoid anyone requesting
-money in exchange for guaranteed employment or guaranteed
-income.
-
+Create your Online Sphere account and start discovering
+digital work categories and resources.
 </p>
+
+<button
+class="btn btn-white"
+onclick="openModal('register')">
+
+Create Account
+
+</button>
 
 </div>
 
@@ -1488,232 +2599,39 @@ income.
 
 </section>
 
-</main>
 
 
-<!-- =========================
-AUTH MODAL
-========================= -->
-
-<div class="modal" id="authModal">
-
-<div class="modal-box">
-
-<button class="close" onclick="closeAuth()">
-×
-</button>
-
-<div id="loginForm">
-
-<h2>Welcome Back</h2>
-
-<p class="modal-sub">
-Login to your Online Sphere account.
-</p>
-
-<div class="form-group">
-
-<label>Email</label>
-
-<input
-type="email"
-id="loginEmail"
-placeholder="you@example.com"
->
-
-</div>
-
-<div class="form-group">
-
-<label>Password</label>
-
-<input
-type="password"
-id="loginPassword"
-placeholder="Enter password"
->
-
-</div>
-
-<button
-class="btn btn-primary full"
-onclick="login()">
-Login
-</button>
-
-<div class="switch-auth">
-
-Don't have an account?
-
-<button onclick="switchAuth('register')">
-Create one
-</button>
-
-</div>
-
-</div>
-
-
-<div id="registerForm" style="display:none">
-
-<h2>Create Account</h2>
-
-<p class="modal-sub">
-Create your Online Sphere member account.
-</p>
-
-<div class="form-group">
-
-<label>Full Name</label>
-
-<input
-type="text"
-id="registerName"
-placeholder="Your full name"
->
-
-</div>
-
-<div class="form-group">
-
-<label>Email</label>
-
-<input
-type="email"
-id="registerEmail"
-placeholder="you@example.com"
->
-
-</div>
-
-<div class="form-group">
-
-<label>Phone Number</label>
-
-<input
-type="tel"
-id="registerPhone"
-placeholder="07XXXXXXXX"
->
-
-</div>
-
-<div class="form-group">
-
-<label>Password</label>
-
-<input
-type="password"
-id="registerPassword"
-placeholder="Create a password"
->
-
-</div>
-
-<div class="form-group">
-
-<label>Membership</label>
-
-<select id="registerPackage">
-
-<option value="None">
-No activation yet
-</option>
-
-<option value="Bronze">
-Bronze - KSh 1,000
-</option>
-
-<option value="Silver">
-Silver - KSh 1,750
-</option>
-
-<option value="Gold">
-Gold - KSh 2,500
-</option>
-
-</select>
-
-</div>
-
-<button
-class="btn btn-primary full"
-onclick="register()">
-Create Account
-</button>
-
-<div class="switch-auth">
-
-Already have an account?
-
-<button onclick="switchAuth('login')">
-Login
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- =========================
-OPPORTUNITY MODAL
-========================= -->
-
-<div class="modal" id="opportunityModal">
-
-<div class="modal-box">
-
-<button class="close"
-onclick="closeOpportunity()">
-×
-</button>
-
-<div id="opportunityDetails"></div>
-
-</div>
-
-</div>
-
-
-<!-- =========================
-TOAST
-========================= -->
-
-<div class="toast" id="toast">
-Action completed.
-</div>
-
-
-<!-- =========================
-FOOTER
-========================= -->
+<!-- =====================================================
+     FOOTER
+===================================================== -->
 
 <footer>
 
-<div class="footer-inner">
+<div class="container">
+
+<div class="footer-grid">
+
 
 <div>
 
-<h3>Online Sphere</h3>
+<div class="footer-logo">
+🌐 Online Sphere
+</div>
 
 <p>
-Discover online-work opportunities,
-develop digital skills and build your
-online career journey.
+A digital opportunities platform designed to help
+members discover online work categories, develop
+skills and explore their options.
 </p>
 
 </div>
 
 
-<div>
+<div class="footer-column">
 
-<h3>Platform</h3>
-
-<div class="footer-links">
+<h4>
+Platform
+</h4>
 
 <a href="#opportunities">
 Opportunities
@@ -1723,34 +2641,51 @@ Opportunities
 Membership
 </a>
 
+<a href="#how">
+How It Works
+</a>
+
+</div>
+
+
+<div class="footer-column">
+
+<h4>
+Account
+</h4>
+
+<a href="#" onclick="openModal('login')">
+Login
+</a>
+
+<a href="#" onclick="openModal('register')">
+Create Account
+</a>
+
 <a href="#about">
 About
 </a>
 
 </div>
 
-</div>
 
+<div class="footer-column">
 
-<div>
+<h4>
+Information
+</h4>
 
-<h3>Account</h3>
-
-<div class="footer-links">
-
-<a href="#" onclick="openAuth('login')">
-Login
+<a href="#">
+Privacy
 </a>
 
-<a href="#" onclick="openAuth('register')">
-Create Account
+<a href="#">
+Terms
 </a>
 
-<a href="#dashboard">
-Dashboard
+<a href="#">
+Contact
 </a>
-
-</div>
 
 </div>
 
@@ -1759,380 +2694,366 @@ Dashboard
 
 <div class="footer-bottom">
 
-© <span id="year"></span> Online Sphere. All rights reserved.
+<span>
+© <span id="year"></span> Online Sphere
+</span>
+
+<span>
+Discover • Learn • Work
+</span>
+
+</div>
 
 </div>
 
 </footer>
 
 
-<script>
 
-/* =====================================================
-   ONLINE SPHERE JAVASCRIPT
-===================================================== */
+<!-- =====================================================
+     MOBILE BOTTOM NAV
+===================================================== -->
 
+<div class="mobile-bottom">
 
-/* -----------------------------
-   OPPORTUNITIES DATABASE
------------------------------ */
+<a href="#home">
+<span>🏠</span>
+Home
+</a>
 
-const opportunities = [
+<a href="#opportunities">
+<span>💼</span>
+Work
+</a>
 
-{
-id:1,
-title:"Transcription",
-category:"Transcription",
-icon:"🎧",
-description:"Convert audio or video recordings into accurate written text.",
-tags:["Typing","Audio","Remote"]
-},
+<a href="#membership">
+<span>💳</span>
+Plans
+</a>
 
-{
-id:2,
-title:"Data Entry",
-category:"Data Entry",
-icon:"⌨️",
-description:"Enter, organize and maintain information using online tools.",
-tags:["Typing","Excel","Remote"]
-},
-
-{
-id:3,
-title:"Freelancing",
-category:"Freelancing",
-icon:"💼",
-description:"Offer professional digital services to clients through freelancing platforms.",
-tags:["Clients","Digital","Remote"]
-},
-
-{
-id:4,
-title:"Academic Writing",
-category:"Writing",
-icon:"📝",
-description:"Explore legitimate writing and research-related opportunities.",
-tags:["Research","Writing","Education"]
-},
-
-{
-id:5,
-title:"Graphic Design",
-category:"Design",
-icon:"🎨",
-description:"Create graphics, social-media designs and digital visual content.",
-tags:["Canva","Design","Creative"]
-},
-
-{
-id:6,
-title:"Gaming Opportunities",
-category:"Gaming",
-icon:"🎮",
-description:"Explore gaming-related work including testing, content and competitions.",
-tags:["Gaming","Testing","Content"]
-},
-
-{
-id:7,
-title:"Online Research",
-category:"Research",
-icon:"🔎",
-description:"Find information and complete research-oriented digital tasks.",
-tags:["Research","Internet","Remote"]
-},
-
-{
-id:8,
-title:"Social Media Marketing",
-category:"Marketing",
-icon:"📱",
-description:"Explore content creation, social-media management and marketing work.",
-tags:["Social Media","Marketing","Content"]
-},
-
-{
-id:9,
-title:"Virtual Assistance",
-category:"Freelancing",
-icon:"🧑‍💻",
-description:"Support businesses and individuals with administrative online tasks.",
-tags:["Admin","Remote","Clients"]
-},
-
-{
-id:10,
-title:"Content Editing",
-category:"Writing",
-icon:"✍️",
-description:"Edit and improve digital content for clients and online publications.",
-tags:["Editing","Writing","Content"]
-},
-
-{
-id:11,
-title:"Video Editing",
-category:"Design",
-icon:"🎬",
-description:"Create and edit videos for social media, businesses and creators.",
-tags:["Video","Creative","Editing"]
-},
-
-{
-id:12,
-title:"Website Services",
-category:"Freelancing",
-icon:"🌐",
-description:"Explore opportunities related to website creation and digital services.",
-tags:["Web","HTML","CSS"]
-}
-
-];
-
-
-/* -----------------------------
-   RENDER OPPORTUNITIES
------------------------------ */
-
-function renderOpportunities(list = opportunities){
-
-const container =
-document.getElementById("opportunityList");
-
-container.innerHTML = "";
-
-if(list.length === 0){
-
-container.innerHTML = `
-<div style="
-grid-column:1/-1;
-text-align:center;
-padding:40px;
-background:white;
-border-radius:18px;
-border:1px solid var(--border);
-">
-<h3>No opportunities found</h3>
-<p style="color:var(--muted)">
-Try another search or category.
-</p>
-</div>
-`;
-
-return;
-}
-
-list.forEach(opp => {
-
-const card = document.createElement("div");
-
-card.className = "opportunity";
-
-card.innerHTML = `
-
-<div class="opp-icon">
-${opp.icon}
-</div>
-
-<h3>
-${opp.title}
-</h3>
-
-<p>
-${opp.description}
-</p>
-
-<div class="tags">
-
-${opp.tags.map(tag => `
-<span class="tag">
-${tag}
-</span>
-`).join("")}
+<a href="#" onclick="openModal('login')">
+<span>👤</span>
+Account
+</a>
 
 </div>
+
+
+
+<!-- =====================================================
+     LOGIN / REGISTER MODAL
+===================================================== -->
+
+<div class="modal" id="authModal">
+
+<div class="modal-box">
 
 <button
-class="btn btn-primary full"
-onclick="viewOpportunity(${opp.id})">
+class="close"
+onclick="closeModal()">
+×
+</button>
 
-View Opportunity
+
+<!-- LOGIN -->
+
+<div id="loginForm">
+
+<h2>
+Welcome Back
+</h2>
+
+<p class="modal-sub">
+Login to your Online Sphere account.
+</p>
+
+
+<div class="form-group">
+
+<label>
+Email Address
+</label>
+
+<input
+type="email"
+id="loginEmail"
+placeholder="you@example.com">
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Password
+</label>
+
+<input
+type="password"
+id="loginPassword"
+placeholder="Enter your password">
+
+</div>
+
+
+<button
+class="btn btn-primary btn-full"
+onclick="loginUser()">
+
+Login
 
 </button>
 
-`;
 
-container.appendChild(card);
+<div class="switch">
 
-});
+Don't have an account?
 
-}
+<button onclick="switchForm('register')">
+Create one
+</button>
 
-
-/* -----------------------------
-   FILTER
------------------------------ */
-
-function filterOpportunities(){
-
-const search =
-document.getElementById("searchInput")
-.value
-.toLowerCase();
-
-const category =
-document.getElementById("categoryFilter")
-.value;
-
-const filtered =
-opportunities.filter(opp => {
-
-const matchesSearch =
-opp.title.toLowerCase().includes(search) ||
-opp.description.toLowerCase().includes(search) ||
-opp.category.toLowerCase().includes(search);
-
-const matchesCategory =
-category === "all" ||
-opp.category === category;
-
-return matchesSearch && matchesCategory;
-
-});
-
-renderOpportunities(filtered);
-
-}
-
-
-/* -----------------------------
-   OPPORTUNITY DETAILS
------------------------------ */
-
-function viewOpportunity(id){
-
-const opp =
-opportunities.find(item => item.id === id);
-
-if(!opp) return;
-
-document.getElementById("opportunityDetails")
-.innerHTML = `
-
-<div class="opp-icon">
-${opp.icon}
 </div>
 
-<h2 style="color:var(--dark)">
-${opp.title}
+</div>
+
+
+
+<!-- REGISTER -->
+
+<div id="registerForm" style="display:none">
+
+<h2>
+Create Account
 </h2>
 
-<p style="
-color:var(--muted);
-margin:10px 0 20px;
-">
-${opp.description}
+<p class="modal-sub">
+Join Online Sphere and start exploring.
 </p>
 
-<h3 style="margin-bottom:10px">
-What this may involve
-</h3>
 
-<ul style="
-margin-left:20px;
-margin-bottom:20px;
-">
+<div class="form-group">
 
-<li>Finding legitimate platforms or clients</li>
-<li>Understanding the requirements</li>
-<li>Completing work according to instructions</li>
-<li>Building skills and experience</li>
+<label>
+Full Name
+</label>
 
-</ul>
-
-<div class="notice" style="margin:0 0 20px">
-
-<strong>Remember</strong>
-
-This opportunity does not guarantee income.
-Check the platform's terms, requirements and payment
-conditions before starting work.
+<input
+type="text"
+id="registerName"
+placeholder="Your full name">
 
 </div>
 
+
+<div class="form-group">
+
+<label>
+Email Address
+</label>
+
+<input
+type="email"
+id="registerEmail"
+placeholder="you@example.com">
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Phone Number
+</label>
+
+<input
+type="tel"
+id="registerPhone"
+placeholder="07XXXXXXXX">
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Password
+</label>
+
+<input
+type="password"
+id="registerPassword"
+placeholder="Minimum 6 characters">
+
+</div>
+
+
+<div class="form-group">
+
+<label>
+Membership Package
+</label>
+
+<select id="registerPackage">
+
+<option value="None">
+No activation yet
+</option>
+
+<option value="Bronze">
+Bronze — KSh 1,000
+</option>
+
+<option value="Silver">
+Silver — KSh 1,750
+</option>
+
+<option value="Gold">
+Gold — KSh 2,500
+</option>
+
+</select>
+
+</div>
+
+
 <button
-class="btn btn-primary full"
-onclick="saveOpportunity(${opp.id})">
+class="btn btn-primary btn-full"
+onclick="registerUser()">
+
+Create Account
+
+</button>
+
+
+<div class="switch">
+
+Already have an account?
+
+<button onclick="switchForm('login')">
+Login
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =====================================================
+     OPPORTUNITY MODAL
+===================================================== -->
+
+<div class="modal" id="opportunityModal">
+
+<div class="modal-box">
+
+<button
+class="close"
+onclick="closeOpportunity()">
+×
+</button>
+
+
+<h2 id="opportunityTitle">
+Opportunity
+</h2>
+
+<p
+class="modal-sub"
+id="opportunityText">
+</p>
+
+
+<div class="notice"
+style="margin:0 0 20px">
+
+<strong>
+Before you apply
+</strong>
+
+Always check the original platform/client,
+requirements, payment terms and legitimacy of the
+opportunity. Never pay for a guaranteed job or
+guaranteed income.
+
+</div>
+
+
+<button
+class="btn btn-primary btn-full"
+onclick="saveOpportunity()">
 
 ☆ Save Opportunity
 
 </button>
 
-`;
+</div>
 
-document
-.getElementById("opportunityModal")
-.classList.add("show");
-
-}
+</div>
 
 
-function closeOpportunity(){
 
-document
-.getElementById("opportunityModal")
-.classList.remove("show");
+<!-- =====================================================
+     TOAST
+===================================================== -->
 
-}
+<div class="toast" id="toast">
+Done
+</div>
 
 
-/* -----------------------------
-   SAVE OPPORTUNITY
------------------------------ */
 
-function saveOpportunity(id){
+<script>
 
-let saved =
-JSON.parse(localStorage.getItem("os_saved") || "[]");
+/* =========================================================
+   ONLINE SPHERE JAVASCRIPT
+========================================================= */
 
-if(!saved.includes(id)){
 
-saved.push(id);
+/* ---------------------------------------------------------
+   YEAR
+--------------------------------------------------------- */
 
-localStorage.setItem(
-"os_saved",
-JSON.stringify(saved)
-);
+document.getElementById("year").textContent =
+new Date().getFullYear();
 
-showToast("Opportunity saved to your dashboard.");
 
-updateDashboard();
+/* ---------------------------------------------------------
+   MOBILE MENU
+--------------------------------------------------------- */
 
-}else{
+function toggleMenu(){
 
-showToast("This opportunity is already saved.");
+const menu =
+document.getElementById("mobileMenu");
 
-}
+menu.classList.toggle("show");
 
 }
 
 
-/* -----------------------------
-   AUTH
------------------------------ */
+/* ---------------------------------------------------------
+   AUTH MODAL
+--------------------------------------------------------- */
 
-function openAuth(mode){
+function openModal(type){
 
-document
-.getElementById("authModal")
-.classList.add("show");
+const modal =
+document.getElementById("authModal");
 
-switchAuth(mode);
+modal.classList.add("show");
+
+switchForm(type);
 
 }
 
 
-function closeAuth(){
+function closeModal(){
 
 document
 .getElementById("authModal")
@@ -2141,34 +3062,38 @@ document
 }
 
 
-function switchAuth(mode){
+function switchForm(type){
 
-if(mode === "login"){
+if(type === "login"){
 
-document.getElementById("loginForm")
-.style.display = "block";
+document
+.getElementById("loginForm")
+.style.display="block";
 
-document.getElementById("registerForm")
-.style.display = "none";
+document
+.getElementById("registerForm")
+.style.display="none";
 
 }else{
 
-document.getElementById("loginForm")
-.style.display = "none";
+document
+.getElementById("loginForm")
+.style.display="none";
 
-document.getElementById("registerForm")
-.style.display = "block";
+document
+.getElementById("registerForm")
+.style.display="block";
 
 }
 
 }
 
 
-/* -----------------------------
+/* ---------------------------------------------------------
    REGISTER
------------------------------ */
+--------------------------------------------------------- */
 
-function register(){
+function registerUser(){
 
 const name =
 document.getElementById("registerName")
@@ -2186,14 +3111,16 @@ const password =
 document.getElementById("registerPassword")
 .value;
 
-const pkg =
+const packageName =
 document.getElementById("registerPackage")
 .value;
 
 
 if(!name || !email || !phone || !password){
 
-showToast("Please complete all required fields.");
+showToast(
+"Please complete all required fields."
+);
 
 return;
 
@@ -2202,7 +3129,9 @@ return;
 
 if(password.length < 6){
 
-showToast("Password should contain at least 6 characters.");
+showToast(
+"Password must contain at least 6 characters."
+);
 
 return;
 
@@ -2211,35 +3140,38 @@ return;
 
 const user = {
 
-name,
-email,
-phone,
-password,
-package:pkg,
-createdAt:new Date().toISOString()
+name:name,
+email:email,
+phone:phone,
+password:password,
+package:packageName,
+
+createdAt:
+new Date().toISOString()
 
 };
 
 
 localStorage.setItem(
-"os_user",
+"onlineSphereUser",
 JSON.stringify(user)
 );
 
-closeAuth();
 
-showDashboard();
+closeModal();
 
-showToast("Account created successfully.");
+showToast(
+"Account created successfully."
+);
 
 }
 
 
-/* -----------------------------
+/* ---------------------------------------------------------
    LOGIN
------------------------------ */
+--------------------------------------------------------- */
 
-function login(){
+function loginUser(){
 
 const email =
 document.getElementById("loginEmail")
@@ -2249,13 +3181,17 @@ const password =
 document.getElementById("loginPassword")
 .value;
 
-const stored =
-JSON.parse(localStorage.getItem("os_user") || "null");
+const user =
+JSON.parse(
+localStorage.getItem("onlineSphereUser") || "null"
+);
 
 
-if(!stored){
+if(!user){
 
-showToast("No local account found. Please create an account first.");
+showToast(
+"No account found. Please register first."
+);
 
 return;
 
@@ -2263,153 +3199,50 @@ return;
 
 
 if(
-email !== stored.email ||
-password !== stored.password
+email !== user.email ||
+password !== user.password
 ){
 
-showToast("Incorrect email or password.");
+showToast(
+"Incorrect email or password."
+);
 
 return;
 
 }
 
 
-closeAuth();
+closeModal();
 
-showDashboard();
-
-showToast("Welcome back.");
-
-}
-
-
-/* -----------------------------
-   DASHBOARD
------------------------------ */
-
-function showDashboard(){
-
-const user =
-JSON.parse(localStorage.getItem("os_user") || "null");
-
-if(!user) return;
-
-document
-.getElementById("dashboard")
-.classList.add("show");
-
-document
-.getElementById("welcomeText")
-.textContent =
-"Welcome, " + user.name;
-
-document
-.getElementById("profileName")
-.textContent =
-user.name;
-
-document
-.getElementById("profileEmail")
-.textContent =
-user.email;
-
-const initials =
-user.name
-.split(" ")
-.map(word => word[0])
-.join("")
-.substring(0,2)
-.toUpperCase();
-
-document
-.getElementById("avatar")
-.textContent = initials;
-
-document
-.getElementById("memberPackage")
-.textContent =
-user.package === "None"
-? "Not activated"
-: user.package;
-
-updateDashboard();
-
-document
-.getElementById("dashboard")
-.scrollIntoView({
-behavior:"smooth"
-});
-
-}
-
-
-function updateDashboard(){
-
-const saved =
-JSON.parse(
-localStorage.getItem("os_saved") || "[]"
+showToast(
+"Welcome back, " + user.name + "!"
 );
 
-document
-.getElementById("savedCount")
-.textContent =
-saved.length;
-
-const applications =
-JSON.parse(
-localStorage.getItem("os_applications") || "[]"
-);
-
-document
-.getElementById("applicationCount")
-.textContent =
-applications.length;
-
 }
 
 
-/* -----------------------------
-   LOGOUT
------------------------------ */
+/* ---------------------------------------------------------
+   PACKAGE
+--------------------------------------------------------- */
 
-function logout(){
-
-localStorage.removeItem("os_logged");
-
-document
-.getElementById("dashboard")
-.classList.remove("show");
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
-});
-
-showToast("You have been logged out.");
-
-}
-
-
-/* -----------------------------
-   PACKAGE SELECTION
------------------------------ */
-
-function selectPackage(name,price){
+function choosePackage(name,price){
 
 const user =
-JSON.parse(localStorage.getItem("os_user") || "null");
+JSON.parse(
+localStorage.getItem("onlineSphereUser") || "null"
+);
 
 
 if(!user){
 
-openAuth("register");
+openModal("register");
 
 document
 .getElementById("registerPackage")
 .value = name;
 
 showToast(
-"Create your account first to continue."
+"Create an account first."
 );
 
 return;
@@ -2420,35 +3253,78 @@ return;
 user.package = name;
 
 localStorage.setItem(
-"os_user",
+"onlineSphereUser",
 JSON.stringify(user)
 );
 
-showDashboard();
-
 showToast(
-`${name} package selected.`
+name + " package selected."
 );
 
 }
 
 
-/* -----------------------------
-   MOBILE MENU
------------------------------ */
+/* ---------------------------------------------------------
+   OPPORTUNITIES
+--------------------------------------------------------- */
 
-function toggleMobileMenu(){
+const opportunityData = {
+
+"Transcription":
+"Transcription involves converting audio or video into written text. Requirements can vary by platform and client.",
+
+"Freelancing":
+"Freelancing allows you to offer services such as graphic design, writing, web development, editing or virtual assistance.",
+
+"Writing":
+"Writing and editing opportunities can include content creation, proofreading, research and other legitimate digital services."
+
+};
+
+
+function viewOpportunity(type){
+
+const modal =
+document.getElementById("opportunityModal");
 
 document
-.getElementById("mobileMenu")
-.classList.toggle("show");
+.getElementById("opportunityTitle")
+.textContent = type;
+
+document
+.getElementById("opportunityText")
+.textContent =
+opportunityData[type] ||
+"Explore this digital opportunity and carefully check its requirements.";
+
+modal.classList.add("show");
 
 }
 
 
-/* -----------------------------
+function closeOpportunity(){
+
+document
+.getElementById("opportunityModal")
+.classList.remove("show");
+
+}
+
+
+function saveOpportunity(){
+
+showToast(
+"Opportunity saved."
+);
+
+closeOpportunity();
+
+}
+
+
+/* ---------------------------------------------------------
    TOAST
------------------------------ */
+--------------------------------------------------------- */
 
 let toastTimer;
 
@@ -2464,7 +3340,7 @@ toast.classList.add("show");
 clearTimeout(toastTimer);
 
 toastTimer =
-setTimeout(() => {
+setTimeout(function(){
 
 toast.classList.remove("show");
 
@@ -2473,16 +3349,18 @@ toast.classList.remove("show");
 }
 
 
-/* -----------------------------
-   CLOSE MODALS OUTSIDE
------------------------------ */
+/* ---------------------------------------------------------
+   CLOSE MODALS BY CLICKING BACKDROP
+--------------------------------------------------------- */
 
 document
 .getElementById("authModal")
-.addEventListener("click",function(e){
+.addEventListener("click",function(event){
 
-if(e.target === this){
-closeAuth();
+if(event.target === this){
+
+closeModal();
+
 }
 
 });
@@ -2490,37 +3368,59 @@ closeAuth();
 
 document
 .getElementById("opportunityModal")
-.addEventListener("click",function(e){
+.addEventListener("click",function(event){
 
-if(e.target === this){
+if(event.target === this){
+
 closeOpportunity();
+
 }
 
 });
 
 
-/* -----------------------------
-   INITIALIZE
------------------------------ */
+/* ---------------------------------------------------------
+   SIMPLE SCROLL REVEAL
+--------------------------------------------------------- */
 
-document
-.getElementById("year")
-.textContent =
-new Date().getFullYear();
-
-renderOpportunities();
-
-const existingUser =
-JSON.parse(
-localStorage.getItem("os_user") || "null"
+const revealElements =
+document.querySelectorAll(
+".category-card,.opportunity-card,.step,.price-card,.split-section"
 );
 
-if(existingUser){
 
-// Keep the dashboard available
-// but don't automatically open it.
+const observer =
+new IntersectionObserver(
+entries => {
+
+entries.forEach(entry => {
+
+if(entry.isIntersecting){
+
+entry.target.style.opacity="1";
+entry.target.style.transform="translateY(0)";
 
 }
+
+});
+
+},
+{
+threshold:.08
+}
+);
+
+
+revealElements.forEach(element => {
+
+element.style.opacity="0";
+element.style.transform="translateY(20px)";
+element.style.transition="opacity .6s ease, transform .6s ease";
+
+observer.observe(element);
+
+});
+
 
 </script>
 
