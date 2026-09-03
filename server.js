@@ -1,789 +1,402 @@
-const express = require("express");
-const cors = require("cors");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const Database = require("better-sqlite3");
-const path = require("path");
-const crypto = require("crypto");
-require("dotenv").config();
+-- =========================================================
+-- ONLINE SPHERE DATABASE
+-- EARNING OPPORTUNITIES + MEMBERSHIP + WALLET
+-- =========================================================
 
-const app = express();
+PRAGMA foreign_keys = ON;
 
-const PORT = process.env.PORT || 3000;
+-- =========================================================
+-- USERS
+-- =========================================================
 
-const JWT_SECRET =
-    process.env.SESSION_SECRET ||
-    "development-only-change-this-secret";
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+    full_name TEXT NOT NULL,
 
-/* =========================================================
-   MIDDLEWARE
-========================================================= */
+    email TEXT UNIQUE NOT NULL,
 
-app.use(cors());
+    phone TEXT UNIQUE,
 
-app.use(express.json());
+    password_hash TEXT NOT NULL,
 
-app.use(
-    express.urlencoded({
-        extended: true
-    })
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 
-/* =========================================================
-   DATABASE
-========================================================= */
+-- =========================================================
+-- USER ACCOUNTS
+-- =========================================================
 
-const databaseDirectory =
-    path.join(__dirname, "database");
+CREATE TABLE IF NOT EXISTS accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-const databaseFile =
-    path.join(
-        databaseDirectory,
-        "online-sphere.db"
-    );
+    user_id INTEGER NOT NULL UNIQUE,
 
-const fs = require("fs");
+    account_number TEXT UNIQUE NOT NULL,
 
-if (!fs.existsSync(databaseDirectory)) {
-    fs.mkdirSync(databaseDirectory, {
-        recursive: true
-    });
-}
+    package TEXT DEFAULT NULL,
 
-const db = new Database(databaseFile);
+    activation_fee INTEGER DEFAULT 0,
 
-db.pragma("foreign_keys = ON");
+    status TEXT DEFAULT 'inactive',
 
+    balance INTEGER DEFAULT 0,
 
-/* =========================================================
-   DATABASE TABLES
-========================================================= */
+    total_earned INTEGER DEFAULT 0,
 
-db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        full_name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        phone TEXT UNIQUE,
-        password_hash TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+    total_withdrawn INTEGER DEFAULT 0,
 
-    CREATE TABLE IF NOT EXISTS accounts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        account_number TEXT UNIQUE NOT NULL,
-        balance INTEGER DEFAULT 0,
-        currency TEXT DEFAULT 'KES',
-        status TEXT DEFAULT 'active',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    pending_withdrawal INTEGER DEFAULT 0,
 
-        FOREIGN KEY (user_id)
+    currency TEXT DEFAULT 'KES',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
-    );
+);
 
-    CREATE TABLE IF NOT EXISTS transactions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        account_id INTEGER NOT NULL,
-        type TEXT NOT NULL,
-        amount INTEGER NOT NULL,
-        status TEXT DEFAULT 'pending',
-        reference TEXT,
-        description TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-        FOREIGN KEY (user_id)
+-- =========================================================
+-- MEMBERSHIP PACKAGES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS packages (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT UNIQUE NOT NULL,
+
+    activation_fee INTEGER NOT NULL,
+
+    description TEXT,
+
+    status TEXT DEFAULT 'active',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =========================================================
+-- TRANSACTIONS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS transactions (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER NOT NULL,
+
+    account_id INTEGER NOT NULL,
+
+    type TEXT NOT NULL,
+
+    amount INTEGER NOT NULL,
+
+    status TEXT DEFAULT 'pending',
+
+    reference TEXT UNIQUE,
+
+    description TEXT,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE,
 
-        FOREIGN KEY (account_id)
+    FOREIGN KEY (account_id)
         REFERENCES accounts(id)
         ON DELETE CASCADE
-    );
+);
 
-    CREATE TABLE IF NOT EXISTS sessions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        token_hash TEXT NOT NULL,
-        expires_at DATETIME NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-        FOREIGN KEY (user_id)
+-- =========================================================
+-- EARNING OPPORTUNITIES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS opportunities (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    title TEXT NOT NULL,
+
+    category TEXT NOT NULL,
+
+    description TEXT NOT NULL,
+
+    difficulty TEXT DEFAULT 'Beginner',
+
+    earning_model TEXT,
+
+    requirements TEXT,
+
+    platform_name TEXT,
+
+    external_url TEXT,
+
+    risk_level TEXT DEFAULT 'Low',
+
+    featured INTEGER DEFAULT 0,
+
+    status TEXT DEFAULT 'active',
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- =========================================================
+-- SAVED OPPORTUNITIES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS saved_opportunities (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER NOT NULL,
+
+    opportunity_id INTEGER NOT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(user_id, opportunity_id),
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (opportunity_id)
+        REFERENCES opportunities(id)
+        ON DELETE CASCADE
+);
+
+
+-- =========================================================
+-- WITHDRAWAL REQUESTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS withdrawals (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER NOT NULL,
+
+    account_id INTEGER NOT NULL,
+
+    amount INTEGER NOT NULL,
+
+    method TEXT NOT NULL,
+
+    phone TEXT,
+
+    reference TEXT UNIQUE,
+
+    status TEXT DEFAULT 'pending',
+
+    notes TEXT,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    processed_at DATETIME,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (account_id)
+        REFERENCES accounts(id)
+        ON DELETE CASCADE
+);
+
+
+-- =========================================================
+-- SESSIONS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS sessions (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER NOT NULL,
+
+    token_hash TEXT NOT NULL,
+
+    expires_at DATETIME NOT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE
-    );
-`);
-
-
-/* =========================================================
-   FRONTEND
-========================================================= */
-
-app.use(
-    express.static(
-        path.join(__dirname, "public")
-    )
 );
 
 
-/* =========================================================
-   HELPERS
-========================================================= */
+-- =========================================================
+-- DEFAULT PACKAGES
+-- =========================================================
 
-function createAccountNumber() {
+INSERT OR IGNORE INTO packages
+(name, activation_fee, description)
+VALUES
+(
+    'Bronze',
+    1000,
+    'Basic access to Online Sphere opportunities and learning resources.'
+);
 
-    return (
-        "OS" +
-        Date.now().toString().slice(-8) +
-        crypto.randomInt(100, 999)
-    );
+INSERT OR IGNORE INTO packages
+(name, activation_fee, description)
+VALUES
+(
+    'Silver',
+    1750,
+    'Expanded access to opportunities and advanced learning resources.'
+);
 
-}
-
-
-function createToken(user) {
-
-    return jwt.sign(
-        {
-            id: user.id,
-            email: user.email
-        },
-        JWT_SECRET,
-        {
-            expiresIn: "7d"
-        }
-    );
-
-}
-
-
-function authenticate(req, res, next) {
-
-    const header =
-        req.headers.authorization;
-
-    if (!header) {
-
-        return res.status(401).json({
-            success: false,
-            message: "Authentication required."
-        });
-
-    }
-
-    const token =
-        header.startsWith("Bearer ")
-            ? header.substring(7)
-            : null;
-
-    if (!token) {
-
-        return res.status(401).json({
-            success: false,
-            message: "Invalid authentication token."
-        });
-
-    }
-
-    try {
-
-        req.user =
-            jwt.verify(
-                token,
-                JWT_SECRET
-            );
-
-        next();
-
-    } catch (error) {
-
-        return res.status(401).json({
-            success: false,
-            message: "Session expired or invalid."
-        });
-
-    }
-
-}
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-app.get(
-    "/api/status",
-    (req, res) => {
-
-        res.json({
-            success: true,
-            app: "Online Sphere",
-            status: "online",
-            version: "1.0.0"
-        });
-
-    }
+INSERT OR IGNORE INTO packages
+(name, activation_fee, description)
+VALUES
+(
+    'Gold',
+    2500,
+    'Full access to the Online Sphere opportunity and learning library.'
 );
 
 
-/* =========================================================
-   REGISTER
-========================================================= */
+-- =========================================================
+-- DEFAULT OPPORTUNITIES
+-- =========================================================
 
-app.post(
-    "/api/auth/register",
-    async (req, res) => {
-
-        try {
-
-            const {
-                fullName,
-                email,
-                phone,
-                password
-            } = req.body;
-
-            if (
-                !fullName ||
-                !email ||
-                !password
-            ) {
-
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Full name, email and password are required."
-                });
-
-            }
-
-            if (password.length < 8) {
-
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Password must contain at least 8 characters."
-                });
-
-            }
-
-            const normalizedEmail =
-                email.trim().toLowerCase();
-
-            const existingUser =
-                db.prepare(`
-                    SELECT id
-                    FROM users
-                    WHERE email = ?
-                `).get(normalizedEmail);
-
-            if (existingUser) {
-
-                return res.status(409).json({
-                    success: false,
-                    message:
-                        "An account with this email already exists."
-                });
-
-            }
-
-            const passwordHash =
-                await bcrypt.hash(
-                    password,
-                    12
-                );
-
-            const createUser =
-                db.transaction(() => {
-
-                    const userResult =
-                        db.prepare(`
-                            INSERT INTO users
-                            (
-                                full_name,
-                                email,
-                                phone,
-                                password_hash
-                            )
-                            VALUES (?, ?, ?, ?)
-                        `).run(
-                            fullName.trim(),
-                            normalizedEmail,
-                            phone || null,
-                            passwordHash
-                        );
-
-                    const userId =
-                        userResult.lastInsertRowid;
-
-                    const accountNumber =
-                        createAccountNumber();
-
-                    db.prepare(`
-                        INSERT INTO accounts
-                        (
-                            user_id,
-                            account_number
-                        )
-                        VALUES (?, ?)
-                    `).run(
-                        userId,
-                        accountNumber
-                    );
-
-                    return {
-                        userId,
-                        accountNumber
-                    };
-
-                });
-
-            const token =
-                createToken({
-                    id: createUser.userId,
-                    email: normalizedEmail
-                });
-
-            res.status(201).json({
-                success: true,
-                message:
-                    "Account created successfully.",
-                token,
-                accountNumber:
-                    createUser.accountNumber
-            });
-
-        } catch (error) {
-
-            console.error(error);
-
-            res.status(500).json({
-                success: false,
-                message:
-                    "Unable to create account."
-            });
-
-        }
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Online Transcription',
+    'Transcription',
+    'Convert audio or video recordings into written text.',
+    'Beginner',
+    'Paid per task or audio minute',
+    'Good listening skills, typing and attention to detail.',
+    'Low',
+    1
 );
 
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-app.post(
-    "/api/auth/login",
-    async (req, res) => {
-
-        try {
-
-            const {
-                email,
-                password
-            } = req.body;
-
-            if (!email || !password) {
-
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Email and password are required."
-                });
-
-            }
-
-            const user =
-                db.prepare(`
-                    SELECT *
-                    FROM users
-                    WHERE email = ?
-                `).get(
-                    email.trim().toLowerCase()
-                );
-
-            if (!user) {
-
-                return res.status(401).json({
-                    success: false,
-                    message:
-                        "Invalid email or password."
-                });
-
-            }
-
-            const passwordMatches =
-                await bcrypt.compare(
-                    password,
-                    user.password_hash
-                );
-
-            if (!passwordMatches) {
-
-                return res.status(401).json({
-                    success: false,
-                    message:
-                        "Invalid email or password."
-                });
-
-            }
-
-            const token =
-                createToken(user);
-
-            res.json({
-                success: true,
-                message:
-                    "Login successful.",
-                token
-            });
-
-        } catch (error) {
-
-            console.error(error);
-
-            res.status(500).json({
-                success: false,
-                message:
-                    "Unable to log in."
-            });
-
-        }
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Data Entry',
+    'Data Entry',
+    'Enter, organize and verify information using online tools.',
+    'Beginner',
+    'Paid per task or project',
+    'Basic computer skills and accuracy.',
+    'Low',
+    1
 );
 
-
-/* =========================================================
-   CURRENT USER
-========================================================= */
-
-app.get(
-    "/api/auth/me",
-    authenticate,
-    (req, res) => {
-
-        const user =
-            db.prepare(`
-                SELECT
-                    id,
-                    full_name,
-                    email,
-                    phone,
-                    created_at
-                FROM users
-                WHERE id = ?
-            `).get(req.user.id);
-
-        if (!user) {
-
-            return res.status(404).json({
-                success: false,
-                message:
-                    "User not found."
-            });
-
-        }
-
-        res.json({
-            success: true,
-            user
-        });
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Freelancing',
+    'Freelancing',
+    'Offer professional skills to clients locally or internationally.',
+    'Beginner-Advanced',
+    'Paid per project or contract',
+    'A marketable skill and a professional profile.',
+    'Low',
+    1
 );
 
-
-/* =========================================================
-   ACCOUNT
-========================================================= */
-
-app.get(
-    "/api/account",
-    authenticate,
-    (req, res) => {
-
-        const account =
-            db.prepare(`
-                SELECT
-                    account_number,
-                    balance,
-                    currency,
-                    status,
-                    created_at
-                FROM accounts
-                WHERE user_id = ?
-            `).get(req.user.id);
-
-        if (!account) {
-
-            return res.status(404).json({
-                success: false,
-                message:
-                    "Account not found."
-            });
-
-        }
-
-        res.json({
-            success: true,
-            account
-        });
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Academic Writing',
+    'Academic Writing',
+    'Provide legitimate research and writing assistance while following academic integrity rules.',
+    'Intermediate',
+    'Paid per project',
+    'Strong writing, research and citation skills.',
+    'Medium',
+    0
 );
 
-
-/* =========================================================
-   TRANSACTIONS
-========================================================= */
-
-app.get(
-    "/api/transactions",
-    authenticate,
-    (req, res) => {
-
-        const transactions =
-            db.prepare(`
-                SELECT
-                    id,
-                    type,
-                    amount,
-                    status,
-                    reference,
-                    description,
-                    created_at
-                FROM transactions
-                WHERE user_id = ?
-                ORDER BY id DESC
-                LIMIT 50
-            `).all(req.user.id);
-
-        res.json({
-            success: true,
-            transactions
-        });
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Online Gaming',
+    'Gaming',
+    'Explore legitimate gaming-related opportunities such as game testing, streaming and content creation.',
+    'Beginner',
+    'Task, contract, content or platform based',
+    'Gaming skills or content creation ability.',
+    'Medium',
+    0
 );
 
-
-/* =========================================================
-   DEMO DEPOSIT REQUEST
-========================================================= */
-
-app.post(
-    "/api/deposit",
-    authenticate,
-    (req, res) => {
-
-        const amount =
-            Number(req.body.amount);
-
-        if (
-            !Number.isFinite(amount) ||
-            amount <= 0
-        ) {
-
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Enter a valid amount."
-            });
-
-        }
-
-        const account =
-            db.prepare(`
-                SELECT id
-                FROM accounts
-                WHERE user_id = ?
-            `).get(req.user.id);
-
-        if (!account) {
-
-            return res.status(404).json({
-                success: false,
-                message:
-                    "Account not found."
-            });
-
-        }
-
-        const reference =
-            "DEMO-" +
-            crypto.randomBytes(5)
-                .toString("hex")
-                .toUpperCase();
-
-        db.prepare(`
-            INSERT INTO transactions
-            (
-                user_id,
-                account_id,
-                type,
-                amount,
-                status,
-                reference,
-                description
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).run(
-            req.user.id,
-            account.id,
-            "deposit",
-            Math.round(amount),
-            "pending",
-            reference,
-            "Demo deposit request"
-        );
-
-        res.status(201).json({
-            success: true,
-            message:
-                "Deposit request created.",
-            reference,
-            status: "pending"
-        });
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Content Creation',
+    'Content',
+    'Create useful digital content for websites and social platforms.',
+    'Beginner-Advanced',
+    'Paid per project, contract or platform',
+    'Writing, video, design or communication skills.',
+    'Low',
+    1
 );
 
-
-/* =========================================================
-   DEMO WITHDRAWAL REQUEST
-========================================================= */
-
-app.post(
-    "/api/withdraw",
-    authenticate,
-    (req, res) => {
-
-        const amount =
-            Number(req.body.amount);
-
-        const phone =
-            String(
-                req.body.phone || ""
-            ).trim();
-
-        if (
-            !Number.isFinite(amount) ||
-            amount <= 0
-        ) {
-
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Enter a valid amount."
-            });
-
-        }
-
-        if (!phone) {
-
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Phone number is required."
-            });
-
-        }
-
-        const account =
-            db.prepare(`
-                SELECT id
-                FROM accounts
-                WHERE user_id = ?
-            `).get(req.user.id);
-
-        if (!account) {
-
-            return res.status(404).json({
-                success: false,
-                message:
-                    "Account not found."
-            });
-
-        }
-
-        const reference =
-            "WD-" +
-            crypto.randomBytes(5)
-                .toString("hex")
-                .toUpperCase();
-
-        db.prepare(`
-            INSERT INTO transactions
-            (
-                user_id,
-                account_id,
-                type,
-                amount,
-                status,
-                reference,
-                description
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).run(
-            req.user.id,
-            account.id,
-            "withdrawal",
-            Math.round(amount),
-            "pending",
-            reference,
-            `Demo withdrawal request for ${phone}`
-        );
-
-        res.status(201).json({
-            success: true,
-            message:
-                "Withdrawal request created.",
-            reference,
-            status: "pending"
-        });
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Graphic Design',
+    'Design',
+    'Create logos, social media graphics, posters and other digital designs.',
+    'Intermediate',
+    'Paid per project',
+    'Design skills and suitable software.',
+    'Low',
+    0
 );
 
-
-/* =========================================================
-   FRONTEND FALLBACK
-========================================================= */
-
-app.get(
-    "*",
-    (req, res) => {
-
-        res.sendFile(
-            path.join(
-                __dirname,
-                "public",
-                "index.html"
-            )
-        );
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'AI-Assisted Work',
+    'AI',
+    'Explore legitimate work involving AI-assisted research, content, data and digital services.',
+    'Beginner-Advanced',
+    'Paid per task or project',
+    'Ability to use AI tools responsibly and verify results.',
+    'Medium',
+    1
 );
 
-
-/* =========================================================
-   START SERVER
-========================================================= */
-
-app.listen(
-    PORT,
-    () => {
-
-        console.log(
-            `Online Sphere running on port ${PORT}`
-        );
-
-    }
+INSERT OR IGNORE INTO opportunities
+(title, category, description, difficulty, earning_model, requirements, risk_level, featured)
+VALUES
+(
+    'Remote Jobs',
+    'Remote Jobs',
+    'Find legitimate remote employment and contract opportunities.',
+    'Intermediate',
+    'Salary, contract or project payment',
+    'Skills and qualifications depend on the job.',
+    'Low',
+    1
 );
