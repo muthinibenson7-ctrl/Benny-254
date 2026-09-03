@@ -1,1 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Online Sphere Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        <div class="brand-logo">OS</div>
+
+        <div>
+            <strong>ONLINE SPHERE</strong>
+            <span>Dashboard</span>
+        </div>
+    </div>
+
+    <button class="menu-btn"
+            onclick="toggleMenu()">
+        ☰
+    </button>
+
+    <nav id="navigation">
+        <a href="index.html">Home</a>
+        <a href="#account">Account</a>
+        <a href="#transactions">Transactions</a>
+    </nav>
+
+</header>
+
+<main class="dashboard-page">
+
+    <section class="dashboard-header">
+
+        <span class="section-label">
+            MEMBER AREA
+        </span>
+
+        <h1>Dashboard</h1>
+
+        <p>
+            Welcome to your Online Sphere account.
+        </p>
+
+    </section>
+
+    <section id="account">
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span>Available Balance</span>
+
+                <h3>
+                    KSh
+                    <span id="dashboardBalance">
+                        0.00
+                    </span>
+                </h3>
+            </div>
+
+            <div class="stat-card">
+                <span>Total Deposits</span>
+
+                <h3>
+                    KSh
+                    <span id="dashboardDeposits">
+                        0.00
+                    </span>
+                </h3>
+            </div>
+
+            <div class="stat-card">
+                <span>Total Bonus</span>
+
+                <h3>
+                    KSh
+                    <span id="dashboardBonus">
+                        0.00
+                    </span>
+                </h3>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="action-grid">
+
+        <div class="action-card">
+
+            <div class="action-icon">
+                ➕
+            </div>
+
+            <h2>Deposit</h2>
+
+            <p>
+                Add money to your account.
+            </p>
+
+            <button onclick="openModal('depositModal')">
+                Deposit
+            </button>
+
+        </div>
+
+        <div class="action-card">
+
+            <div class="action-icon">
+                💸
+            </div>
+
+            <h2>Withdraw</h2>
+
+            <p>
+                Request a withdrawal.
+            </p>
+
+            <button onclick="openModal('withdrawModal')">
+                Withdraw
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+
+    <strong>ONLINE SPHERE</strong>
+
+    <p>
+        Secure Member Portal
+    </p>
+
+</footer>
+
+<div class="modal" id="depositModal">
+
+    <div class="modal-box">
+
+        <button class="close-btn"
+                onclick="closeModal('depositModal')">
+            ×
+        </button>
+
+        <h2>Deposit</h2>
+
+        <label>Amount</label>
+
+        <input
+            type="number"
+            id="dashboardDepositAmount"
+            placeholder="Amount in KSh"
+        >
+
+        <label>M-Pesa Number</label>
+
+        <input
+            type="tel"
+            placeholder="07XXXXXXXX"
+        >
+
+        <button class="primary-btn full"
+                onclick="processDashboardDeposit()">
+            Continue
+        </button>
+
+    </div>
+
+</div>
+
+<div class="modal" id="withdrawModal">
+
+    <div class="modal-box">
+
+        <button class="close-btn"
+                onclick="closeModal('withdrawModal')">
+            ×
+        </button>
+
+        <h2>Withdraw</h2>
+
+        <label>Amount</label>
+
+        <input
+            type="number"
+            id="dashboardWithdrawAmount"
+            placeholder="Amount in KSh"
+        >
+
+        <label>M-Pesa Number</label>
+
+        <input
+            type="tel"
+            placeholder="07XXXXXXXX"
+        >
+
+        <button class="primary-btn full"
+                onclick="processDashboardWithdrawal()">
+            Request Withdrawal
+        </button>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
