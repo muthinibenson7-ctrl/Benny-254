@@ -1,2975 +1,2867 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a2e5c">
-<title>Online Sphere Commerce | Member Portal</title>
+============================================================
+ONLINE SPHERE COMMERCE — REAL AUTHENTICATION VERSION
+============================================================
 
-<style>
+PROJECT STRUCTURE
+
+online-sphere/
+│
+├── package.json
+├── server.js
+├── .env
+│
+└── public/
+    ├── index.html
+    ├── dashboard.html
+    ├── style.css
+    └── app.js
+
+
+============================================================
+FILE: package.json
+============================================================
+
+{
+  "name": "online-sphere-portal",
+  "version": "1.0.0",
+  "description": "Online Sphere Commerce member portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.8.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
+
+
+============================================================
+FILE: .env
+============================================================
+
+PORT=3000
+
+# CHANGE THIS TO A LONG RANDOM SECRET BEFORE PRODUCTION
+JWT_SECRET=CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_123456789
+
+
+============================================================
+FILE: server.js
+============================================================
+
+require("dotenv").config();
+
+const express = require("express");
+const path = require("path");
+const bcrypt = require("bcryptjs");
+const Database = require("better-sqlite3");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const rateLimit = require("express-rate-limit");
+
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET || JWT_SECRET.includes("CHANGE_THIS")) {
+    console.warn(
+        "WARNING: Change JWT_SECRET in .env before using this system in production."
+    );
+}
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.use(
+    "/api/",
+    rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: {
+            error: "Too many requests. Please try again later."
+        }
+    })
+);
+
+const db = new Database("sphere.db");
+
+db.pragma("journal_mode = WAL");
+
+db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        phone TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        balance REAL DEFAULT 0,
+        level INTEGER DEFAULT 1,
+        experience INTEGER DEFAULT 15,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        amount REAL NOT NULL,
+        status TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    );
+`);
+
+function normalizePhone(phone) {
+    return String(phone || "")
+        .trim()
+        .replace(/\s+/g, "");
+}
+
+function validPhone(phone) {
+    return /^(07\d{8}|01\d{8}|\+2547\d{8}|\+2541\d{8})$/.test(phone);
+}
+
+function createToken(user) {
+    return jwt.sign(
+        {
+            id: user.id,
+            phone: user.phone
+        },
+        JWT_SECRET,
+        {
+            expiresIn: "7d"
+        }
+    );
+}
+
+function authenticate(req, res, next) {
+    const token = req.cookies.sphere_session;
+
+    if (!token) {
+        return res.status(401).json({
+            error: "Authentication required."
+        });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        const user = db
+            .prepare(
+                `
+                SELECT id, phone, balance, level, experience, created_at
+                FROM users
+                WHERE id = ?
+                `
+            )
+            .get(decoded.id);
+
+        if (!user) {
+            return res.status(401).json({
+                error: "Account not found."
+            });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        return res.status(401).json({
+            error: "Session expired. Please log in again."
+        });
+    }
+}
+
+
 /* =========================================================
-   ONLINE SPHERE COMMERCE
-   COMPLETE SINGLE-FILE INTERACTIVE MEMBER PORTAL
+   REGISTER
    ========================================================= */
 
-:root{
-    --primary:#0a2e5c;
-    --secondary:#0d3d7a;
-    --accent:#1dbf73;
-    --whatsapp:#25D366;
-    --gold:#d4af37;
-    --danger:#e63946;
-    --warning:#f08c00;
-    --info:#3b82f6;
-    --white:#ffffff;
-    --bg:#f4f7fa;
-    --surface:#ffffff;
-    --surface2:#f1f5f9;
-    --text:#1e293b;
-    --muted:#64748b;
-    --border:#e2e8f0;
-    --shadow:0 18px 50px rgba(15,23,42,.10);
-    --radius:28px;
-    --header:linear-gradient(135deg,#071d3a,#0a2e5c 55%,#0d3d7a);
-}
+app.post("/api/register", async (req, res) => {
+    try {
+        const phone = normalizePhone(req.body.phone);
+        const password = String(req.body.password || "");
 
-[data-theme="dark"]{
-    --bg:#07111f;
-    --surface:#101d2e;
-    --surface2:#162538;
-    --white:#101d2e;
-    --text:#f1f5f9;
-    --muted:#9aaabd;
-    --border:#26384d;
-    --shadow:0 20px 60px rgba(0,0,0,.35);
-}
+        if (!validPhone(phone)) {
+            return res.status(400).json({
+                error: "Enter a valid Kenyan phone number."
+            });
+        }
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
+        if (password.length < 8) {
+            return res.status(400).json({
+                error: "Password must contain at least 8 characters."
+            });
+        }
 
-html{
-    scroll-behavior:smooth;
-}
+        const existing = db
+            .prepare("SELECT id FROM users WHERE phone = ?")
+            .get(phone);
 
-body{
-    font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    line-height:1.6;
-    overflow-x:hidden;
-}
+        if (existing) {
+            return res.status(409).json({
+                error: "An account with this phone number already exists."
+            });
+        }
 
-button,
-input,
-select,
-textarea{
-    font:inherit;
-}
+        const passwordHash = await bcrypt.hash(password, 12);
 
-button{
-    cursor:pointer;
-}
+        const result = db
+            .prepare(
+                `
+                INSERT INTO users
+                (phone, password_hash, balance, level, experience)
+                VALUES (?, ?, 0, 1, 15)
+                `
+            )
+            .run(phone, passwordHash);
 
-a{
-    text-decoration:none;
-}
+        const user = db
+            .prepare(
+                `
+                SELECT id, phone, balance, level, experience, created_at
+                FROM users
+                WHERE id = ?
+                `
+            )
+            .get(result.lastInsertRowid);
 
-.container{
-    width:min(1160px,calc(100% - 32px));
-    margin:auto;
-}
+        const token = createToken(user);
 
-/* =========================================================
-   LOADING SCREEN
-   ========================================================= */
+        res.cookie("sphere_session", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
 
-#loadingScreen{
-    position:fixed;
-    inset:0;
-    z-index:9999999;
-    background:var(--header);
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    gap:20px;
-}
+        res.json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.error(error);
 
-.loader{
-    width:55px;
-    height:55px;
-    border:5px solid rgba(255,255,255,.2);
-    border-top-color:#fff;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-}
+        res.status(500).json({
+            error: "Unable to create account."
+        });
+    }
+});
 
-@keyframes spin{
-    to{transform:rotate(360deg)}
-}
 
 /* =========================================================
    LOGIN
    ========================================================= */
 
-#gatewayOverlay{
-    position:fixed;
-    inset:0;
-    z-index:999999;
-    background:
-        radial-gradient(circle at 20% 20%,rgba(29,191,115,.18),transparent 30%),
-        linear-gradient(135deg,#020712,#0a2e5c);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
+app.post("/api/login", async (req, res) => {
+    try {
+        const phone = normalizePhone(req.body.phone);
+        const password = String(req.body.password || "");
 
-.auth-card{
-    width:min(440px,100%);
-    background:var(--surface);
-    border-radius:38px;
-    padding:42px 32px;
-    box-shadow:0 35px 100px rgba(0,0,0,.45);
-    text-align:center;
-}
+        if (!validPhone(phone)) {
+            return res.status(400).json({
+                error: "Enter a valid phone number."
+            });
+        }
 
-.logo-mark{
-    width:72px;
-    height:72px;
-    margin:0 auto 18px;
-    border-radius:22px;
-    background:linear-gradient(135deg,var(--primary),var(--accent));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    font-size:28px;
-    font-weight:900;
-}
+        const user = db
+            .prepare(
+                `
+                SELECT *
+                FROM users
+                WHERE phone = ?
+                `
+            )
+            .get(phone);
 
-.badge{
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-    padding:8px 15px;
-    border-radius:50px;
-    background:rgba(29,191,115,.12);
-    color:var(--accent);
-    font-weight:900;
-    font-size:12px;
-    margin-bottom:15px;
-}
+        if (!user) {
+            return res.status(401).json({
+                error: "Invalid phone number or password."
+            });
+        }
 
-.auth-card h1{
-    font-size:30px;
-    color:var(--text);
-    margin-bottom:8px;
-}
+        const passwordCorrect = await bcrypt.compare(
+            password,
+            user.password_hash
+        );
 
-.auth-card p{
-    color:var(--muted);
-    font-size:14px;
-}
+        if (!passwordCorrect) {
+            return res.status(401).json({
+                error: "Invalid phone number or password."
+            });
+        }
 
-.field{
-    width:100%;
-    padding:16px 17px;
-    margin-top:14px;
-    border:1.5px solid var(--border);
-    background:var(--surface2);
-    color:var(--text);
-    border-radius:15px;
-    outline:none;
-}
+        const safeUser = {
+            id: user.id,
+            phone: user.phone,
+            balance: user.balance,
+            level: user.level,
+            experience: user.experience,
+            created_at: user.created_at
+        };
 
-.field:focus{
-    border-color:var(--accent);
-    box-shadow:0 0 0 4px rgba(29,191,115,.12);
-}
+        const token = createToken(safeUser);
 
-.password-wrap{
-    position:relative;
-}
+        res.cookie("sphere_session", token, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
 
-.password-wrap .field{
-    padding-right:55px;
-}
+        res.json({
+            success: true,
+            user: safeUser
+        });
+    } catch (error) {
+        console.error(error);
 
-.eye{
-    position:absolute;
-    right:15px;
-    top:50%;
-    transform:translateY(-50%);
-    background:none;
-    border:0;
-    color:var(--muted);
-}
+        res.status(500).json({
+            error: "Login failed."
+        });
+    }
+});
 
-.main-btn{
-    width:100%;
-    border:0;
-    border-radius:15px;
-    padding:16px 20px;
-    margin-top:15px;
-    color:#fff;
-    background:var(--primary);
-    font-weight:900;
-    letter-spacing:.6px;
-    transition:.25s;
-}
-
-.main-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 12px 25px rgba(10,46,92,.2);
-}
-
-.green-btn{
-    background:var(--accent);
-}
-
-.gold-btn{
-    background:var(--gold);
-}
-
-.warning-btn{
-    background:var(--warning);
-}
-
-.small-note{
-    margin-top:18px;
-    font-size:12px;
-    color:var(--muted);
-}
 
 /* =========================================================
-   APP
+   CURRENT USER
    ========================================================= */
 
-#mainContent{
-    display:none;
-}
+app.get("/api/me", authenticate, (req, res) => {
+    res.json({
+        authenticated: true,
+        user: req.user
+    });
+});
 
-.navbar{
-    position:sticky;
-    top:0;
-    z-index:8000;
-    background:rgba(255,255,255,.92);
-    backdrop-filter:blur(15px);
-    border-bottom:1px solid var(--border);
-}
-
-[data-theme="dark"] .navbar{
-    background:rgba(16,29,46,.92);
-}
-
-.nav-inner{
-    min-height:72px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-}
-
-.brand{
-    font-size:18px;
-    font-weight:950;
-    color:var(--primary);
-}
-
-[data-theme="dark"] .brand{
-    color:#fff;
-}
-
-.brand span{
-    color:var(--accent);
-}
-
-.nav-actions{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.icon-btn{
-    width:43px;
-    height:43px;
-    border:1px solid var(--border);
-    border-radius:13px;
-    background:var(--surface);
-    color:var(--text);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-}
-
-.notification-dot{
-    position:absolute;
-    width:9px;
-    height:9px;
-    background:var(--danger);
-    border-radius:50%;
-    top:8px;
-    right:8px;
-}
-
-.logout{
-    border:1px solid rgba(230,57,70,.3);
-    color:var(--danger);
-    background:transparent;
-    padding:10px 14px;
-    border-radius:12px;
-    font-weight:900;
-}
 
 /* =========================================================
-   MOBILE NAV
+   LOGOUT
    ========================================================= */
 
-.mobile-nav{
-    display:none;
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    z-index:9000;
-    background:var(--surface);
-    border-top:1px solid var(--border);
-    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
-    grid-template-columns:repeat(5,1fr);
-}
+app.post("/api/logout", (req, res) => {
+    res.clearCookie("sphere_session");
 
-.mobile-nav button{
-    background:none;
-    border:0;
-    color:var(--muted);
-    padding:7px 3px;
-    font-size:10px;
-    font-weight:800;
-}
+    res.json({
+        success: true
+    });
+});
 
-.mobile-nav button.active{
-    color:var(--accent);
-}
-
-.mobile-nav span{
-    display:block;
-    font-size:19px;
-    margin-bottom:2px;
-}
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
-.hero{
-    background:var(--header);
-    color:#fff;
-    padding:68px 0 110px;
-    border-radius:0 0 55px 55px;
-}
-
-.hero-content{
-    text-align:center;
-}
-
-.hero .badge{
-    background:rgba(255,255,255,.12);
-    color:#fff;
-}
-
-.hero h1{
-    font-size:clamp(35px,7vw,65px);
-    line-height:1;
-    letter-spacing:-3px;
-    font-weight:950;
-}
-
-.hero p{
-    margin:17px auto 0;
-    max-width:650px;
-    opacity:.85;
-}
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-.dashboard-grid{
-    display:grid;
-    grid-template-columns:1.15fr .85fr;
-    gap:24px;
-    margin-top:-58px;
-    position:relative;
-    z-index:2;
-}
-
-.card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:28px;
-}
-
-.member-card{
-    color:#fff;
-    background:linear-gradient(135deg,#162a43,#020914);
-    border:0;
-}
-
-.member-top{
-    display:flex;
-    justify-content:space-between;
-    gap:15px;
-    align-items:flex-start;
-}
-
-.member-label{
-    text-transform:uppercase;
-    font-size:11px;
-    opacity:.7;
-    font-weight:900;
-    letter-spacing:1px;
-}
-
-.member-number{
-    font-size:28px;
-    font-weight:950;
-    margin-top:4px;
-}
-
-.status{
-    background:rgba(29,191,115,.16);
-    color:#61e6a0;
-    border:1px solid rgba(29,191,115,.3);
-    padding:6px 10px;
-    border-radius:50px;
-    font-size:10px;
-    font-weight:900;
-}
-
-.progress{
-    height:11px;
-    background:rgba(255,255,255,.1);
-    border-radius:20px;
-    overflow:hidden;
-    margin:30px 0 10px;
-}
-
-.progress-fill{
-    width:15%;
-    height:100%;
-    background:var(--accent);
-    border-radius:20px;
-    box-shadow:0 0 15px var(--accent);
-}
-
-.member-bottom{
-    display:flex;
-    justify-content:space-between;
-    font-size:11px;
-    font-weight:900;
-    opacity:.8;
-}
-
-.balance-card{
-    text-align:center;
-}
-
-.balance-label{
-    color:var(--muted);
-    text-transform:uppercase;
-    font-size:11px;
-    font-weight:900;
-    letter-spacing:1px;
-}
-
-.balance{
-    color:var(--danger);
-    font-size:38px;
-    font-weight:950;
-    margin:7px 0 18px;
-}
-
-.two-btn{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-
-.two-btn button{
-    border:0;
-    border-radius:13px;
-    padding:13px 10px;
-    color:#fff;
-    font-weight:900;
-}
-
-/* =========================================================
-   SECTION
-   ========================================================= */
-
-.section{
-    padding:60px 0 0;
-}
-
-.section-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:end;
-    gap:15px;
-    margin-bottom:20px;
-}
-
-.section-head h2{
-    color:var(--primary);
-    font-size:27px;
-    font-weight:950;
-}
-
-[data-theme="dark"] .section-head h2{
-    color:#fff;
-}
-
-.section-head p{
-    color:var(--muted);
-    font-size:14px;
-}
-
-/* =========================================================
-   QUICK ACTIONS
-   ========================================================= */
-
-.quick-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-}
-
-.quick{
-    border:1px solid var(--border);
-    background:var(--surface);
-    color:var(--text);
-    border-radius:20px;
-    padding:20px;
-    text-align:center;
-    box-shadow:var(--shadow);
-}
-
-.quick-icon{
-    font-size:27px;
-    margin-bottom:8px;
-}
-
-.quick strong{
-    display:block;
-    font-size:13px;
-}
-
-.quick small{
-    color:var(--muted);
-}
-
-/* =========================================================
-   STATS
-   ========================================================= */
-
-.stats-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-}
-
-.stat{
-    padding:22px;
-    border-radius:22px;
-    background:var(--surface);
-    border:1px solid var(--border);
-}
-
-.stat-icon{
-    font-size:22px;
-}
-
-.stat-value{
-    font-size:25px;
-    font-weight:950;
-    margin-top:5px;
-}
-
-.stat-label{
-    color:var(--muted);
-    font-size:12px;
-}
-
-/* =========================================================
-   CALCULATOR
-   ========================================================= */
-
-.calculator{
-    border-top:5px solid var(--primary);
-}
-
-.slider{
-    width:100%;
-    margin:28px 0;
-    accent-color:var(--accent);
-}
-
-.calc-results{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-}
-
-.calc-box{
-    background:var(--surface2);
-    padding:20px;
-    border-radius:18px;
-    text-align:center;
-}
-
-.calc-box small{
-    color:var(--muted);
-    font-weight:900;
-}
-
-.calc-box strong{
-    display:block;
-    color:var(--accent);
-    font-size:24px;
-    margin-top:4px;
-}
-
-/* =========================================================
-   TASK CENTER
-   ========================================================= */
-
-.task-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:18px;
-}
-
-.task{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:22px;
-    padding:22px;
-    box-shadow:var(--shadow);
-}
-
-.task-tag{
-    display:inline-block;
-    font-size:10px;
-    font-weight:900;
-    padding:5px 9px;
-    border-radius:50px;
-    background:rgba(29,191,115,.12);
-    color:var(--accent);
-}
-
-.task h3{
-    margin:12px 0 5px;
-}
-
-.task p{
-    color:var(--muted);
-    font-size:13px;
-}
-
-.task-footer{
-    margin-top:18px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.task-reward{
-    font-weight:950;
-    color:var(--accent);
-}
-
-.task button{
-    border:0;
-    padding:9px 13px;
-    border-radius:10px;
-    background:var(--primary);
-    color:#fff;
-    font-weight:900;
-}
-
-/* =========================================================
-   PACKAGES
-   ========================================================= */
-
-.package-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:22px;
-}
-
-.package{
-    background:var(--surface);
-    border:2px solid transparent;
-    border-radius:28px;
-    padding:30px;
-    box-shadow:var(--shadow);
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-}
-
-.package.featured{
-    border-color:var(--gold);
-    transform:translateY(-8px);
-}
-
-.recommended{
-    display:inline-block;
-    background:var(--gold);
-    color:#fff;
-    padding:6px 13px;
-    border-radius:50px;
-    font-size:10px;
-    font-weight:900;
-}
-
-.price{
-    font-size:42px;
-    font-weight:950;
-    color:var(--primary);
-    margin:18px 0;
-}
-
-[data-theme="dark"] .price{
-    color:#fff;
-}
-
-.package ul{
-    list-style:none;
-    color:var(--muted);
-    line-height:2;
-    font-size:13px;
-    margin-bottom:20px;
-}
-
-.package li::first-letter{
-    color:var(--accent);
-}
-
-/* =========================================================
-   PAYOUT DEMO
-   ========================================================= */
-
-.demo-note{
-    background:rgba(240,140,0,.1);
-    color:#b45309;
-    border:1px solid rgba(240,140,0,.25);
-    padding:12px 15px;
-    border-radius:13px;
-    font-size:12px;
-    margin-bottom:15px;
-}
-
-[data-theme="dark"] .demo-note{
-    color:#fbbf24;
-}
-
-.payout-table{
-    overflow:hidden;
-    border-radius:22px;
-    border:1px solid var(--border);
-}
-
-.table-head,
-.payout-row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    padding:16px 20px;
-    gap:10px;
-}
-
-.table-head{
-    background:var(--primary);
-    color:#fff;
-    font-weight:900;
-    font-size:11px;
-    text-transform:uppercase;
-}
-
-.payout-row{
-    border-bottom:1px solid var(--border);
-    font-size:13px;
-}
-
-.payout-row:last-child{
-    border-bottom:0;
-}
-
-.amount{
-    color:var(--accent);
-    font-weight:900;
-}
 
 /* =========================================================
    TRANSACTIONS
    ========================================================= */
 
-.transaction-list{
-    display:flex;
-    flex-direction:column;
-}
+app.get("/api/transactions", authenticate, (req, res) => {
+    const transactions = db
+        .prepare(
+            `
+            SELECT
+                id,
+                type,
+                amount,
+                status,
+                created_at
+            FROM transactions
+            WHERE user_id = ?
+            ORDER BY id DESC
+            `
+        )
+        .all(req.user.id);
 
-.transaction{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    padding:17px 0;
-    border-bottom:1px solid var(--border);
-}
+    res.json({
+        transactions
+    });
+});
 
-.transaction:last-child{
-    border-bottom:0;
-}
-
-.transaction-left{
-    display:flex;
-    align-items:center;
-    gap:13px;
-}
-
-.transaction-icon{
-    width:42px;
-    height:42px;
-    border-radius:13px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:var(--surface2);
-}
-
-.transaction small{
-    color:var(--muted);
-    display:block;
-}
-
-.positive{
-    color:var(--accent);
-    font-weight:900;
-}
-
-.pending{
-    color:var(--warning);
-    font-weight:900;
-}
 
 /* =========================================================
-   SUPPORT
+   PROTECTED DASHBOARD
    ========================================================= */
 
-.support{
-    background:var(--primary);
-    color:#fff;
-    border-radius:30px;
-    padding:35px;
-}
+app.get("/dashboard", (req, res) => {
+    res.sendFile(
+        path.join(__dirname, "public", "dashboard.html")
+    );
+});
 
-.support h2{
-    margin-bottom:8px;
-}
-
-.support p{
-    opacity:.75;
-}
-
-.support-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-    margin-top:25px;
-}
-
-.support-link{
-    color:#fff;
-    padding:17px;
-    border-radius:15px;
-    text-align:center;
-    font-weight:900;
-}
-
-.whatsapp{
-    background:var(--whatsapp);
-}
-
-.email{
-    background:#3b82f6;
-}
 
 /* =========================================================
-   FAQ
+   STATIC FILES
    ========================================================= */
 
-.faq{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
+app.use(express.static(path.join(__dirname, "public")));
 
-.faq-item{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:17px;
-    overflow:hidden;
-}
-
-.faq-question{
-    width:100%;
-    padding:18px;
-    background:none;
-    color:var(--text);
-    border:0;
-    display:flex;
-    justify-content:space-between;
-    text-align:left;
-    font-weight:900;
-}
-
-.faq-answer{
-    display:none;
-    padding:0 18px 18px;
-    color:var(--muted);
-    font-size:13px;
-}
 
 /* =========================================================
-   MODALS
+   START SERVER
    ========================================================= */
 
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    backdrop-filter:blur(8px);
-    z-index:20000;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-}
+app.listen(PORT, () => {
+    console.log(`Online Sphere running on port ${PORT}`);
+});
 
-.modal-card{
-    width:min(500px,100%);
-    max-height:90vh;
-    overflow:auto;
-    background:var(--surface);
-    color:var(--text);
-    border-radius:28px;
-    padding:28px;
-    box-shadow:0 30px 100px rgba(0,0,0,.4);
-}
 
-.modal-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:18px;
-}
+============================================================
+FILE: public/index.html
+============================================================
 
-.close{
-    border:0;
-    background:var(--surface2);
-    color:var(--text);
-    width:38px;
-    height:38px;
-    border-radius:12px;
-}
+<!DOCTYPE html>
+<html lang="en">
 
-/* =========================================================
-   NOTIFICATION PANEL
-   ========================================================= */
+<head>
 
-.notification{
-    padding:15px 0;
-    border-bottom:1px solid var(--border);
-}
+<meta charset="UTF-8">
 
-.notification strong{
-    display:block;
-}
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-.notification small{
-    color:var(--muted);
-}
+<title>Online Sphere Commerce | Login</title>
 
-/* =========================================================
-   TOAST
-   ========================================================= */
+<link rel="stylesheet" href="style.css">
 
-#toast{
-    position:fixed;
-    left:50%;
-    bottom:30px;
-    transform:translate(-50%,120px);
-    background:#111827;
-    color:#fff;
-    padding:14px 20px;
-    border-radius:14px;
-    z-index:99999;
-    opacity:0;
-    transition:.35s;
-    font-size:13px;
-    box-shadow:0 15px 40px rgba(0,0,0,.25);
-}
-
-#toast.show{
-    transform:translate(-50%,0);
-    opacity:1;
-}
-
-/* =========================================================
-   FLOATING THEME BUTTON
-   ========================================================= */
-
-.theme{
-    position:fixed;
-    right:22px;
-    bottom:25px;
-    width:53px;
-    height:53px;
-    border:0;
-    border-radius:50%;
-    background:var(--primary);
-    color:#fff;
-    z-index:7000;
-    box-shadow:0 12px 30px rgba(0,0,0,.25);
-}
-
-/* =========================================================
-   TIMER
-   ========================================================= */
-
-.activation{
-    margin-top:40px;
-    padding:35px;
-    border:2px dashed var(--warning);
-    border-radius:28px;
-    background:rgba(240,140,0,.07);
-    text-align:center;
-}
-
-.timer{
-    font-size:45px;
-    color:var(--danger);
-    font-family:monospace;
-    font-weight:950;
-    margin:10px 0;
-}
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-footer{
-    text-align:center;
-    padding:70px 0 100px;
-    color:var(--muted);
-    font-size:12px;
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media(max-width:900px){
-    .dashboard-grid{
-        grid-template-columns:1fr;
-    }
-
-    .quick-grid,
-    .stats-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .task-grid{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .package-grid{
-        grid-template-columns:1fr;
-    }
-
-    .package.featured{
-        transform:none;
-    }
-
-    .theme{
-        bottom:85px;
-    }
-
-    .mobile-nav{
-        display:grid;
-    }
-
-    footer{
-        padding-bottom:120px;
-    }
-}
-
-@media(max-width:600px){
-    .container{
-        width:min(100% - 22px,1160px);
-    }
-
-    .nav-inner{
-        min-height:64px;
-    }
-
-    .brand{
-        font-size:15px;
-    }
-
-    .logout{
-        font-size:10px;
-        padding:8px 10px;
-    }
-
-    .hero{
-        padding:50px 0 95px;
-        border-radius:0 0 35px 35px;
-    }
-
-    .hero h1{
-        letter-spacing:-2px;
-    }
-
-    .dashboard-grid{
-        margin-top:-45px;
-    }
-
-    .card{
-        padding:21px;
-        border-radius:23px;
-    }
-
-    .member-number{
-        font-size:23px;
-    }
-
-    .balance{
-        font-size:32px;
-    }
-
-    .quick-grid,
-    .stats-grid,
-    .task-grid{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .section{
-        padding-top:45px;
-    }
-
-    .section-head{
-        display:block;
-    }
-
-    .section-head p{
-        margin-top:4px;
-    }
-
-    .calc-results,
-    .support-grid{
-        grid-template-columns:1fr;
-    }
-
-    .table-head,
-    .payout-row{
-        grid-template-columns:1fr 1fr 1fr;
-        padding:13px 10px;
-        font-size:10px;
-    }
-
-    .activation{
-        padding:25px 18px;
-    }
-}
-</style>
 </head>
 
-<body data-theme="light">
+<body class="auth-page">
 
-<!-- =======================================================
-     LOADING
-======================================================= -->
-<div id="loadingScreen">
-    <div class="loader"></div>
-    <strong>ONLINE SPHERE COMMERCE</strong>
-    <small>Loading portal...</small>
+<div class="theme-button" onclick="toggleTheme()">
+    🌓
 </div>
 
-<!-- =======================================================
-     LOGIN
-======================================================= -->
-<div id="gatewayOverlay">
+
+<div class="auth-container">
 
     <div class="auth-card">
 
-        <div class="logo-mark">OS</div>
+        <div class="security-badge">
+            🔒 SECURE MEMBER PORTAL
+        </div>
 
-        <div class="badge">🔒 SPHERE SECURITY VERIFIED</div>
+        <h1>
+            ONLINE SPHERE
+        </h1>
 
-        <h1>Member Portal</h1>
-
-        <p>
-            Access your digital workspace and member dashboard.
+        <p class="auth-subtitle">
+            Commerce Member Portal
         </p>
 
-        <form id="loginForm">
+
+        <!-- LOGIN -->
+
+        <div id="loginForm">
+
+            <h2>
+                Welcome Back
+            </h2>
+
+            <p class="muted">
+                Sign in to access your member workspace.
+            </p>
 
             <input
+                id="loginPhone"
+                class="input"
                 type="tel"
-                id="userPhone"
-                class="field"
                 placeholder="M-Pesa Number (e.g. 07...)"
-                maxlength="10"
-                required
+                autocomplete="tel"
             >
 
-            <div class="password-wrap">
+            <div class="password-wrapper">
 
                 <input
+                    id="loginPassword"
+                    class="input"
                     type="password"
-                    id="userPass"
-                    class="field"
                     placeholder="Access Password"
-                    required
+                    autocomplete="current-password"
                 >
 
                 <button
                     type="button"
-                    class="eye"
-                    onclick="togglePassword()"
-                >👁</button>
+                    class="show-password"
+                    onclick="togglePassword('loginPassword')"
+                >
+                    👁
+                </button>
 
             </div>
 
             <button
-                type="submit"
-                class="main-btn"
+                class="primary-button"
+                onclick="login()"
+                id="loginButton"
             >
                 AUTHORIZE LOGIN
             </button>
 
-        </form>
+            <div id="loginMessage" class="message"></div>
 
-        <div class="small-note">
-            Demo interface: connect a secure backend before using this
-            for real member authentication.
-        </div>
-
-    </div>
-
-</div>
-
-<!-- =======================================================
-     MAIN APPLICATION
-======================================================= -->
-<div id="mainContent">
-
-    <!-- NAVBAR -->
-    <nav class="navbar">
-
-        <div class="container nav-inner">
-
-            <div class="brand">
-                ONLINE SPHERE <span>COMMERCE</span>
-            </div>
-
-            <div class="nav-actions">
-
+            <p class="switch-text">
+                Don't have an account?
                 <button
-                    class="icon-btn"
-                    onclick="openModal('notificationModal')"
-                    aria-label="Notifications"
+                    class="link-button"
+                    onclick="showRegister()"
                 >
-                    🔔
-                    <span class="notification-dot"></span>
+                    Create account
                 </button>
-
-                <button
-                    class="icon-btn"
-                    onclick="openModal('profileModal')"
-                    aria-label="Profile"
-                >
-                    👤
-                </button>
-
-                <button
-                    class="logout"
-                    onclick="logout()"
-                >
-                    LOGOUT
-                </button>
-
-            </div>
-
-        </div>
-
-    </nav>
-
-    <!-- HERO -->
-    <header class="hero">
-
-        <div class="container hero-content">
-
-            <div class="badge">
-                ⭐ MEMBER WORKSPACE ACTIVE
-            </div>
-
-            <h1>WORKSPACE ACTIVE</h1>
-
-            <p>
-                Welcome to your Online Sphere Commerce member dashboard.
-                Manage your account, explore available tasks and monitor
-                your activity from one place.
             </p>
 
         </div>
 
-    </header>
 
-    <main class="container">
+        <!-- REGISTER -->
 
-        <!-- DASHBOARD -->
-        <section class="dashboard-grid">
-
-            <div class="card member-card" id="profile-card">
-
-                <div class="member-top">
-
-                    <div>
-
-                        <div class="member-label">
-                            Official Member
-                        </div>
-
-                        <div
-                            class="member-number"
-                            id="displayNum"
-                        >
-                            07XXXXXXXX
-                        </div>
-
-                    </div>
-
-                    <div class="status">
-                        ● ACTIVE
-                    </div>
-
-                </div>
-
-                <div class="progress">
-                    <div
-                        class="progress-fill"
-                        id="levelProgress"
-                    ></div>
-                </div>
-
-                <div class="member-bottom">
-
-                    <span>
-                        LEVEL 1: NEWBIE
-                    </span>
-
-                    <span id="experience">
-                        EXP: 15%
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div class="card balance-card" id="balance-card">
-
-                <div class="balance-label">
-                    Available Balance
-                </div>
-
-                <div class="balance" id="balance">
-                    KES 0.00
-                </div>
-
-                <div class="two-btn">
-
-                    <button
-                        class="green-btn"
-                        onclick="scrollToSection('packages-section')"
-                    >
-                        DEPOSIT
-                    </button>
-
-                    <button
-                        class="main-btn"
-                        style="margin:0"
-                        onclick="showToast('Account activation required for withdrawals.')"
-                    >
-                        WITHDRAW
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- QUICK ACTIONS -->
-        <section class="section">
-
-            <div class="section-head">
-
-                <div>
-                    <h2>Quick Actions</h2>
-                    <p>Access your most-used portal features.</p>
-                </div>
-
-            </div>
-
-            <div class="quick-grid">
-
-                <button
-                    class="quick"
-                    onclick="scrollToSection('tasks-section')"
-                >
-                    <div class="quick-icon">📋</div>
-                    <strong>Task Center</strong>
-                    <small>View tasks</small>
-                </button>
-
-                <button
-                    class="quick"
-                    onclick="scrollToSection('calculator-section')"
-                >
-                    <div class="quick-icon">📊</div>
-                    <strong>Calculator</strong>
-                    <small>View projection</small>
-                </button>
-
-                <button
-                    class="quick"
-                    onclick="openModal('transactionModal')"
-                >
-                    <div class="quick-icon">🧾</div>
-                    <strong>Transactions</strong>
-                    <small>View activity</small>
-                </button>
-
-                <button
-                    class="quick"
-                    onclick="openModal('profileModal')"
-                >
-                    <div class="quick-icon">⚙️</div>
-                    <strong>Settings</strong>
-                    <small>Manage account</small>
-                </button>
-
-            </div>
-
-        </section>
-
-        <!-- STATISTICS -->
-        <section class="section">
-
-            <div class="stats-grid">
-
-                <div class="stat">
-                    <div class="stat-icon">📋</div>
-                    <div class="stat-value" id="tasksCompleted">0</div>
-                    <div class="stat-label">Tasks Completed</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-icon">🎯</div>
-                    <div class="stat-value">15%</div>
-                    <div class="stat-label">Level Progress</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-icon">💳</div>
-                    <div class="stat-value">0</div>
-                    <div class="stat-label">Withdrawals</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-icon">⭐</div>
-                    <div class="stat-value">L1</div>
-                    <div class="stat-label">Current Level</div>
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- CALCULATOR -->
-        <section
-            class="section"
-            id="calculator-section"
+        <div
+            id="registerForm"
+            style="display:none;"
         >
 
-            <div class="card calculator">
+            <h2>
+                Create Account
+            </h2>
 
-                <div class="section-head">
+            <p class="muted">
+                Create your secure member account.
+            </p>
 
-                    <div>
-                        <h2>Weekly Earning Projections</h2>
-                        <p>
-                            Adjust task volume to view a simple projection.
-                            This is not a guaranteed payout.
-                        </p>
-                    </div>
+            <input
+                id="registerPhone"
+                class="input"
+                type="tel"
+                placeholder="M-Pesa Number (e.g. 07...)"
+                autocomplete="tel"
+            >
 
-                </div>
+            <div class="password-wrapper">
 
                 <input
-                    type="range"
-                    min="1"
-                    max="50"
-                    value="8"
-                    class="slider"
-                    id="taskSlider"
+                    id="registerPassword"
+                    class="input"
+                    type="password"
+                    placeholder="Create Password"
+                    autocomplete="new-password"
                 >
-
-                <div class="calc-results">
-
-                    <div class="calc-box">
-
-                        <small>DAILY TASKS</small>
-
-                        <strong id="labelTasks">
-                            8 Tasks
-                        </strong>
-
-                    </div>
-
-                    <div class="calc-box">
-
-                        <small>WEEKLY PROJECTION</small>
-
-                        <strong id="labelPayout">
-                            KES 5,600
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- ACTIVATION TIMER -->
-        <section class="section">
-
-            <div class="activation">
-
-                <h2>🎁 NEW MEMBER BONUS</h2>
-
-                <p style="margin-top:8px">
-                    Step in, work smart and grow.
-                    Activate your account within the next 15 minutes
-                    to receive a <strong>KES 250 Activation Bonus!</strong>
-                </p>
-
-                <div
-                    class="timer"
-                    id="mainTimer"
-                >
-                    15:00
-                </div>
 
                 <button
-                    class="main-btn warning-btn"
-                    style="max-width:300px;margin:15px auto 0"
-                    onclick="scrollToSection('packages-section')"
+                    type="button"
+                    class="show-password"
+                    onclick="togglePassword('registerPassword')"
                 >
-                    CLAIM MY BONUS NOW
+                    👁
                 </button>
 
             </div>
 
-        </section>
-
-        <!-- TASK CENTER -->
-        <section
-            class="section"
-            id="tasks-section"
-        >
-
-            <div class="section-head">
-
-                <div>
-                    <h2>Task Center</h2>
-                    <p>
-                        Interactive task interface for your member workspace.
-                    </p>
-                </div>
-
+            <div class="password-rules">
+                Password must contain at least 8 characters.
             </div>
 
-            <div class="task-grid">
-
-                <div class="task">
-
-                    <span class="task-tag">
-                        AVAILABLE
-                    </span>
-
-                    <h3>Ad Verification</h3>
-
-                    <p>
-                        Review advertising content according to the
-                        provided task instructions.
-                    </p>
-
-                    <div class="task-footer">
-
-                        <span class="task-reward">
-                            KES 100
-                        </span>
-
-                        <button onclick="completeTask(this)">
-                            START
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <div class="task">
-
-                    <span class="task-tag">
-                        AVAILABLE
-                    </span>
-
-                    <h3>Content Review</h3>
-
-                    <p>
-                        Review sample content and submit the requested
-                        feedback.
-                    </p>
-
-                    <div class="task-footer">
-
-                        <span class="task-reward">
-                            KES 150
-                        </span>
-
-                        <button onclick="completeTask(this)">
-                            START
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <div class="task">
-
-                    <span class="task-tag">
-                        AVAILABLE
-                    </span>
-
-                    <h3>Digital Survey</h3>
-
-                    <p>
-                        Complete a short sample survey for the member
-                        workspace.
-                    </p>
-
-                    <div class="task-footer">
-
-                        <span class="task-reward">
-                            KES 200
-                        </span>
-
-                        <button onclick="completeTask(this)">
-                            START
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- PACKAGES -->
-        <section
-            class="section"
-            id="packages-section"
-        >
-
-            <div class="section-head">
-
-                <div>
-                    <h2>Activate Your Account</h2>
-                    <p>
-                        Select a membership tier to unlock your task directory.
-                    </p>
-                </div>
-
-            </div>
-
-            <div class="package-grid">
-
-                <!-- STARTER -->
-                <div class="package">
-
-                    <div>
-
-                        <h3>STARTER</h3>
-
-                        <div class="price">
-                            KES 500
-                        </div>
-
-                        <ul>
-                            <li>✓ Weekly M-Pesa Withdrawals</li>
-                            <li>✓ Basic Ad Verification Tasks</li>
-                            <li>✓ Standard Support Access</li>
-                            <li>✓ Level 1 Progression</li>
-                        </ul>
-
-                    </div>
-
-                    <button
-                        class="main-btn"
-                        onclick="initializeMpesa(500,'STARTER')"
-                    >
-                        CHOOSE STARTER
-                    </button>
-
-                </div>
-
-                <!-- EXECUTIVE -->
-                <div class="package featured">
-
-                    <div>
-
-                        <span class="recommended">
-                            RECOMMENDED
-                        </span>
-
-                        <h3 style="margin-top:12px">
-                            EXECUTIVE
-                        </h3>
-
-                        <div class="price">
-                            KES 2,500
-                        </div>
-
-                        <ul>
-                            <li>✓ Instant Daily Withdrawals</li>
-                            <li>✓ Priority High-Pay Task Batches</li>
-                            <li>✓ 5% Lifetime Task Bonus</li>
-                            <li>✓ VIP WhatsApp Group Entry</li>
-                            <li>✓ Dedicated Account Manager</li>
-                        </ul>
-
-                    </div>
-
-                    <button
-                        class="main-btn green-btn"
-                        onclick="initializeMpesa(2500,'EXECUTIVE')"
-                    >
-                        CHOOSE EXECUTIVE
-                    </button>
-
-                </div>
-
-                <!-- PRO -->
-                <div class="package">
-
-                    <div>
-
-                        <h3>PRO</h3>
-
-                        <div class="price">
-                            KES 1,500
-                        </div>
-
-                        <ul>
-                            <li>✓ Daily M-Pesa Withdrawals</li>
-                            <li>✓ Full Directory Task Access</li>
-                            <li>✓ Priority Email Support</li>
-                            <li>✓ Level 2 Progression Jump</li>
-                        </ul>
-
-                    </div>
-
-                    <button
-                        class="main-btn"
-                        onclick="initializeMpesa(1500,'PRO')"
-                    >
-                        CHOOSE PRO
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- PAYOUT GALLERY -->
-        <section class="section">
-
-            <div class="section-head">
-
-                <div>
-                    <h2>Member Activity Gallery</h2>
-                    <p>
-                        Sample interface showing how verified transaction
-                        records can appear.
-                    </p>
-                </div>
-
-            </div>
-
-            <div class="demo-note">
-                ⚠️ DEMO DATA: The records below are sample interface data,
-                not proof of actual withdrawals.
-            </div>
-
-            <div class="payout-table">
-
-                <div class="table-head">
-                    <div>Recipient</div>
-                    <div>Amount</div>
-                    <div>Reference</div>
-                </div>
-
-                <div id="payoutTicker"></div>
-
-            </div>
-
-        </section>
-
-        <!-- TRANSACTIONS -->
-        <section class="section">
-
-            <div class="card">
-
-                <div class="section-head">
-
-                    <div>
-                        <h2>Recent Activity</h2>
-                        <p>Your local demo activity history.</p>
-                    </div>
-
-                    <button
-                        class="main-btn"
-                        style="width:auto;margin:0;padding:10px 15px"
-                        onclick="openModal('transactionModal')"
-                    >
-                        VIEW ALL
-                    </button>
-
-                </div>
-
-                <div
-                    class="transaction-list"
-                    id="recentTransactions"
+            <button
+                class="primary-button"
+                onclick="register()"
+                id="registerButton"
+            >
+                CREATE ACCOUNT
+            </button>
+
+            <div id="registerMessage" class="message"></div>
+
+            <p class="switch-text">
+                Already have an account?
+                <button
+                    class="link-button"
+                    onclick="showLogin()"
                 >
-
-                    <div class="transaction">
-
-                        <div class="transaction-left">
-
-                            <div class="transaction-icon">
-                                👤
-                            </div>
-
-                            <div>
-                                <strong>Account Login</strong>
-                                <small>Today</small>
-                            </div>
-
-                        </div>
-
-                        <span class="positive">
-                            ACTIVE
-                        </span>
-
-                    </div>
-
-                    <div class="transaction">
-
-                        <div class="transaction-left">
-
-                            <div class="transaction-icon">
-                                📋
-                            </div>
-
-                            <div>
-                                <strong>Task Center</strong>
-                                <small>Ready</small>
-                            </div>
-
-                        </div>
-
-                        <span class="pending">
-                            READY
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- SUPPORT -->
-        <section class="section">
-
-            <div class="support">
-
-                <h2>Official Support Center</h2>
-
-                <p>
-                    Contact the support team through the available channels.
-                </p>
-
-                <div class="support-grid">
-
-                    <a
-                        href="https://wa.me/254741723223"
-                        class="support-link whatsapp"
-                    >
-                        💬 WHATSAPP SUPPORT
-                    </a>
-
-                    <a
-                        href="mailto:support@onlinesphere.co.ke"
-                        class="support-link email"
-                    >
-                        📧 EMAIL HELP DESK
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- FAQ -->
-        <section class="section">
-
-            <div class="section-head">
-
-                <div>
-                    <h2>Frequently Asked Questions</h2>
-                    <p>Quick answers about the member portal.</p>
-                </div>
-
-            </div>
-
-            <div class="faq">
-
-                <div class="faq-item">
-
-                    <button
-                        class="faq-question"
-                        onclick="toggleFaq(this)"
-                    >
-                        What is the member portal?
-                        <span>＋</span>
-                    </button>
-
-                    <div class="faq-answer">
-                        The portal is the member-facing dashboard where
-                        account information, tasks, activity and other
-                        features can be presented.
-                    </div>
-
-                </div>
-
-                <div class="faq-item">
-
-                    <button
-                        class="faq-question"
-                        onclick="toggleFaq(this)"
-                    >
-                        Are the earnings shown guaranteed?
-                        <span>＋</span>
-                    </button>
-
-                    <div class="faq-answer">
-                        No. The calculator displays projections based on
-                        the values entered. Actual earnings depend on
-                        available work, eligibility and the applicable
-                        terms.
-                    </div>
-
-                </div>
-
-                <div class="faq-item">
-
-                    <button
-                        class="faq-question"
-                        onclick="toggleFaq(this)"
-                    >
-                        Is the M-Pesa integration live?
-                        <span>＋</span>
-                    </button>
-
-                    <div class="faq-answer">
-                        The current interface preserves the M-Pesa package
-                        details from the original design. A real payment
-                        integration should be connected through a secure
-                        backend before accepting real payments.
-                    </div>
-
-                </div>
-
-                <div class="faq-item">
-
-                    <button
-                        class="faq-question"
-                        onclick="toggleFaq(this)"
-                    >
-                        Can I use this website on my phone?
-                        <span>＋</span>
-                    </button>
-
-                    <div class="faq-answer">
-                        Yes. The interface is responsive and includes a
-                        mobile navigation bar for smaller screens.
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <footer>
-
-            <p>
-                © 2026 Online Sphere Commerce Company.
-                All Rights Reserved.
+                    Sign in
+                </button>
             </p>
 
-            <p style="margin-top:7px">
-                Member Portal Interface
-            </p>
-
-        </footer>
-
-    </main>
-
-</div>
-
-<!-- =======================================================
-     MOBILE NAV
-======================================================= -->
-
-<div class="mobile-nav">
-
-    <button
-        class="active"
-        onclick="scrollToTop()"
-    >
-        <span>🏠</span>
-        Home
-    </button>
-
-    <button
-        onclick="scrollToSection('tasks-section')"
-    >
-        <span>📋</span>
-        Tasks
-    </button>
-
-    <button
-        onclick="scrollToSection('packages-section')"
-    >
-        <span>💳</span>
-        Plans
-    </button>
-
-    <button
-        onclick="openModal('transactionModal')"
-    >
-        <span>🧾</span>
-        Activity
-    </button>
-
-    <button
-        onclick="openModal('profileModal')"
-    >
-        <span>👤</span>
-        Profile
-    </button>
-
-</div>
-
-<!-- =======================================================
-     PROFILE MODAL
-======================================================= -->
-
-<div
-    class="modal"
-    id="profileModal"
-    onclick="closeOutside(event,'profileModal')"
->
-
-    <div class="modal-card">
-
-        <div class="modal-head">
-
-            <h2>Account Settings</h2>
-
-            <button
-                class="close"
-                onclick="closeModal('profileModal')"
-            >
-                ✕
-            </button>
-
         </div>
 
-        <label>Member Number</label>
 
-        <input
-            class="field"
-            id="profilePhone"
-            readonly
-        >
-
-        <label style="display:block;margin-top:15px">
-            Display Name
-        </label>
-
-        <input
-            class="field"
-            id="profileName"
-            placeholder="Your name"
-        >
-
-        <button
-            class="main-btn green-btn"
-            onclick="saveProfile()"
-        >
-            SAVE PROFILE
-        </button>
-
-        <button
-            class="main-btn"
-            onclick="toggleInterfaceMode()"
-        >
-            🌓 TOGGLE DARK MODE
-        </button>
-
-    </div>
-
-</div>
-
-<!-- =======================================================
-     NOTIFICATION MODAL
-======================================================= -->
-
-<div
-    class="modal"
-    id="notificationModal"
-    onclick="closeOutside(event,'notificationModal')"
->
-
-    <div class="modal-card">
-
-        <div class="modal-head">
-
-            <h2>Notifications</h2>
-
-            <button
-                class="close"
-                onclick="closeModal('notificationModal')"
-            >
-                ✕
-            </button>
-
-        </div>
-
-        <div class="notification">
-
-            <strong>Welcome to your workspace</strong>
-
-            <small>
-                Your dashboard is ready.
-            </small>
-
-        </div>
-
-        <div class="notification">
-
-            <strong>Task Center available</strong>
-
-            <small>
-                Sample tasks are available for the demo interface.
-            </small>
-
-        </div>
-
-        <div class="notification">
-
-            <strong>Account status</strong>
-
-            <small>
-                Your current demo status is Active.
-            </small>
-
+        <div class="security-note">
+            Your password is securely hashed on the server.
         </div>
 
     </div>
 
 </div>
 
-<!-- =======================================================
-     TRANSACTION MODAL
-======================================================= -->
 
-<div
-    class="modal"
-    id="transactionModal"
-    onclick="closeOutside(event,'transactionModal')"
+<script src="app.js"></script>
+
+</body>
+</html>
+
+
+============================================================
+FILE: public/dashboard.html
+============================================================
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
 >
 
-    <div class="modal-card">
+<title>Online Sphere Commerce | Dashboard</title>
 
-        <div class="modal-head">
+<link rel="stylesheet" href="style.css">
 
-            <h2>Transaction History</h2>
+</head>
 
-            <button
-                class="close"
-                onclick="closeModal('transactionModal')"
-            >
-                ✕
-            </button>
+<body>
 
-        </div>
-
-        <div id="fullTransactions">
-
-            <div class="transaction">
-
-                <div class="transaction-left">
-
-                    <div class="transaction-icon">
-                        👤
-                    </div>
-
-                    <div>
-                        <strong>Login</strong>
-                        <small>Account access</small>
-                    </div>
-
-                </div>
-
-                <span class="positive">
-                    SUCCESS
-                </span>
-
-            </div>
-
-            <div class="transaction">
-
-                <div class="transaction-left">
-
-                    <div class="transaction-icon">
-                        📋
-                    </div>
-
-                    <div>
-                        <strong>Task Center</strong>
-                        <small>Opened</small>
-                    </div>
-
-                </div>
-
-                <span class="pending">
-                    READY
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-<!-- =======================================================
-     TOAST
-======================================================= -->
-
-<div id="toast"></div>
-
-<!-- =======================================================
-     THEME BUTTON
-======================================================= -->
-
-<button
-    class="theme"
-    onclick="toggleInterfaceMode()"
-    aria-label="Toggle theme"
->
+<div class="theme-button" onclick="toggleTheme()">
     🌓
-</button>
+</div>
+
+
+<nav class="navbar">
+
+    <div class="brand">
+        ONLINE SPHERE
+        <span>COMMERCE</span>
+    </div>
+
+    <button
+        class="logout-button"
+        onclick="logout()"
+    >
+        LOGOUT
+    </button>
+
+</nav>
+
+
+<header class="dashboard-header">
+
+    <div class="badge">
+        ⭐ MEMBER WORKSPACE
+    </div>
+
+    <h1>
+        WORKSPACE ACTIVE
+    </h1>
+
+    <p>
+        Your authenticated member dashboard.
+    </p>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- MEMBER + BALANCE -->
+
+<section class="dashboard-grid">
+
+
+    <div class="dashboard-card member-card">
+
+        <p class="small-label">
+            AUTHENTICATED MEMBER
+        </p>
+
+        <h2 id="displayPhone">
+            Loading...
+        </h2>
+
+        <div class="level-bar">
+            <div
+                id="levelProgress"
+                class="level-progress"
+            ></div>
+        </div>
+
+        <div class="level-info">
+
+            <span id="memberLevel">
+                LEVEL 1
+            </span>
+
+            <span id="memberExperience">
+                EXP: 15%
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-card balance-card">
+
+        <p class="small-label">
+            AVAILABLE BALANCE
+        </p>
+
+        <h2 id="balance">
+            KES 0.00
+        </h2>
+
+        <div class="two-buttons">
+
+            <button
+                class="green-button"
+                onclick="showNotice('Deposit integration will be connected to the real payment backend.')"
+            >
+                DEPOSIT
+            </button>
+
+            <button
+                class="blue-button"
+                onclick="showNotice('Withdrawal processing will be connected to verified transactions.')"
+            >
+                WITHDRAW
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- STATS -->
+
+<section class="stats-grid">
+
+    <div class="stat-card">
+
+        <span>
+            TASKS COMPLETED
+        </span>
+
+        <strong>
+            0
+        </strong>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <span>
+            PENDING TASKS
+        </span>
+
+        <strong>
+            0
+        </strong>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <span>
+            THIS WEEK
+        </span>
+
+        <strong>
+            KES 0
+        </strong>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <span>
+            ACCOUNT STATUS
+        </span>
+
+        <strong class="verified">
+            VERIFIED
+        </strong>
+
+    </div>
+
+</section>
+
+
+<!-- EARNINGS CALCULATOR -->
+
+<section class="dashboard-card calculator">
+
+    <h2>
+        Weekly Earning Projection
+    </h2>
+
+    <p class="muted">
+        This calculator is a projection only and does not represent guaranteed earnings.
+    </p>
+
+    <input
+        id="taskSlider"
+        type="range"
+        min="1"
+        max="50"
+        value="8"
+        oninput="calculateEarnings()"
+    >
+
+    <div class="calculator-results">
+
+        <div>
+
+            <span>
+                DAILY TASKS
+            </span>
+
+            <strong id="taskValue">
+                8
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>
+                PROJECTED WEEKLY VALUE
+            </span>
+
+            <strong id="weeklyValue">
+                KES 5,600
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- PACKAGES -->
+
+<section id="packages">
+
+    <div class="section-heading">
+
+        <h2>
+            Membership Options
+        </h2>
+
+        <p>
+            Choose an option that matches your needs.
+        </p>
+
+    </div>
+
+
+    <div class="package-grid">
+
+
+        <div class="package-card">
+
+            <h3>
+                STARTER
+            </h3>
+
+            <div class="price">
+                KES 500
+            </div>
+
+            <ul>
+
+                <li>✓ Basic task access</li>
+
+                <li>✓ Standard support</li>
+
+                <li>✓ Level 1 progression</li>
+
+                <li>✓ Member dashboard</li>
+
+            </ul>
+
+            <button
+                class="primary-button"
+                onclick="showNotice('Starter activation will be connected to verified payment processing.')"
+            >
+                CHOOSE STARTER
+            </button>
+
+        </div>
+
+
+        <div class="package-card featured">
+
+            <div class="recommended">
+                RECOMMENDED
+            </div>
+
+            <h3>
+                EXECUTIVE
+            </h3>
+
+            <div class="price">
+                KES 2,500
+            </div>
+
+            <ul>
+
+                <li>✓ Priority task access</li>
+
+                <li>✓ Advanced dashboard</li>
+
+                <li>✓ Member support</li>
+
+                <li>✓ Progress tracking</li>
+
+                <li>✓ VIP support access</li>
+
+            </ul>
+
+            <button
+                class="green-button"
+                onclick="showNotice('Executive activation will be connected to verified payment processing.')"
+            >
+                CHOOSE EXECUTIVE
+            </button>
+
+        </div>
+
+
+        <div class="package-card">
+
+            <h3>
+                PRO
+            </h3>
+
+            <div class="price">
+                KES 1,500
+            </div>
+
+            <ul>
+
+                <li>✓ Full task directory</li>
+
+                <li>✓ Priority support</li>
+
+                <li>✓ Level progression</li>
+
+                <li>✓ Earnings tracking</li>
+
+            </ul>
+
+            <button
+                class="primary-button"
+                onclick="showNotice('Pro activation will be connected to verified payment processing.')"
+            >
+                CHOOSE PRO
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- TRANSACTIONS -->
+
+<section class="dashboard-card">
+
+    <h2>
+        Transaction History
+    </h2>
+
+    <p class="muted">
+        Only verified transactions will appear here.
+    </p>
+
+    <div id="transactions">
+
+        <div class="empty-state">
+            No transactions yet.
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- SUPPORT -->
+
+<section class="support-card">
+
+    <h2>
+        Official Support Center
+    </h2>
+
+    <div class="support-grid">
+
+        <a
+            href="https://wa.me/254741723223"
+            class="support-button whatsapp"
+        >
+            💬 WHATSAPP SUPPORT
+        </a>
+
+        <a
+            href="mailto:support@onlinesphere.co.ke"
+            class="support-button email"
+        >
+            📧 EMAIL HELP DESK
+        </a>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    © 2026 Online Sphere Commerce.
+    All Rights Reserved.
+
+</footer>
+
+</main>
+
+
+<div
+    id="notice"
+    class="notice"
+></div>
+
+
+<script src="app.js"></script>
 
 <script>
 
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
-
-let currentPhone = "";
-let timerInterval = null;
-let taskCount = 0;
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-window.addEventListener("load", () => {
-
-    setTimeout(() => {
-
-        document.getElementById("loadingScreen").style.display = "none";
-
-        const savedTheme =
-            localStorage.getItem("sphere_portal_theme");
-
-        if(savedTheme){
-            document.body.setAttribute(
-                "data-theme",
-                savedTheme
-            );
-        }
-
-    },700);
-
-});
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-document
-.getElementById("loginForm")
-.addEventListener("submit", function(event){
-
-    event.preventDefault();
-
-    const phone =
-        document.getElementById("userPhone").value.trim();
-
-    const password =
-        document.getElementById("userPass").value;
-
-    if(!/^0\d{9}$/.test(phone)){
-
-        showToast(
-            "Enter a valid 10-digit Kenyan phone number."
-        );
-
-        return;
-    }
-
-    if(password.length < 4){
-
-        showToast(
-            "Password must contain at least 4 characters."
-        );
-
-        return;
-    }
-
-    currentPhone = phone;
-
-    localStorage.setItem(
-        "sphere_member_phone",
-        phone
-    );
-
-    document.getElementById("gatewayOverlay").style.display =
-        "none";
-
-    document.getElementById("mainContent").style.display =
-        "block";
-
-    document.getElementById("displayNum").textContent =
-        phone;
-
-    document.getElementById("profilePhone").value =
-        phone;
-
-    generatePayoutTicker();
-
-    startUrgencyTimer(900);
-
-    loadProfile();
-
-    showToast("Welcome to your member workspace.");
-
-});
-
-/* =========================================================
-   PASSWORD
-========================================================= */
-
-function togglePassword(){
-
-    const input =
-        document.getElementById("userPass");
-
-    input.type =
-        input.type === "password"
-        ? "text"
-        : "password";
-
-}
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-function logout(){
-
-    if(
-        confirm("Are you sure you want to logout?")
-    ){
-
-        document.getElementById("mainContent").style.display =
-            "none";
-
-        document.getElementById("gatewayOverlay").style.display =
-            "flex";
-
-        document.getElementById("userPass").value = "";
-
-        showToast("Logged out.");
-
-    }
-
-}
-
-/* =========================================================
-   THEME
-========================================================= */
-
-function toggleInterfaceMode(){
-
-    const body =
-        document.body;
-
-    const current =
-        body.getAttribute("data-theme");
-
-    const next =
-        current === "light"
-        ? "dark"
-        : "light";
-
-    body.setAttribute(
-        "data-theme",
-        next
-    );
-
-    localStorage.setItem(
-        "sphere_portal_theme",
-        next
-    );
-
-}
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-function scrollToSection(id){
-
-    const element =
-        document.getElementById(id);
-
-    if(element){
-
-        element.scrollIntoView({
-            behavior:"smooth",
-            block:"start"
-        });
-
-    }
-
-}
-
-function scrollToTop(){
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-}
-
-/* =========================================================
-   CALCULATOR
-========================================================= */
-
-const slider =
-    document.getElementById("taskSlider");
-
-slider.addEventListener("input", function(){
-
-    runEarningsLogic(
-        Number(this.value)
-    );
-
-});
-
-function runEarningsLogic(tasksPerDay){
-
-    const weekly =
-        tasksPerDay * 100 * 7;
-
-    document.getElementById(
-        "labelTasks"
-    ).textContent =
-        tasksPerDay + " Tasks";
-
-    document.getElementById(
-        "labelPayout"
-    ).textContent =
-        "KES " +
-        weekly.toLocaleString();
-
-}
-
-/* =========================================================
-   TIMER
-========================================================= */
-
-function startUrgencyTimer(seconds){
-
-    clearInterval(timerInterval);
-
-    let remaining =
-        seconds;
-
-    const display =
-        document.getElementById("mainTimer");
-
-    function update(){
-
-        const minutes =
-            Math.floor(remaining / 60)
-            .toString()
-            .padStart(2,"0");
-
-        const secs =
-            (remaining % 60)
-            .toString()
-            .padStart(2,"0");
-
-        display.textContent =
-            minutes + ":" + secs;
-
-    }
-
-    update();
-
-    timerInterval =
-        setInterval(() => {
-
-            remaining--;
-
-            if(remaining <= 0){
-
-                remaining = 0;
-
-                clearInterval(
-                    timerInterval
-                );
-
-                display.textContent =
-                    "00:00";
-
-                return;
-
-            }
-
-            update();
-
-        },1000);
-
-}
-
-/* =========================================================
-   TASKS
-========================================================= */
-
-function completeTask(button){
-
-    if(
-        button.dataset.completed === "true"
-    ){
-
-        showToast(
-            "This task has already been completed."
-        );
-
-        return;
-
-    }
-
-    button.dataset.completed =
-        "true";
-
-    button.textContent =
-        "DONE";
-
-    button.style.background =
-        "var(--accent)";
-
-    taskCount++;
-
-    document.getElementById(
-        "tasksCompleted"
-    ).textContent =
-        taskCount;
-
-    addTransaction(
-        "Task Completed",
-        "Demo task activity",
-        "COMPLETED"
-    );
-
-    showToast(
-        "Demo task completed."
-    );
-
-}
-
-/* =========================================================
-   DEMO PAYOUT TABLE
-========================================================= */
-
-function generatePayoutTicker(){
-
-    const container =
-        document.getElementById(
-            "payoutTicker"
-        );
-
-    const records = [
-
-        ["0722***410","KES 1,200","DEMO-001"],
-        ["0718***834","KES 2,500","DEMO-002"],
-        ["0798***112","KES 800","DEMO-003"],
-        ["0704***556","KES 1,500","DEMO-004"],
-        ["0112***921","KES 600","DEMO-005"],
-        ["0741***728","KES 2,000","DEMO-006"]
-
-    ];
-
-    container.innerHTML =
-        records.map(record => `
-
-            <div class="payout-row">
-
-                <div>${record[0]}</div>
-
-                <div class="amount">
-                    ${record[1]}
-                </div>
-
-                <div>
-                    ${record[2]}
-                </div>
-
-            </div>
-
-        `).join("");
-
-}
-
-/* =========================================================
-   M-PESA BUTTONS
-========================================================= */
-
-function initializeMpesa(amount, packageName){
-
-    /*
-      M-PESA DETAILS ARE KEPT AS REQUESTED.
-
-      This function currently represents the existing
-      frontend behaviour. A real Daraja STK Push should
-      eventually be handled by a secure server/backend.
-    */
-
-    showToast(
-        "Initializing M-Pesa STK Push for KES " +
-        amount.toLocaleString() +
-        " (" + packageName + ")..."
-    );
-
-    setTimeout(() => {
-
-        alert(
-            "Initializing M-Pesa STK Push for KES " +
-            amount.toLocaleString() +
-            "..."
-        );
-
-    },300);
-
-}
-
-/* =========================================================
-   MODALS
-========================================================= */
-
-function openModal(id){
-
-    document.getElementById(id).style.display =
-        "flex";
-
-}
-
-function closeModal(id){
-
-    document.getElementById(id).style.display =
-        "none";
-
-}
-
-function closeOutside(event,id){
-
-    if(event.target.id === id){
-
-        closeModal(id);
-
-    }
-
-}
-
-/* =========================================================
-   FAQ
-========================================================= */
-
-function toggleFaq(button){
-
-    const answer =
-        button.nextElementSibling;
-
-    const icon =
-        button.querySelector("span");
-
-    const isOpen =
-        answer.style.display === "block";
-
-    document
-        .querySelectorAll(".faq-answer")
-        .forEach(item => {
-            item.style.display = "none";
-        });
-
-    document
-        .querySelectorAll(".faq-question span")
-        .forEach(item => {
-            item.textContent = "＋";
-        });
-
-    if(!isOpen){
-
-        answer.style.display =
-            "block";
-
-        icon.textContent =
-            "−";
-
-    }
-
-}
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-let toastTimer;
-
-function showToast(message){
-
-    const toast =
-        document.getElementById("toast");
-
-    toast.textContent =
-        message;
-
-    toast.classList.add("show");
-
-    clearTimeout(toastTimer);
-
-    toastTimer =
-        setTimeout(() => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-        },3000);
-
-}
-
-/* =========================================================
-   PROFILE
-========================================================= */
-
-function loadProfile(){
-
-    const savedName =
-        localStorage.getItem(
-            "sphere_member_name"
-        );
-
-    if(savedName){
-
-        document.getElementById(
-            "profileName"
-        ).value =
-            savedName;
-
-    }
-
-}
-
-function saveProfile(){
-
-    const name =
-        document.getElementById(
-            "profileName"
-        ).value.trim();
-
-    if(!name){
-
-        showToast(
-            "Enter a display name."
-        );
-
-        return;
-
-    }
-
-    localStorage.setItem(
-        "sphere_member_name",
-        name
-    );
-
-    showToast(
-        "Profile saved successfully."
-    );
-
-    closeModal(
-        "profileModal"
-    );
-
-}
-
-/* =========================================================
-   TRANSACTIONS
-========================================================= */
-
-function addTransaction(
-    title,
-    description,
-    status
-){
-
-    const list =
-        document.getElementById(
-            "recentTransactions"
-        );
-
-    const item =
-        document.createElement("div");
-
-    item.className =
-        "transaction";
-
-    item.innerHTML = `
-
-        <div class="transaction-left">
-
-            <div class="transaction-icon">
-                📋
-            </div>
-
-            <div>
-
-                <strong>
-                    ${title}
-                </strong>
-
-                <small>
-                    ${description}
-                </small>
-
-            </div>
-
-        </div>
-
-        <span class="positive">
-            ${status}
-        </span>
-
-    `;
-
-    list.prepend(item);
-
-}
-
-/* =========================================================
-   KEYBOARD SHORTCUT
-========================================================= */
-
 document.addEventListener(
-    "keydown",
-    function(event){
-
-        if(event.key === "Escape"){
-
-            document
-                .querySelectorAll(".modal")
-                .forEach(modal => {
-
-                    modal.style.display =
-                        "none";
-
-                });
-
-        }
-
-    }
+    "DOMContentLoaded",
+    loadDashboard
 );
 
 </script>
 
 </body>
 </html>
+
+
+============================================================
+FILE: public/app.js
+============================================================
+
+async function api(url, options = {}) {
+
+    const response = await fetch(url, {
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        },
+        ...options
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(
+            data.error || "Something went wrong."
+        );
+    }
+
+    return data;
+}
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+async function login() {
+
+    const phone =
+        document.getElementById("loginPhone").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    const message =
+        document.getElementById("loginMessage");
+
+    const button =
+        document.getElementById("loginButton");
+
+    message.textContent = "";
+
+    if (!phone || !password) {
+
+        message.textContent =
+            "Enter your phone number and password.";
+
+        message.className =
+            "message error";
+
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "AUTHENTICATING...";
+
+    try {
+
+        await api("/api/login", {
+            method: "POST",
+            body: JSON.stringify({
+                phone,
+                password
+            })
+        });
+
+        message.textContent =
+            "Login successful.";
+
+        message.className =
+            "message success";
+
+        window.location.href =
+            "/dashboard";
+
+    } catch (error) {
+
+        message.textContent =
+            error.message;
+
+        message.className =
+            "message error";
+
+        button.disabled = false;
+        button.textContent =
+            "AUTHORIZE LOGIN";
+    }
+}
+
+
+/* =========================================================
+   REGISTER
+   ========================================================= */
+
+async function register() {
+
+    const phone =
+        document.getElementById("registerPhone").value.trim();
+
+    const password =
+        document.getElementById("registerPassword").value;
+
+    const message =
+        document.getElementById("registerMessage");
+
+    const button =
+        document.getElementById("registerButton");
+
+    if (!phone || !password) {
+
+        message.textContent =
+            "Enter your phone number and password.";
+
+        message.className =
+            "message error";
+
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "CREATING ACCOUNT...";
+
+    try {
+
+        await api("/api/register", {
+            method: "POST",
+            body: JSON.stringify({
+                phone,
+                password
+            })
+        });
+
+        message.textContent =
+            "Account created successfully.";
+
+        message.className =
+            "message success";
+
+        window.location.href =
+            "/dashboard";
+
+    } catch (error) {
+
+        message.textContent =
+            error.message;
+
+        message.className =
+            "message error";
+
+        button.disabled = false;
+        button.textContent =
+            "CREATE ACCOUNT";
+    }
+}
+
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+async function loadDashboard() {
+
+    try {
+
+        const data =
+            await api("/api/me");
+
+        const user =
+            data.user;
+
+        const phone =
+            document.getElementById("displayPhone");
+
+        if (phone) {
+            phone.textContent =
+                user.phone;
+        }
+
+        const balance =
+            document.getElementById("balance");
+
+        if (balance) {
+            balance.textContent =
+                "KES " +
+                Number(user.balance).toLocaleString(
+                    "en-KE",
+                    {
+                        minimumFractionDigits: 2
+                    }
+                );
+        }
+
+        const level =
+            document.getElementById("memberLevel");
+
+        if (level) {
+            level.textContent =
+                "LEVEL " + user.level;
+        }
+
+        const experience =
+            document.getElementById("memberExperience");
+
+        if (experience) {
+            experience.textContent =
+                "EXP: " + user.experience + "%";
+        }
+
+        const progress =
+            document.getElementById("levelProgress");
+
+        if (progress) {
+            progress.style.width =
+                Math.min(user.experience, 100) + "%";
+        }
+
+        loadTransactions();
+
+    } catch (error) {
+
+        window.location.href = "/";
+
+    }
+}
+
+
+/* =========================================================
+   TRANSACTIONS
+   ========================================================= */
+
+async function loadTransactions() {
+
+    const container =
+        document.getElementById("transactions");
+
+    if (!container) return;
+
+    try {
+
+        const data =
+            await api("/api/transactions");
+
+        if (!data.transactions.length) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+                    No verified transactions yet.
+                </div>
+            `;
+
+            return;
+        }
+
+        container.innerHTML =
+            data.transactions
+                .map(transaction => {
+
+                    return `
+                        <div class="transaction">
+                            <div>
+                                <strong>
+                                    ${escapeHtml(transaction.type)}
+                                </strong>
+
+                                <small>
+                                    ${escapeHtml(transaction.created_at)}
+                                </small>
+                            </div>
+
+                            <strong>
+                                KES ${Number(
+                                    transaction.amount
+                                ).toLocaleString()}
+                            </strong>
+
+                            <span class="status">
+                                ${escapeHtml(
+                                    transaction.status
+                                )}
+                            </span>
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+    } catch (error) {
+
+        container.innerHTML = `
+            <div class="empty-state">
+                Unable to load transactions.
+            </div>
+        `;
+    }
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+async function logout() {
+
+    try {
+
+        await api("/api/logout", {
+            method: "POST"
+        });
+
+    } finally {
+
+        window.location.href = "/";
+    }
+}
+
+
+/* =========================================================
+   PASSWORD VISIBILITY
+   ========================================================= */
+
+function togglePassword(id) {
+
+    const input =
+        document.getElementById(id);
+
+    if (!input) return;
+
+    input.type =
+        input.type === "password"
+            ? "text"
+            : "password";
+}
+
+
+/* =========================================================
+   LOGIN / REGISTER SWITCH
+   ========================================================= */
+
+function showRegister() {
+
+    document.getElementById("loginForm")
+        .style.display = "none";
+
+    document.getElementById("registerForm")
+        .style.display = "block";
+}
+
+
+function showLogin() {
+
+    document.getElementById("registerForm")
+        .style.display = "none";
+
+    document.getElementById("loginForm")
+        .style.display = "block";
+}
+
+
+/* =========================================================
+   EARNINGS CALCULATOR
+   ========================================================= */
+
+function calculateEarnings() {
+
+    const slider =
+        document.getElementById("taskSlider");
+
+    if (!slider) return;
+
+    const tasks =
+        Number(slider.value);
+
+    const weekly =
+        tasks * 100 * 7;
+
+    const taskValue =
+        document.getElementById("taskValue");
+
+    const weeklyValue =
+        document.getElementById("weeklyValue");
+
+    if (taskValue) {
+        taskValue.textContent =
+            tasks;
+    }
+
+    if (weeklyValue) {
+        weeklyValue.textContent =
+            "KES " +
+            weekly.toLocaleString();
+    }
+}
+
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
+function toggleTheme() {
+
+    const current =
+        document.body.dataset.theme;
+
+    const next =
+        current === "dark"
+            ? "light"
+            : "dark";
+
+    document.body.dataset.theme =
+        next;
+
+    localStorage.setItem(
+        "sphere_theme",
+        next
+    );
+}
+
+
+function loadTheme() {
+
+    const theme =
+        localStorage.getItem(
+            "sphere_theme"
+        );
+
+    if (theme) {
+        document.body.dataset.theme =
+            theme;
+    }
+}
+
+
+/* =========================================================
+   NOTICE
+   ========================================================= */
+
+function showNotice(text) {
+
+    const notice =
+        document.getElementById("notice");
+
+    if (!notice) {
+        alert(text);
+        return;
+    }
+
+    notice.textContent =
+        text;
+
+    notice.classList.add("show");
+
+    setTimeout(() => {
+
+        notice.classList.remove("show");
+
+    }, 4000);
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+   ========================================================= */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        loadTheme();
+
+        const slider =
+            document.getElementById("taskSlider");
+
+        if (slider) {
+            calculateEarnings();
+        }
+
+    }
+);
+
+
+============================================================
+FILE: public/style.css
+============================================================
+
+:root {
+
+    --primary: #0a2e5c;
+    --secondary: #0d3d7a;
+    --accent: #1dbf73;
+    --gold: #d4af37;
+    --danger: #e63946;
+    --white: #ffffff;
+    --bg: #f4f7fa;
+    --text: #172033;
+    --muted: #64748b;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --shadow:
+        0 20px 50px rgba(0,0,0,.08);
+}
+
+body[data-theme="dark"] {
+
+    --bg: #0f172a;
+    --white: #1e293b;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --card: #1e293b;
+    --border: #334155;
+
+    --shadow:
+        0 20px 50px rgba(0,0,0,.4);
+}
+
+
+* {
+
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html {
+
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background:
+        var(--bg);
+
+    color:
+        var(--text);
+
+    line-height:
+        1.6;
+
+    min-height:
+        100vh;
+}
+
+
+button,
+input {
+
+    font: inherit;
+}
+
+
+button {
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   AUTH PAGE
+   ========================================================= */
+
+.auth-page {
+
+    min-height:
+        100vh;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    padding:
+        25px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #000000,
+            #0a2e5c
+        );
+}
+
+
+.auth-container {
+
+    width:
+        100%;
+
+    max-width:
+        460px;
+}
+
+
+.auth-card {
+
+    background:
+        var(--card);
+
+    border-radius:
+        35px;
+
+    padding:
+        45px;
+
+    box-shadow:
+        0 40px 100px
+        rgba(0,0,0,.4);
+
+    text-align:
+        center;
+}
+
+
+.security-badge,
+.badge {
+
+    display:
+        inline-block;
+
+    background:
+        var(--accent);
+
+    color:
+        white;
+
+    padding:
+        9px 18px;
+
+    border-radius:
+        50px;
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        .8px;
+
+    margin-bottom:
+        20px;
+}
+
+
+.auth-card h1 {
+
+    color:
+        var(--primary);
+
+    font-size:
+        28px;
+
+    font-weight:
+        900;
+}
+
+
+.auth-card h2 {
+
+    margin-top:
+        25px;
+
+    margin-bottom:
+        8px;
+}
+
+
+.auth-subtitle,
+.muted {
+
+    color:
+        var(--muted);
+}
+
+
+.input {
+
+    width:
+        100%;
+
+    padding:
+        17px;
+
+    border:
+        2px solid var(--border);
+
+    border-radius:
+        15px;
+
+    margin-top:
+        15px;
+
+    background:
+        var(--bg);
+
+    color:
+        var(--text);
+
+    outline:
+        none;
+}
+
+
+.input:focus {
+
+    border-color:
+        var(--accent);
+}
+
+
+.password-wrapper {
+
+    position:
+        relative;
+}
+
+
+.password-wrapper .input {
+
+    padding-right:
+        55px;
+}
+
+
+.show-password {
+
+    position:
+        absolute;
+
+    right:
+        12px;
+
+    bottom:
+        11px;
+
+    border:
+        none;
+
+    background:
+        transparent;
+}
+
+
+.primary-button,
+.green-button,
+.blue-button {
+
+    border:
+        none;
+
+    border-radius:
+        14px;
+
+    padding:
+        16px 20px;
+
+    color:
+        white;
+
+    font-weight:
+        900;
+
+    width:
+        100%;
+
+    margin-top:
+        18px;
+}
+
+
+.primary-button,
+.blue-button {
+
+    background:
+        var(--primary);
+}
+
+
+.green-button {
+
+    background:
+        var(--accent);
+}
+
+
+.primary-button:hover,
+.green-button:hover,
+.blue-button:hover {
+
+    transform:
+        translateY(-2px);
+
+    opacity:
+        .92;
+}
+
+
+.primary-button:disabled {
+
+    opacity:
+        .6;
+
+    cursor:
+        not-allowed;
+}
+
+
+.message {
+
+    margin-top:
+        15px;
+
+    font-weight:
+        700;
+}
+
+
+.message.error {
+
+    color:
+        var(--danger);
+}
+
+
+.message.success {
+
+    color:
+        var(--accent);
+}
+
+
+.link-button {
+
+    border:
+        none;
+
+    background:
+        none;
+
+    color:
+        var(--accent);
+
+    font-weight:
+        800;
+}
+
+
+.switch-text {
+
+    margin-top:
+        25px;
+
+    color:
+        var(--muted);
+}
+
+
+.password-rules,
+.security-note {
+
+    margin-top:
+        15px;
+
+    font-size:
+        12px;
+
+    color:
+        var(--muted);
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.navbar {
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        100;
+
+    background:
+        var(--card);
+
+    padding:
+        18px 5%;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    box-shadow:
+        0 3px 20px
+        rgba(0,0,0,.05);
+}
+
+
+.brand {
+
+    font-weight:
+        900;
+
+    font-size:
+        20px;
+
+    color:
+        var(--primary);
+}
+
+
+.brand span {
+
+    color:
+        var(--accent);
+}
+
+
+.logout-button {
+
+    border:
+        2px solid var(--danger);
+
+    background:
+        transparent;
+
+    color:
+        var(--danger);
+
+    border-radius:
+        10px;
+
+    padding:
+        8px 15px;
+
+    font-weight:
+        900;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.dashboard-header {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--secondary)
+        );
+
+    color:
+        white;
+
+    text-align:
+        center;
+
+    padding:
+        75px 20px;
+
+    border-radius:
+        0 0 60px 60px;
+}
+
+
+.dashboard-header h1 {
+
+    font-size:
+        clamp(32px, 6vw, 55px);
+
+    font-weight:
+        900;
+}
+
+
+.dashboard-header p {
+
+    opacity:
+        .9;
+
+    margin-top:
+        10px;
+}
+
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+
+.container {
+
+    width:
+        min(1100px, 92%);
+
+    margin:
+        auto;
+}
+
+
+/* =========================================================
+   DASHBOARD GRID
+   ========================================================= */
+
+.dashboard-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        25px;
+
+    margin-top:
+        -45px;
+
+    position:
+        relative;
+}
+
+
+.dashboard-card {
+
+    background:
+        var(--card);
+
+    padding:
+        30px;
+
+    border-radius:
+        28px;
+
+    box-shadow:
+        var(--shadow);
+
+    margin-top:
+        30px;
+}
+
+
+.member-card {
+
+    background:
+        linear-gradient(
+            135deg,
+            #1e293b,
+            #000
+        );
+
+    color:
+        white;
+}
+
+
+.member-card h2 {
+
+    font-size:
+        30px;
+
+    margin-top:
+        5px;
+}
+
+
+.small-label {
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    opacity:
+        .75;
+
+    letter-spacing:
+        1px;
+}
+
+
+.level-bar {
+
+    height:
+        10px;
+
+    background:
+        rgba(255,255,255,.15);
+
+    border-radius:
+        50px;
+
+    margin:
+        25px 0 10px;
+
+    overflow:
+        hidden;
+}
+
+
+.level-progress {
+
+    width:
+        15%;
+
+    height:
+        100%;
+
+    background:
+        var(--accent);
+
+    border-radius:
+        50px;
+}
+
+
+.level-info {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+}
+
+
+.balance-card {
+
+    text-align:
+        center;
+}
+
+
+.balance-card h2 {
+
+    font-size:
+        38px;
+
+    color:
+        var(--danger);
+
+    margin:
+        8px 0;
+}
+
+
+.two-buttons {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        10px;
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.stats-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap:
+        15px;
+
+    margin-top:
+        30px;
+}
+
+
+.stat-card {
+
+    background:
+        var(--card);
+
+    padding:
+        25px;
+
+    border-radius:
+        22px;
+
+    box-shadow:
+        var(--shadow);
+}
+
+
+.stat-card span {
+
+    display:
+        block;
+
+    font-size:
+        11px;
+
+    font-weight:
+        900;
+
+    color:
+        var(--muted);
+}
+
+
+.stat-card strong {
+
+    display:
+        block;
+
+    margin-top:
+        8px;
+
+    font-size:
+        22px;
+}
+
+
+.verified {
+
+    color:
+        var(--accent);
+}
+
+
+/* =========================================================
+   CALCULATOR
+   ========================================================= */
+
+.calculator {
+
+    text-align:
+        center;
+}
+
+
+.calculator input {
+
+    width:
+        100%;
+
+    margin:
+        30px 0;
+
+    accent-color:
+        var(--accent);
+}
+
+
+.calculator-results {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        20px;
+}
+
+
+.calculator-results div {
+
+    background:
+        var(--bg);
+
+    padding:
+        20px;
+
+    border-radius:
+        18px;
+}
+
+
+.calculator-results span {
+
+    display:
+        block;
+
+    font-size:
+        11px;
+
+    color:
+        var(--muted);
+
+    font-weight:
+        900;
+}
+
+
+.calculator-results strong {
+
+    font-size:
+        22px;
+
+    color:
+        var(--accent);
+}
+
+
+/* =========================================================
+   PACKAGES
+   ========================================================= */
+
+.section-heading {
+
+    text-align:
+        center;
+
+    margin:
+        60px 0 20px;
+}
+
+
+.section-heading h2 {
+
+    font-size:
+        32px;
+
+    color:
+        var(--primary);
+}
+
+
+.package-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        25px;
+}
+
+
+.package-card {
+
+    background:
+        var(--card);
+
+    padding:
+        35px;
+
+    border-radius:
+        28px;
+
+    box-shadow:
+        var(--shadow);
+
+    text-align:
+        center;
+
+    position:
+        relative;
+}
+
+
+.package-card.featured {
+
+    border:
+        2px solid var(--gold);
+}
+
+
+.recommended {
+
+    display:
+        inline-block;
+
+    background:
+        var(--gold);
+
+    color:
+        white;
+
+    border-radius:
+        50px;
+
+    padding:
+        6px 15px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        900;
+
+    margin-bottom:
+        15px;
+}
+
+
+.price {
+
+    color:
+        var(--primary);
+
+    font-size:
+        38px;
+
+    font-weight:
+        900;
+
+    margin:
+        20px 0;
+}
+
+
+.package-card ul {
+
+    list-style:
+        none;
+
+    text-align:
+        left;
+
+    color:
+        var(--muted);
+
+    line-height:
+        2;
+
+    margin-bottom:
+        20px;
+}
+
+
+/* =========================================================
+   TRANSACTIONS
+   ========================================================= */
+
+.transaction {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr auto auto;
+
+    gap:
+        15px;
+
+    align-items:
+        center;
+
+    padding:
+        15px 0;
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+
+.transaction small {
+
+    display:
+        block;
+
+    color:
+        var(--muted);
+}
+
+
+.status {
+
+    color:
+        var(--accent);
+
+    font-weight:
+        800;
+}
+
+
+.empty-state {
+
+    padding:
+        30px;
+
+    text-align:
+        center;
+
+    color:
+        var(--muted);
+}
+
+
+/* =========================================================
+   SUPPORT
+   ========================================================= */
+
+.support-card {
+
+    background:
+        var(--primary);
+
+    color:
+        white;
+
+    padding:
+        35px;
+
+    border-radius:
+        28px;
+
+    margin-top:
+        30px;
+
+    text-align:
+        center;
+}
+
+
+.support-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        15px;
+
+    margin-top:
+        20px;
+}
+
+
+.support-button {
+
+    padding:
+        18px;
+
+    color:
+        white;
+
+    text-decoration:
+        none;
+
+    border-radius:
+        15px;
+
+    font-weight:
+        900;
+}
+
+
+.whatsapp {
+
+    background:
+        #25D366;
+}
+
+
+.email {
+
+    background:
+        #3b82f6;
+}
+
+
+footer {
+
+    text-align:
+        center;
+
+    padding:
+        60px 0;
+
+    color:
+        var(--muted);
+}
+
+
+.theme-button {
+
+    position:
+        fixed;
+
+    right:
+        20px;
+
+    bottom:
+        25px;
+
+    width:
+        52px;
+
+    height:
+        52px;
+
+    border-radius:
+        50%;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    background:
+        var(--primary);
+
+    color:
+        white;
+
+    cursor:
+        pointer;
+
+    z-index:
+        1000;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0,0,0,.3);
+}
+
+
+.notice {
+
+    position:
+        fixed;
+
+    bottom:
+        30px;
+
+    left:
+        50%;
+
+    transform:
+        translate(-50%, 100px);
+
+    background:
+        var(--primary);
+
+    color:
+        white;
+
+    padding:
+        18px 25px;
+
+    border-radius:
+        15px;
+
+    opacity:
+        0;
+
+    transition:
+        .3s;
+
+    z-index:
+        2000;
+
+    max-width:
+        90%;
+
+    text-align:
+        center;
+}
+
+
+.notice.show {
+
+    opacity:
+        1;
+
+    transform:
+        translate(-50%, 0);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:850px) {
+
+    .dashboard-grid,
+    .package-grid {
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .stats-grid {
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+
+    .dashboard-header {
+
+        padding:
+            60px 20px;
+    }
+
+
+    .auth-card {
+
+        padding:
+            30px 22px;
+    }
+
+}
+
+
+@media(max-width:550px) {
+
+    .stats-grid {
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .calculator-results,
+    .support-grid,
+    .two-buttons {
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .transaction {
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .navbar {
+
+        padding:
+            15px;
+    }
+
+
+    .brand {
+
+        font-size:
+            16px;
+    }
+
+}
