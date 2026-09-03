@@ -1,14 +1,13 @@
 {
-  "name": "online-sphere-commerce",
+  "name": "online-sphere-daraja",
   "version": "1.0.0",
-  "description": "Online Sphere Commerce with M-PESA Daraja integration",
+  "description": "Online Sphere M-Pesa Daraja backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "axios": "^1.11.0",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
   }
 }
